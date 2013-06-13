@@ -433,6 +433,7 @@ void CBoolIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
 {
     DatasetInfo::createPropertiesSizer(parent);
 
+    // TODO should clean this.
     /*m_ptoggleCutFrontSector = new wxToggleButton(parent, wxID_ANY,wxT("Cut Front Sector"),wxDefaultPosition, wxSize(140,-1));
     m_propertiesSizer->Add(m_ptoggleCutFrontSector,0,wxALIGN_CENTER);
     parent->Connect(m_ptoggleCutFrontSector->GetId(),wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(PropertiesWindow::OnToggleShowFS));  
@@ -450,6 +451,7 @@ void CBoolIsoSurface::createPropertiesSizer(PropertiesWindow *parent)
 
 void CBoolIsoSurface::updatePropertiesSizer()
 {
+    // TODO: should clean this.
     DatasetInfo::updatePropertiesSizer();
     /*m_ptoggleFiltering->Enable(false);
     m_ptoggleFiltering->SetValue(false);

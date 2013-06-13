@@ -307,14 +307,21 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pApplyDifferentColors = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
     m_pToggleInterFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
     m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
     m_pRadTorsion              = new wxRadioButton( pParent, wxID_ANY, wxT( "Torsion" ) );
+#endif
+    
     m_pRadConstantColor        = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant color" ) );
     m_pApplyBtn  = new wxButton( pParent, wxID_ANY, wxT( "Apply" ) );
     m_pCancelBtn = new wxButton( pParent, wxID_ANY, wxT( "Cancel" ) );
+
+#if !_USE_LIGHT_GUI
     m_pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+#endif
 
     m_pBtnOpacity      = new wxButton( pParent, wxID_ANY, wxT( "Opacity" ) );
     m_pBtnIntensity    = new wxButton( pParent, wxID_ANY, wxT( "Intensity" ) );
@@ -354,10 +361,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 
     wxBoxSizer *pBoxColoringRadios = new wxBoxSizer( wxVERTICAL );
     pBoxColoringRadios->Add( m_pRadNormalColoring,       0, wxALIGN_LEFT | wxALL, 1 );
+
+#if !_USE_LIGHT_GUI
     pBoxColoringRadios->Add( m_pRadDistanceAnchoring,    0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadMinDistanceAnchoring, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadCurvature,            0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
+#endif
+    
     pBoxColoringRadios->Add( m_pRadConstantColor,        0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
     pBoxColoring->Add( m_pApplyDifferentColors, 0, wxALIGN_CENTER | wxCENTER );
@@ -381,7 +392,10 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
+#if !_USE_LIGHT_GUI
     pBoxMain->Add( m_pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+#endif
+    
     pBoxMain->Add( m_pToggleInterFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
@@ -408,8 +422,12 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnMinMaxLength->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleMinMaxLengthBtn ) );
     pParent->Connect( m_pBtnSubsampling->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleSubsamplingBtn ) );
     pParent->Connect( m_pToggleInterFibers->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibersBtn ) );
-    pParent->Connect( m_pBtnGeneratesDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickGenerateFiberVolumeBtn ) );
     pParent->Connect( m_pBtnColorMode->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleColorModeBtn ) );
+    
+#if !_USE_LIGHT_GUI
+    pParent->Connect( m_pBtnGeneratesDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickGenerateFiberVolumeBtn ) );
+#endif
+
 }
 
 void FibersGroup::OnToggleVisibleBtn()
@@ -437,9 +455,12 @@ void FibersGroup::OnToggleIntensityBtn()
     m_pBtnIntensity->Hide();
     m_pBtnOpacity->Disable();
     m_pBtnMinMaxLength->Disable();
-    m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
+    m_pBtnSubsampling->Disable();    
     m_pBtnColorMode->Disable();
+
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleOpacityBtn()
@@ -457,8 +478,11 @@ void FibersGroup::OnToggleOpacityBtn()
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
     m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleMinMaxLengthBtn()
@@ -492,8 +516,11 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
     m_pBtnIntensity->Disable();
     m_pBtnOpacity->Disable();
     m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleSubsamplingBtn()
@@ -511,8 +538,11 @@ void FibersGroup::OnToggleSubsamplingBtn()
     m_pBtnOpacity->Disable();
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleCrossingFibersBtn()
@@ -531,8 +561,11 @@ void FibersGroup::OnToggleCrossingFibersBtn()
     m_pBtnOpacity->Disable();
     m_pBtnIntensity->Disable();
     m_pBtnMinMaxLength->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Disable();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::OnToggleColorModeBtn()
@@ -545,10 +578,14 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pApplyDifferentColors->Show();
     m_pLblColoring->Show();
     m_pRadNormalColoring->Show();
+    
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->Show();
     m_pRadMinDistanceAnchoring->Show();
     m_pRadCurvature->Show();
     m_pRadTorsion->Show();
+#endif
+    
     m_pRadConstantColor->Show();
     m_pApplyBtn->Show();
     m_pCancelBtn->Show();
@@ -569,10 +606,14 @@ void FibersGroup::OnToggleColorModeBtn()
     }
 
     m_pRadNormalColoring->SetValue( colorationMode == NORMAL_COLOR );
+    
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->SetValue( colorationMode == DISTANCE_COLOR );
     m_pRadMinDistanceAnchoring->SetValue( colorationMode == MINDISTANCE_COLOR );
     m_pRadCurvature->SetValue( colorationMode == CURVATURE_COLOR );
     m_pRadTorsion->SetValue( colorationMode == TORSION_COLOR );
+#endif
+    
     m_pRadConstantColor->SetValue( colorationMode == CONSTANT_COLOR );
 
     // Disable other toggleButtons
@@ -580,8 +621,11 @@ void FibersGroup::OnToggleColorModeBtn()
     m_pBtnOpacity->Disable();
     m_pBtnMinMaxLength->Disable();
     m_pBtnSubsampling->Disable();
-    m_pBtnGeneratesDensityVolume->Disable();
     m_pBtnColorMode->Hide();
+    
+#if !_USE_LIGHT_GUI
+    m_pBtnGeneratesDensityVolume->Disable();
+#endif
 }
 
 void FibersGroup::updateGroupFilters()
@@ -700,6 +744,7 @@ void FibersGroup::OnClickApplyBtn()
         {
             colorationMode = NORMAL_COLOR;
         }
+#if !_USE_LIGHT_GUI
         else if( m_pRadDistanceAnchoring->GetValue() )
         {
             colorationMode  = DISTANCE_COLOR;
@@ -716,6 +761,7 @@ void FibersGroup::OnClickApplyBtn()
         {
             colorationMode = TORSION_COLOR;
         }
+#endif
         else if( m_pRadConstantColor->GetValue() )
         {
             colorationMode = CONSTANT_COLOR;
@@ -830,8 +876,9 @@ void FibersGroup::updatePropertiesSizer()
     DatasetInfo::m_pBtnFlipY->Hide();
     DatasetInfo::m_pBtnFlipZ->Hide();
 
-    // Hide temporarily opacity functionality
+    // Hide temporarily opacity and intensity functionalities.
     m_pBtnOpacity->Hide();
+    m_pBtnIntensity->Hide();
 
     vector<Fibers *> fibers = DatasetManager::getInstance()->getFibers();
     if( fibers.size() > 0 )
@@ -841,8 +888,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Enable();
         m_pBtnSubsampling->Enable();
         m_pToggleInterFibers->Enable();
-        m_pBtnGeneratesDensityVolume->Enable();
         m_pBtnColorMode->Enable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Enable();
+#endif
     }
     else
     {
@@ -851,16 +901,23 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
 
     m_pSliderOpacity->Enable( false );
     m_pRadNormalColoring->Enable( DatasetInfo::getShowFS() );
-    m_pRadCurvature->Enable( DatasetInfo::getShowFS() );
+
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
     m_pRadMinDistanceAnchoring->Enable( DatasetInfo::getShowFS() );
     m_pRadTorsion->Enable( DatasetInfo::getShowFS() );
+    m_pRadCurvature->Enable( DatasetInfo::getShowFS() );
+#endif
+    
     m_pRadConstantColor->Enable( DatasetInfo::getShowFS() );
 
     if( m_isIntensityToggled )
@@ -872,14 +929,19 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
         DatasetInfo::m_pIntensityText->Hide();
         DatasetInfo::m_pSliderThresholdIntensity->Hide();
-        m_pBtnIntensity->Show();
+        // TODO: clean this.
+        // Hide temporarily intensity functionality
+        // m_pBtnIntensity->Show();
     }
 
     if( m_isOpacityToggled )
@@ -891,14 +953,18 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
         m_pSliderOpacity->SetValue( getAlpha()*100 );
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
         DatasetInfo::m_pOpacityText->Hide();
         DatasetInfo::m_pSliderOpacity->Hide();
+        // TODO: clean this.
         // Hide temporarily opacity functionality
         //m_pBtnOpacity->Show();
     }
@@ -914,8 +980,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnOpacity->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -935,8 +1004,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnOpacity->Disable();
         m_pBtnMinMaxLength->Disable();
         m_pToggleInterFibers->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -954,8 +1026,11 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnOpacity->Disable();
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
-        m_pBtnGeneratesDensityVolume->Disable();
         m_pBtnColorMode->Disable();
+        
+#if !_USE_LIGHT_GUI
+        m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -972,10 +1047,14 @@ void FibersGroup::updatePropertiesSizer()
         m_pApplyDifferentColors->Show();
         m_pLblColoring->Show();
         m_pRadNormalColoring->Show();
+        
+#if !_USE_LIGHT_GUI
         m_pRadDistanceAnchoring->Show();
         m_pRadMinDistanceAnchoring->Show();
         m_pRadCurvature->Show();
         m_pRadTorsion->Show();
+#endif
+        
         m_pRadConstantColor->Show();
         m_pBtnColorMode->Hide();
         m_pBtnIntensity->Disable();
@@ -983,7 +1062,10 @@ void FibersGroup::updatePropertiesSizer()
         m_pBtnMinMaxLength->Disable();
         m_pBtnSubsampling->Disable();
         m_pToggleInterFibers->Disable();
+
+#if !_USE_LIGHT_GUI
         m_pBtnGeneratesDensityVolume->Disable();
+#endif
     }
     else
     {
@@ -992,10 +1074,14 @@ void FibersGroup::updatePropertiesSizer()
         m_pApplyDifferentColors->Hide();
         m_pLblColoring->Hide();
         m_pRadNormalColoring->Hide();
+        
+#if !_USE_LIGHT_GUI
         m_pRadDistanceAnchoring->Hide();
         m_pRadMinDistanceAnchoring->Hide();
         m_pRadCurvature->Hide();
         m_pRadTorsion->Hide();
+#endif
+        
         m_pRadConstantColor->Hide();
         m_pBtnColorMode->Show();
     }

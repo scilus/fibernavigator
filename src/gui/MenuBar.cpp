@@ -67,8 +67,11 @@ MenuBar::MenuBar()
     m_itemRotateZ = m_menuRotate->AppendCheckItem(wxID_ANY, wxT("Z axis"));
     m_menuView->AppendSeparator();
 
+#if !_USE_LIGHT_GUI
     m_itemToggleShowCrosshair = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Crosshair"));
     m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
+#endif
+    
     m_itemLockSlizes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Slices\tF"));
     m_itemLockScene = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Scene\tG"));
 
@@ -76,20 +79,26 @@ MenuBar::MenuBar()
     m_itemNewSelectionBox = m_menuVoi->Append(wxID_ANY, wxT("New Selection Box"));
     m_itemNewSelectionEllipsoid = m_menuVoi->Append(wxID_ANY, wxT("New Selection Ellipsoid"));
 
+#if !_USE_LIGHT_GUI
     m_menuFibers = new wxMenu();
+    
     m_itemResetFibersColors = m_menuFibers->Append(wxID_ANY, wxT("Reset Color on Fibers"));
-    m_itemToogleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Inverse Fibers Selection"));
-    m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));
+    m_itemToggleInvertFibersSelection = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Invert Fibers Selection"));
+    m_itemToggleUseFakeTubes = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Fake Tubes"));    
     m_itemToggleUseTransparency = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Transparent Fibers"));
     m_itemToggleUseGeometryShader = m_menuFibers->AppendCheckItem(wxID_ANY, wxT("Use Geometry Shader"));
+#endif
     
     m_menuOptions = new wxMenu();
+
+#if !_USE_LIGHT_GUI
     m_menuRuler = new wxMenu();
     m_itemToggleRuler = m_menuRuler->AppendCheckItem(wxID_ANY, wxT("Activate Ruler"));
     m_itemRulerClear = m_menuRuler->Append(wxID_ANY, wxT("Clear Points"));
     m_itemRulerAdd = m_menuRuler->Append(wxID_ANY, wxT("Add New Point"));
     m_itemRulerRemove = m_menuRuler->Append(wxID_ANY, wxT("Remove Last Point"));
     m_menuOptions->AppendSubMenu(m_menuRuler, wxT("Ruler"));
+#endif
 
     m_menuDrawer = new wxMenu();
     m_itemToggleDrawer = m_menuDrawer->AppendCheckItem(wxID_ANY, wxT("Drawer Activated"));
@@ -119,8 +128,11 @@ MenuBar::MenuBar()
     m_itemBlueLightblue = m_menuColorMaps->Append(wxID_ANY, wxT("Blue-Lightblue"));
     m_menuOptions->AppendSubMenu(m_menuColorMaps,wxT("Color Maps"));  
 
+#if !_USE_LIGHT_GUI
     m_itemToggleDrawPoints = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Draw Points"));
     m_itemToggleDrawVectors = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Draw Vectors"));
+#endif
+    
     m_itemToggleLighting = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Lighting"));
     m_itemToggleClearToBlack = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Clear to Black"));
     m_itemToggleBlendTextureOnMesh = m_menuOptions->AppendCheckItem(wxID_ANY, wxT("Blend Tex. on Mesh"));
@@ -137,7 +149,11 @@ MenuBar::MenuBar()
     this->Append(m_menuFile, wxT("&File"));
     this->Append(m_menuView, wxT("&View"));
     this->Append(m_menuVoi, wxT("&VOI"));
+
+#if !_USE_LIGHT_GUI
     this->Append(m_menuFibers, wxT("&Fibers"));
+#endif
+    
     this->Append(m_menuOptions, wxT("&Option"));
     this->Append(m_menuHelp, wxT("&Help"));
 
@@ -178,26 +194,42 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemPosterior->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewFront));
     mf->Connect(m_itemLockSlizes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuLock));
     mf->Connect(m_itemLockScene->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSceneLock));
+
+#if !_USE_LIGHT_GUI
     mf->Connect(m_itemToggleShowCrosshair->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewCrosshair));
     mf->Connect(m_itemToggleShowAxes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewAxes));
+#endif
+    
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionBox));
     mf->Connect(m_itemNewSelectionEllipsoid->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionEllipsoid));
-    mf->Connect(m_itemResetFibersColors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResetColor));
+    
+    // TODO light
     mf->Connect(m_itemToggleLighting->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleLighting));    
-    mf->Connect(m_itemToogleInvertFibersSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
+    
+#if !_USE_LIGHT_GUI    
+    mf->Connect(m_itemResetFibersColors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResetColor));
+    mf->Connect(m_itemToggleInvertFibersSelection->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertFibers));
     mf->Connect(m_itemToggleUseFakeTubes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseFakeTubes));
+#endif
+    
     mf->Connect(m_itemToggleClearToBlack->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onClearToBlack));
     mf->Connect(m_itemToggleBlendTextureOnMesh->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleBlendTexOnMesh));
     mf->Connect(m_itemToggleFilterISO->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleFilterIso));
     mf->Connect(m_itemToggleNormal->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleNormal));
+
+#if !_USE_LIGHT_GUI
     mf->Connect(m_itemToggleRuler->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectRuler));
     mf->Connect(m_itemRulerClear->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerToolClear));
     mf->Connect(m_itemRulerAdd->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerToolAdd));
     mf->Connect(m_itemRulerRemove->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRulerToolDel));
+    
     mf->Connect(m_itemToggleDrawPoints->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawPointsMode));
     mf->Connect(m_itemToggleDrawVectors->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawVectors));
+    
     mf->Connect(m_itemToggleUseTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseTransparency));
     mf->Connect(m_itemToggleUseGeometryShader->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onUseGeometryShader));
+#endif
+
     mf->Connect(m_itemToggleDrawer->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSwitchDrawer));
     mf->Connect(m_itemToggleDrawRound->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDrawRound));
     mf->Connect(m_itemToggleDraw3d->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleDraw3d));
@@ -230,7 +262,10 @@ void MenuBar::initMenuBar( MainFrame *mf )
 void MenuBar::updateMenuBar( MainFrame *mf )
 {
     m_itemToggleLighting->Check( SceneManager::getInstance()->isLightingActive() );
+
+#if !_USE_LIGHT_GUI
     m_itemToggleRuler->Check( SceneManager::getInstance()->isRulerActive() );
+#endif
 
     bool isFiberSelected( false );
     bool isFiberUsingFakeTubes( false );
@@ -281,30 +316,36 @@ void MenuBar::updateMenuBar( MainFrame *mf )
         }
     }
     m_itemSaveSelectedFibers->Enable(isFiberSelected);
+
+#if !_USE_LIGHT_GUI
     m_itemResetFibersColors->Enable(isFiberSelected);
-    m_itemToogleInvertFibersSelection->Enable(isFiberSelected);
-    m_itemToogleInvertFibersSelection->Check(isFiberInverted);
+    m_itemToggleInvertFibersSelection->Enable(isFiberSelected);
+    m_itemToggleInvertFibersSelection->Check(isFiberInverted);
     m_itemToggleUseTransparency->Enable(isFiberSelected);
     m_itemToggleUseTransparency->Check(isFiberUsingTransparency);
     m_itemToggleUseFakeTubes->Enable(isFiberSelected);
     m_itemToggleUseFakeTubes->Check(isFiberUsingFakeTubes);
-
     m_itemToggleUseGeometryShader->Check( SceneManager::getInstance()->isFibersGeomShaderActive() );
 #if _COMPILE_GEO_SHADERS
     m_itemToggleUseGeometryShader->Enable( SceneManager::getInstance()->areGeometryShadersSupported() );
 #else
     m_itemToggleUseGeometryShader->Enable(false);
-#endif
-    m_itemToggleShowCrosshair->Check( SceneManager::getInstance()->isCrosshairDisplayed() );
+#endif  // _COMPILE_GEO_SHADERS
+#endif  // !_USE_LIGHT_GUI
+    
     m_itemToggleShowAxial->Check( SceneManager::getInstance()->isAxialDisplayed() );
     m_itemToggleShowCoronal->Check( SceneManager::getInstance()->isCoronalDisplayed() );
     m_itemToggleShowSagittal->Check( SceneManager::getInstance()->isSagittalDisplayed() );
     m_itemToggleClearToBlack->Check( SceneManager::getInstance()->getClearToBlack() );
     m_itemToggleBlendTextureOnMesh->Check( SceneManager::getInstance()->isTexBlendOnMesh() );
     m_itemToggleFilterISO->Check( SceneManager::getInstance()->isIsoSurfaceFiltered() );
+    
+#if !_USE_LIGHT_GUI
+    m_itemToggleShowCrosshair->Check( SceneManager::getInstance()->isCrosshairDisplayed() );
     m_itemToggleShowAxes->Check( SceneManager::getInstance()->areAxesDisplayed() );
     m_itemToggleDrawPoints->Check( SceneManager::getInstance()->isPointMode() );
     m_itemToggleDrawVectors->Check( SceneManager::getInstance()->areVectorsDisplayed() );
+#endif
     
     m_itemToggleDrawer->Check( mf->isDrawerToolActive() );
     m_itemToggleDrawRound->Check( mf->canDrawRound() );

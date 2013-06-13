@@ -694,6 +694,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
 
+#if !_USE_LIGHT_GUI
     m_pSliderMinHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100, DEF_POS, wxSize( 150, -1 ) );
     m_pSliderMaxHue       = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
     m_pSliderSaturation   = new wxSlider( pParent, wxID_ANY,  0,    0, 100 );
@@ -702,16 +703,27 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderLightXPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
     m_pSliderLightYPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
     m_pSliderLightZPosition    = new wxSlider( pParent, wxID_ANY,  0, -100, 100 );
-    m_pSliderDisplay           = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
-    m_pSliderScalingFactor     = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
+#endif
+    
+    // Need to track it to be able to hide it for Maximas.
+    m_pLabelDisplay        = new wxStaticText( pParent, wxID_ANY, wxT( "Display" ) );
+    m_pSliderDisplay       = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
+    m_pSliderScalingFactor = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
+    
+    // Need to track it to be able to hide it for Maximas.
+    m_pLabelLOD           = new wxStaticText( pParent, wxID_ANY, wxT( "Details" ) );
     m_pSliderLOD          = new wxSlider( pParent, wxID_ANY,  0,    0, NB_OF_LOD - 1 );
     m_pRadNormal          = new wxRadioButton( pParent,  wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
     m_pRadMapOnSphere     = new wxRadioButton( pParent,  wxID_ANY, wxT( "Map On Sphere" ) );
     m_pRadMainAxis        = new wxRadioButton( pParent,  wxID_ANY, wxT( "Maximas" ) );
-    m_pToggleAxisFlipX         = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), DEF_POS, wxSize( 15, -1 ) );
-    m_pToggleAxisFlipY         = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 15, -1 ) );
-    m_pToggleAxisFlipZ         = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 15, -1 ) );
+    m_pToggleAxisFlipX    = new wxToggleButton( pParent, wxID_ANY, wxT( "X" ), DEF_POS, wxSize( 45, -1 ) );
+    m_pToggleAxisFlipY    = new wxToggleButton( pParent, wxID_ANY, wxT( "Y" ), DEF_POS, wxSize( 45, -1 ) );
+    m_pToggleAxisFlipZ    = new wxToggleButton( pParent, wxID_ANY, wxT( "Z" ), DEF_POS, wxSize( 45, -1 ) );
+    
+#if !_USE_LIGHT_GUI
     m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), DEF_POS, wxSize( 80, -1 ) );
+#endif
+    
     m_pTxtBoxScalingFactor  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.1f" ), 5.0f ), DEF_POS, wxSize( 50, -1 ) );
 
     m_pRadNormal->SetValue(      isDisplayShape( NORMAL ) );
@@ -722,6 +734,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 
     wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
 
+#if !_USE_LIGHT_GUI
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Min Hue" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderMinHue, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
@@ -745,34 +758,40 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Light Z" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLightZPosition, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+#endif
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pLabelDisplay, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderDisplay, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-
-
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Details" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pLabelLOD, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderLOD, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderScalingFactor, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( " " ) ), 0, wxALIGN_LEFT | wxALL );
+    pGridSliders->Add( m_pTxtBoxScalingFactor, 0, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
 
     wxBoxSizer *pBoxFlips = new wxBoxSizer( wxHORIZONTAL );
     pBoxFlips->Add( m_pToggleAxisFlipX, 1, wxALIGN_CENTER | wxALL, 1 );
     pBoxFlips->Add( m_pToggleAxisFlipY, 1, wxALIGN_CENTER | wxALL, 1 );
     pBoxFlips->Add( m_pToggleAxisFlipZ, 1, wxALIGN_CENTER | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Flips" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Local Flips" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( pBoxFlips, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    
+#if !_USE_LIGHT_GUI
+    // Cheating to align the button.
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( " " ) ), 0, wxALIGN_LEFT | wxALL );
+    pGridSliders->Add( m_pToggleColorWithPosition, 1, wxEXPAND | wxALIGN_CENTER | wxALL, 1 );
+#endif
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxMain->Add( m_pToggleColorWithPosition, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
-
-    //////////////////////////////////////////////////////////////////////////
-
     wxBoxSizer *pBoxDisplay = new wxBoxSizer( wxVERTICAL );
-    pBoxDisplay->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Display:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+    m_pLabelDisplayRadioType = new wxStaticText( pParent, wxID_ANY, wxT( "Display:" ) );
+    pBoxDisplay->Add( m_pLabelDisplayRadioType, 0, wxALIGN_LEFT | wxALL, 1 );
 
     m_pBoxDisplayRadios = new wxBoxSizer( wxVERTICAL );
     m_pBoxDisplayRadios->Add( m_pRadNormal,      0, wxALIGN_LEFT | wxALL, 1 );
@@ -781,10 +800,6 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxDisplay->Add( m_pBoxDisplayRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
     pBoxMain->Add( pBoxDisplay, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
-
-       pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Scaling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderScalingFactor, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-    pGridSliders->Add( m_pTxtBoxScalingFactor, 0, wxALIGN_CENTER | wxEXPAND | wxALL, 1 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -798,6 +813,8 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pRadNormal->GetId(),          wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphNormalSelected ) );
     pParent->Connect( m_pRadMapOnSphere->GetId(),     wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphMapOnSphereSelected ) );
     pParent->Connect( m_pRadMainAxis->GetId(),        wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnGlyphMainAxisSelected ) );
+    
+#if !_USE_LIGHT_GUI
     pParent->Connect( m_pSliderMinHue->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphMinHueSliderMoved ) ); 
     pParent->Connect( m_pSliderMaxHue->GetId(),       wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphMaxHueSliderMoved ) ); 
     pParent->Connect( m_pSliderSaturation->GetId(),   wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphSaturationSliderMoved ) ); 
@@ -806,17 +823,28 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderLightXPosition->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightXDirectionSliderMoved ) ); 
     pParent->Connect( m_pSliderLightYPosition->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightYDirectionSliderMoved ) );
     pParent->Connect( m_pSliderLightZPosition->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLightZDirectionSliderMoved ) );
+#endif
+    
     pParent->Connect( m_pSliderDisplay->GetId(),      wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphDisplaySliderMoved ) );
     pParent->Connect( m_pSliderScalingFactor->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphScalingFactorSliderMoved ) );
     pParent->Connect( m_pSliderLOD->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnGlyphLODSliderMoved ) );
+
+#if !_USE_LIGHT_GUI
     pParent->Connect( m_pToggleColorWithPosition->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnGlyphColorWithPosition ) );
+#endif
+    
     pParent->Connect( m_pTxtBoxScalingFactor->GetId(),  wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxScalingFactor ) );
 }
 
 void Glyph::updatePropertiesSizer()
 {
     DatasetInfo::updatePropertiesSizer();
+    
+    // TODO: issue 117
+    // Interpolation has no effect for glyphs for the moment.
+    m_pToggleFiltering->Hide();
 
+#if !_USE_LIGHT_GUI
     m_pSliderMinHue->SetValue    ( getColor( MIN_HUE )    * 100 );
     m_pSliderMaxHue->SetValue    ( getColor( MAX_HUE )    * 100 );
     m_pSliderSaturation->SetValue( getColor( SATURATION ) * 100 );
@@ -826,17 +854,20 @@ void Glyph::updatePropertiesSizer()
     m_pSliderLightXPosition->SetValue  ( getLightPosition( X_AXIS ) * 100 );
     m_pSliderLightYPosition->SetValue  ( getLightPosition( Y_AXIS ) * 100 );
     m_pSliderLightZPosition->SetValue  ( getLightPosition( Z_AXIS ) * 100 );
+    m_pToggleColorWithPosition->SetValue( getColorWithPosition() );
+#endif
+    
     m_pSliderDisplay->SetValue( getDisplayFactor() );
     m_pSliderScalingFactor->SetValue( getScalingFactor() * 10.0f );
 
     m_pToggleAxisFlipX->SetValue    ( isAxisFlipped( X_AXIS ) );
     m_pToggleAxisFlipY->SetValue    ( isAxisFlipped( Y_AXIS ) );
     m_pToggleAxisFlipZ->SetValue    ( isAxisFlipped( Z_AXIS ) );
-    m_pToggleColorWithPosition->SetValue( getColorWithPosition() );
     
-    // Disabled for the moment, not implemented.
-    m_pBtnFlipX->Enable( false );
-    m_pBtnFlipY->Enable( false );
-    m_pBtnFlipZ->Enable( false );
+    // TODO issue 118.
+    // Hidden for the moment, not implemented.
+    m_pBtnFlipX->Hide();
+    m_pBtnFlipY->Hide();
+    m_pBtnFlipZ->Hide();
 }
 

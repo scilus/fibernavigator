@@ -416,16 +416,26 @@ void SelectionVOI::createPropertiesSizer( PropertiesWindow *pParent )
     wxImage bmpColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
     
     wxBitmapButton *pBtnSelectColor = new wxBitmapButton( pParent, wxID_ANY, bmpColor );
+    
+#if !_USE_LIGHT_GUI
     wxButton       *pBtnFlipNormal  = new wxButton( pParent, wxID_ANY, wxT( "Flip Normal" ) );
+#endif
     
     pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
+
+#if !_USE_LIGHT_GUI
     pBoxSizer->Add( pBtnFlipNormal,  3, wxEXPAND | wxALL, 1 );
+#endif
+    
     pBoxSizer->Add( pBtnSelectColor, 1, wxEXPAND | wxALL, 1 );
     m_pPropertiesSizer->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );    
     
     // Establish connections
     pParent->Connect( pBtnSelectColor->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnColorRoi ) );
+    
+#if !_USE_LIGHT_GUI
     pParent->Connect( pBtnFlipNormal->GetId(),  wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnVoiFlipNormals ) );
+#endif
 }
 
 void SelectionVOI::updatePropertiesSizer()

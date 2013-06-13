@@ -816,7 +816,11 @@ void MainFrame::updateDrawerToolbar()
 {
     SceneManager::getInstance()->setRulerActive( false );
 
-    m_pToolBar->m_txtRuler->Disable();
+    // Need to check to avoid crash when using the light weight version.
+    if( m_pToolBar->m_txtRuler != NULL )
+    {
+        m_pToolBar->m_txtRuler->Disable();
+    }
 
     m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
     m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
@@ -1489,7 +1493,12 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( false );
     m_isDrawerToolActive = false;
 
-    m_pToolBar->m_txtRuler->Disable();
+    // Need to check to avoid crash when using the light weight version.
+    if( m_pToolBar->m_txtRuler != NULL )
+    {
+        m_pToolBar->m_txtRuler->Disable();
+    }
+    
     m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
     m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
     m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
@@ -1503,7 +1512,12 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( true );
     m_isDrawerToolActive = false;
 
-    m_pToolBar->m_txtRuler->Enable();
+    // Need to check to avoid crash when using the light weight version.
+    if( m_pToolBar->m_txtRuler != NULL )
+    {
+        m_pToolBar->m_txtRuler->Enable();
+    }
+    
     m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
     m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
     m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
@@ -1769,7 +1783,12 @@ void MainFrame::refreshAllGLWidgets()
     if( SceneManager::getInstance()->isRulerActive() )
     {
         wxString sbString1 = wxString::Format( wxT( "%4.1fmm (%2.1fmm) " ), SceneManager::getInstance()->getRulerFullLength(), SceneManager::getInstance()->getRulerPartialLenth() );
-        m_pToolBar->m_txtRuler->SetValue(sbString1);
+        
+        // Need to check to avoid crash when using the light weight version.
+        if( m_pToolBar->m_txtRuler != NULL )
+        {
+            m_pToolBar->m_txtRuler->SetValue(sbString1);
+        }
     }
 }
 
