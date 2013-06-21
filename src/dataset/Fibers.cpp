@@ -1357,7 +1357,7 @@ bool Fibers::loadDmri( const wxString &filename )
     m_countPoints = 0;
     float back, front;
     stringstream ss;
-    
+
     for( int i = 0; i < m_countLines; i++ )
     {
         res = fscanf( pFile, "%s %s %s", pS1, pS2, pS3 );
@@ -1368,6 +1368,7 @@ bool Fibers::loadDmri( const wxString &filename )
         ss << pS2;
         ss >> front;
         ss.clear();
+        
         int nbpoints = back + front;
 
         if( back != 0 && front != 0 )
