@@ -3316,22 +3316,24 @@ void Fibers::flipAxis( AxisType i_axe )
             Logger::getInstance()->print( wxT( "Cannot flip fibers. The specified axis is undefined" ), LOGLEVEL_ERROR );
             return; //No axis specified - Cannot flip
     }
+    
+    // Compute the dimension of the bounding box.
+    DatasetManager *pDatMan = DatasetManager::getInstance();
 
-    //Computing mesh center for the given axis
-    float center;
-    float maxVal= -9999999;
-    float minVal = 9999999;
-    for ( unsigned int j(i); j < m_pointArray.size(); j += 3 )
-    {
-        minVal = std::min( m_pointArray[j], minVal );
-        maxVal = std::max( m_pointArray[j], maxVal );
-    }
-    center = ( minVal + maxVal ) / 2; 
+    float axisShift(0.0f);
+    
+    if( i_axe == X_AXIS )
+        axisShift = (pDatMan->getColumns() * pDatMan->getVoxelX()) / 2.0f;
+    else if( i_axe == Y_AXIS )
+        axisShift = (pDatMan->getRows() * pDatMan->getVoxelY()) / 2.0f;
+    else if( i_axe == Z_AXIS )
+        axisShift = (pDatMan->getFrames() * pDatMan->getVoxelZ()) / 2.0f;
+        
 
-    //Translate mesh at origin, flip it and move it back;
+    // Translate fibers at origin, flip them and move them back.
     for ( ; i < m_pointArray.size(); i += 3 )
     {
-        m_pointArray[i] = -( m_pointArray[i] - center ) + center;
+        m_pointArray[i] = -( m_pointArray[i] - axisShift ) + axisShift;
     }
 
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
