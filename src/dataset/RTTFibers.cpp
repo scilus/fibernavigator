@@ -197,12 +197,12 @@ void RTTFibers::seed()
 		{ 
 			Vector val = m_pSeedMap[s];	
 			
-			minCorner.x = val.x * xVoxel / 2.0f;
-			minCorner.y = val.y * yVoxel / 2.0f;
-			minCorner.z = val.z * zVoxel / 2.0f;
-			maxCorner.x = val.x * xVoxel / 2.0f + xVoxel;
-			maxCorner.y = val.y * yVoxel / 2.0f + yVoxel;
-			maxCorner.z = val.z * zVoxel / 2.0f + zVoxel;
+			minCorner.x = val.x * xVoxel;
+			minCorner.y = val.y * yVoxel;
+			minCorner.z = val.z * zVoxel;
+			maxCorner.x = val.x * xVoxel + xVoxel;
+			maxCorner.y = val.y * yVoxel + yVoxel;
+			maxCorner.z = val.z * zVoxel + zVoxel;
 
 			float xstep =  xVoxel / float( m_nbSeed - 1.0f );
 			float ystep =  yVoxel / float( m_nbSeed - 1.0f );

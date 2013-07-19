@@ -516,7 +516,7 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
 		m_pToggleShell->Enable(true);
         m_pToggleShell->SetValue(true);
 
-        RTTrackingHelper::getInstance()->toggleShellSeeds();
+        RTTrackingHelper::getInstance()->setShellSeed(true);
         RTTrackingHelper::getInstance()->setRTTDirty( true );
         float sliderValue = m_pSliderAxisSeedNb->GetValue();
 
@@ -549,7 +549,7 @@ void TrackingWindow::OnSelectSeedMap( wxCommandEvent& WXUNUSED(event) )
 		m_pToggleSeedMap->Enable(true);
         m_pToggleSeedMap->SetValue(true);
 
-        RTTrackingHelper::getInstance()->toggleSeedMap();
+        RTTrackingHelper::getInstance()->setSeedMap(true);
         RTTrackingHelper::getInstance()->setRTTDirty( true );
         float sliderValue = m_pSliderAxisSeedNb->GetValue();
 
@@ -662,10 +662,15 @@ void TrackingWindow::OnSliderAxisSeedNbMoved( wxCommandEvent& WXUNUSED(event) )
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( sliderValue );
     m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue) );
 
-    if( !RTTrackingHelper::getInstance()->isShellSeeds() )
+	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap())
     {
         m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue*sliderValue*sliderValue) );
     }
+	else if( RTTrackingHelper::getInstance()->isSeedMap())
+	{
+		float mapSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getSeedMapNb();
+		m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), mapSeedNb) );
+	}
     else
     {
         float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getNbMeshPoint();

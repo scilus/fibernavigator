@@ -32,6 +32,8 @@ public:
     bool isTrackActionPaused() const { return m_isPaused;}
     void setTrackAction(bool enabled) {m_isTrackActionPlaying = enabled;}
     void setTrackActionPause(bool paused) {m_isPaused = paused;}
+	void setShellSeed(bool enabled) {m_isShellSeeds = enabled;}
+	void setSeedMap(bool enabled) {m_isSeedMap = enabled;}
 	
 
 protected:
