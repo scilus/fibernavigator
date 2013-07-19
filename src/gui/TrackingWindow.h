@@ -44,13 +44,15 @@ public:
     void OnSelectFileHARDI                     ( wxCommandEvent& event );
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnShellSeeding                        ( wxCommandEvent& event );
-    void OnSelectMap                           ( wxCommandEvent& event );
+    void OnSelectMask                           ( wxCommandEvent& event );
     void OnInterpolate                         ( wxCommandEvent& event );
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
     void OnSliderMinLengthMoved                ( wxCommandEvent& event );
     void OnSliderMaxLengthMoved                ( wxCommandEvent& event );
 	void OnConvertToFibers					   ( wxCommandEvent& event );
     void OnSliderAxisSeedNbMoved               ( wxCommandEvent& event );
+	void OnMapSeeding                          ( wxCommandEvent& event );
+	void OnSelectSeedMap                       ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
@@ -77,6 +79,8 @@ private:
     wxButton            *m_pBtnSelectFile;
 	wxButton			*m_pBtnSelectShell;
 	wxToggleButton		*m_pToggleShell;
+	wxButton			*m_pBtnSelectSeed;
+	wxToggleButton		*m_pToggleSeedMap;
     wxButton            *m_pBtnSelectMap;
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;

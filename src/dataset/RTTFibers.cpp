@@ -38,7 +38,6 @@ RTTFibers::RTTFibers()
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
     m_isHARDI( false ),
-    m_usingMap( false ),
 	m_trackActionStep(std::numeric_limits<unsigned int>::max()),
 	m_timerStep( 0 )
 {
@@ -47,6 +46,30 @@ RTTFibers::RTTFibers()
     readTex = 1;
 }
 
+void RTTFibers::setSeedMapInfo(Anatomy *info)
+{
+	m_pSeedMapInfo = info; 
+	if( m_pSeedMapInfo != NULL )
+	{
+		int cols = DatasetManager::getInstance()->getColumns();
+		int rows = DatasetManager::getInstance()->getRows();
+		int frames = DatasetManager::getInstance()->getFrames();
+
+        for( int f = 0; f < frames; ++f )
+		{
+			for( int r = 0; r < rows; ++r )
+			{
+				for( int c = 0; c < cols; ++c )
+				{
+					if ( m_pSeedMapInfo->at(f * rows * cols + r * cols + c) > 0.0f)
+					{
+						m_pSeedMap.push_back( Vector(c, r, f) );
+					}
+				}
+			}
+		}
+	}
+}
 ///////////////////////////////////////////////////////////////////////////
 // Generate random seeds
 ///////////////////////////////////////////////////////////////////////////
@@ -81,6 +104,18 @@ float RTTFibers::getShellSeedNb()
     return pts;
 }
 ///////////////////////////////////////////////////////////////////////////
+// Returns the nb of seeds for Map seeding
+///////////////////////////////////////////////////////////////////////////
+float RTTFibers::getSeedMapNb()
+{
+	float pts = m_nbSeed*m_nbSeed*m_nbSeed;
+	if( m_pSeedMapInfo != NULL )
+	{
+		pts *= m_pSeedMap.size();
+	}
+    return pts;
+}
+///////////////////////////////////////////////////////////////////////////
 // Generate seeds and tracks
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::seed()
@@ -96,7 +131,7 @@ void RTTFibers::seed()
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	//Evenly distanced seeds
-    if( !RTTrackingHelper::getInstance()->isShellSeeds() )
+    if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap())
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
@@ -116,6 +151,63 @@ void RTTFibers::seed()
 			float ystep =  selObjs[b]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
 			float zstep =  selObjs[b]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
 			
+			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
+			{
+				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
+				{
+					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
+					{
+						vector<Vector> pointsF; // Points to be rendered Forward
+						vector<Vector> colorF; //Color (local directions)Forward
+						vector<Vector> pointsB; // Points to be rendered Backward
+						vector<Vector> colorB; //Color (local directions) Backward
+                        
+                        if(m_isHARDI)
+                        {
+						    //Track both sides
+							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+                        }
+                        else
+                        {
+						    //Track both sides
+						    performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+                        }
+                        
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						{
+							m_fibersRTT.push_back( pointsF ); 
+							m_colorsRTT.push_back( colorF );
+							m_fibersRTT.push_back( pointsB ); 
+							m_colorsRTT.push_back( colorB );
+						}
+
+						//glColor3f(1,0,0);
+						//SceneManager::getInstance()->getScene()->drawSphere( x, y ,z, 0.2 );
+
+					}
+				}
+			}
+		}
+	}
+	else if ( RTTrackingHelper::getInstance()->isSeedMap())
+	{
+		for( unsigned int s = 0; s < m_pSeedMap.size(); s++ )
+		{ 
+			Vector val = m_pSeedMap[s];	
+			
+			minCorner.x = val.x * xVoxel / 2.0f;
+			minCorner.y = val.y * yVoxel / 2.0f;
+			minCorner.z = val.z * zVoxel / 2.0f;
+			maxCorner.x = val.x * xVoxel / 2.0f + xVoxel;
+			maxCorner.y = val.y * yVoxel / 2.0f + yVoxel;
+			maxCorner.z = val.z * zVoxel / 2.0f + zVoxel;
+
+			float xstep =  xVoxel / float( m_nbSeed - 1.0f );
+			float ystep =  yVoxel / float( m_nbSeed - 1.0f );
+			float zstep =  zVoxel / float( m_nbSeed - 1.0f );
+
 			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
 			{
 				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
@@ -420,7 +512,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = m_vinvout;
-    float fa = m_pMapInfo->at(s_number);
+    float fa = m_pMaskInfo->at(s_number);
 	vin.normalize();
 
     for(unsigned int i=0; i < sticks.size()/3; i++)
@@ -763,15 +855,10 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
 ///////////////////////////////////////////////////////////////////////////
 bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 {
-    bool isOk = true;
-
-    if(m_usingMap)
+    bool isOk = false;
+	if(m_pMaskInfo->at(sticksNumber) > m_FAThreshold)
     {
-        isOk = false;
-        if(m_pMapInfo->at(sticksNumber) > m_FAThreshold)
-        {
-            isOk = true;
-        }
+       isOk = true;
     }
 
     return isOk;

@@ -20,7 +20,7 @@ class RTTFibers
 {
 public:
     RTTFibers(); //Constructor
-    ~RTTFibers(); //Destructor
+	~RTTFibers(); //Destructor
 
     //RTT functions
     void seed();
@@ -54,13 +54,15 @@ public:
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
-    void setMapInfo( Anatomy* info )                                  { m_pMapInfo = info; m_usingMap = true; }
+    void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
+	void setSeedMapInfo( Anatomy* info );							  
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
     float getStep()                              { return m_step; }
     float getNbMeshPoint()                       { return m_nbMeshPt; }
-	float getShellSeedNb();						 
+	float getShellSeedNb();		
+	float getSeedMapNb();
 
     float getPuncture()                          { return m_puncture; }
     float getVinVout()                           { return m_vinvout; }
@@ -80,6 +82,7 @@ public:
 
 	unsigned int  m_trackActionStep;
 	float m_timerStep;
+	std::vector<Vector> m_pSeedMap;
 	
     
 
@@ -138,11 +141,12 @@ private:
     float       m_minFiberLength;
     float       m_maxFiberLength;
     bool        m_isHARDI;
-    bool        m_usingMap;
     Tensors     *m_pTensorsInfo;
     Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
-    Anatomy     *m_pMapInfo;
+    Anatomy     *m_pMaskInfo;
+	Anatomy     *m_pSeedMapInfo;
+
 
 
     std::vector< FMatrix > m_tensorsMatrix;
