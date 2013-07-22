@@ -584,8 +584,8 @@ void TrackingWindow::OnMapSeeding( wxCommandEvent& WXUNUSED(event) )
     {
 		m_pSliderAxisSeedNb->SetValue( 10 );
         m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), 1000.0f) );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 1000.0f );
-	m_pTxtAxisSeedNbBox->SetValue( wxString::Format( wxT( "%.1f"), 10.0f) );
+		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 10 );
+	    m_pTxtAxisSeedNbBox->SetValue( wxString::Format( wxT( "%.1f"), 10.0f) );
         m_pToggleSeedMap->SetLabel(wxT( "Seed map OFF"));
     }
     else
