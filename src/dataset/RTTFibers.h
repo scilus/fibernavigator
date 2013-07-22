@@ -68,6 +68,7 @@ public:
     float getVinVout()                           { return m_vinvout; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
+	void insert(std::vector<Vector> pointsF, std::vector<Vector> pointsB, std::vector<Vector> colorF, std::vector<Vector> colorB);
 
     bool isHardiSelected()                       { return m_isHARDI;}
     

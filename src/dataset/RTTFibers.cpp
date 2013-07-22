@@ -103,6 +103,17 @@ float RTTFibers::getShellSeedNb()
 	}
     return pts;
 }
+
+void RTTFibers::insert(std::vector<Vector> pointsF, std::vector<Vector> pointsB, std::vector<Vector> colorF, std::vector<Vector> colorB)
+{
+	if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+	{
+		m_fibersRTT.push_back( pointsF ); 
+		m_colorsRTT.push_back( colorF );
+		m_fibersRTT.push_back( pointsB ); 
+		m_colorsRTT.push_back( colorB );
+	}
+}
 ///////////////////////////////////////////////////////////////////////////
 // Returns the nb of seeds for Map seeding
 ///////////////////////////////////////////////////////////////////////////
