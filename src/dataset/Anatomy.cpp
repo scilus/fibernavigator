@@ -146,6 +146,10 @@ Anatomy::Anatomy( const int type )
     m_columns = DatasetManager::getInstance()->getColumns();
     m_rows    = DatasetManager::getInstance()->getRows();
     m_frames  = DatasetManager::getInstance()->getFrames();
+	
+	m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+	m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+	m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
 
     if(type == RGB)
     {
