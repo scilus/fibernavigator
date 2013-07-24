@@ -85,52 +85,6 @@ public:
 	float m_timerStep;
 	std::vector<Vector> m_pSeedMap;
 	
-    
-
-    //GPGPU functions
-    bool checkFramebufferStatus(void);
-    void checkGLErrors(const char *label);
-    void compareResults(void);
-    void createTextures(void);
-    void createAllTextureParameters(void);
-    void initGLSL(void);
-    void initFBO(void);
-    void initGLEW(void);
-    void initGLUT(int argc, char** argv);
-    void performComputation(void);
-    void printProgramInfoLog(GLuint obj);
-    void printShaderInfoLog(GLuint obj);
-    void printVector(const float *p, const int N);
-    void setupTexture(const GLuint texID);
-    void swap(void);
-    void transferFromTexture(float* data);
-    void transferToTexture(float* data, GLuint texID);
-    void setupALL();
-
-    //GPGPU vars
-    // problem size, texture size, number of iterations (set from command line)
-    int N;
-    int texSize;
-    int numIterations;
-
-    // texture identifiers
-    GLuint yTexID[2];
-    GLuint xTexID;
-    // ping pong management vars
-    int writeTex;
-    int readTex;
-    GLenum attachmentpoints[2];
-
-
-    // FBO identifier
-    GLuint fb;
-    GLint yParam;
-    GLuint fbo;
-
-    float* seeds;
-    float* result;
-    float* xValues;
-
 private:
     float       m_FAThreshold;
     float       m_angleThreshold;
@@ -147,8 +101,6 @@ private:
 	DatasetInfo *m_pShellInfo;
     Anatomy     *m_pMaskInfo;
 	Anatomy     *m_pSeedMapInfo;
-
-
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;

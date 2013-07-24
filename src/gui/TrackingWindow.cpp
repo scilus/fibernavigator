@@ -23,8 +23,6 @@
 IMPLEMENT_DYNAMIC_CLASS( TrackingWindow, wxScrolledWindow )
 
 BEGIN_EVENT_TABLE( TrackingWindow, wxScrolledWindow )
-//EVT_PAINT( TrackingWindow::OnPaint )
-//EVT_SIZE( TrackingWindow::OnSize )
 END_EVENT_TABLE()
 
 
@@ -33,7 +31,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pMainFrame( pMf )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
-    //SetCursor( wxCursor( wxCURSOR_HAND ) );
     m_pTrackingSizer = new wxBoxSizer( wxVERTICAL );
     SetSizer( m_pTrackingSizer );
     SetAutoLayout( true );
@@ -49,10 +46,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStartTracking) );
     m_pBtnStart->Enable(false);
 
-    //wxImage bmpDelete(MyApp::iconsPath+ wxT("delete.png" ), wxBITMAP_TYPE_PNG);
-    //wxBitmapButton *m_pbtnDelete = new wxBitmapButton(this, wxID_ANY, bmpDelete, wxPoint(170,30), wxSize(60,-1));
-    //Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(TrackingWindow::OnClearBox));
-
 	m_pBtnSelectShell = new wxButton( this, wxID_ANY,wxT("Shell not selected"), wxPoint(30,30), wxSize(100, -1) );
     Connect( m_pBtnSelectShell->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectShell) );
 
@@ -66,7 +59,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pSliderFA->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderFAMoved) );
     m_pTxtFABox = new wxTextCtrl( this, wxID_ANY, wxT("0.10"), wxPoint(190,60), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
     
-
     m_pTextAngle = new wxStaticText( this, wxID_ANY, wxT("Max angle"), wxPoint(0,90), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderAngle = new MySlider( this, wxID_ANY, 0, 1, 90, wxPoint(60,90), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderAngle->SetValue( 60 );
@@ -97,12 +89,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     Connect( m_pSliderMaxLength->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderMaxLengthMoved) );
     m_pTxtMaxLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("200 mm"), wxPoint(190,210), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
-    //wxToggleButton *m_pToggleRandom = new wxToggleButton( this, wxID_ANY,wxT("Use random seeds"), wxPoint(50,240), wxSize(140, -1) );
-    //Connect( m_pToggleRandom->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnRandomSeeding) );
-
-    //wxToggleButton *m_pToggleInterp = new wxToggleButton( m_pTrackingWindow, wxID_ANY,wxT("Interpolation"), wxPoint(0,270), wxSize(140, -1) );
-    //m_pTrackingWindow->Connect( m_pToggleInterp->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnInterpolate) );
-
     m_pTextAxisSeedNb = new wxStaticText( this, wxID_ANY, wxT("Seed/axis"), wxPoint(0,240), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderAxisSeedNb = new MySlider( this, wxID_ANY, 0, 1, 15, wxPoint(60,240), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderAxisSeedNb->SetValue( 10 );
@@ -122,7 +108,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pMainFrame( pMf )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
-    //SetCursor( wxCursor( wxCURSOR_HAND ) );
     m_pTrackingSizer = new wxBoxSizer( wxVERTICAL );
     SetSizer( m_pTrackingSizer );
     SetAutoLayout( true );
@@ -142,11 +127,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxRow1->Add( m_pBtnSelectFile, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
     pBoxRow1->Add( m_pBtnStart,   0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
-
-
-    //wxImage bmpDelete(MyApp::iconsPath+ wxT("delete.png" ), wxBITMAP_TYPE_PNG);
-    //wxBitmapButton *m_pbtnDelete = new wxBitmapButton(this, wxID_ANY, bmpDelete, wxPoint(170,30), wxSize(60,-1));
-    //Connect(m_pbtnDelete->GetId(),wxEVT_COMMAND_BUTTON_CLICKED, wxTreeEventHandler(TrackingWindow::OnClearBox));
 
 	m_pBtnSelectShell = new wxButton( this, wxID_ANY,wxT("Shell not selected"), wxPoint(30,30), wxSize(115, -1) );
     Connect( m_pBtnSelectShell->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectShell) );
@@ -255,12 +235,6 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxRow10->Add( m_pTxtMaxLengthBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxRow10, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
- //   //wxToggleButton *m_pToggleRandom = new wxToggleButton( this, wxID_ANY,wxT("Use random seeds"), wxPoint(50,240), wxSize(140, -1) );
- //   //Connect( m_pToggleRandom->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnRandomSeeding) );
-
- //   //wxToggleButton *m_pToggleInterp = new wxToggleButton( m_pTrackingWindow, wxID_ANY,wxT("Interpolation"), wxPoint(0,270), wxSize(140, -1) );
- //   //m_pTrackingWindow->Connect( m_pToggleInterp->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnInterpolate) );
-
     m_pTextAxisSeedNb = new wxStaticText( this, wxID_ANY, wxT("Seed/axis"), wxPoint(0,300), wxSize(70, -1), wxALIGN_CENTER );
     m_pSliderAxisSeedNb = new MySlider( this, wxID_ANY, 0, 1, 15, wxPoint(60,300), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderAxisSeedNb->SetValue( 10 );
@@ -349,19 +323,6 @@ void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
     {
         m_pBtnStart->SetLabel(wxT("Stop tracking"));
     }
-
-	//RTTrackingHelper::getInstance()->setTrackAction(true);
- //   RTTrackingHelper::getInstance()->togglePlayStop();
- //   if(!RTTrackingHelper::getInstance()->isTrackActionPaused())
- //   {
- //       m_pPlayPause->SetBitmapLabel(m_bmpPause);
- //       m_pMainFrame->setTimerSpeed();
- //   }
- //   else
- //   {
- //       m_pPlayPause->SetBitmapLabel(m_bmpPlay);
- //       m_pMainFrame->setTimerSpeed();
- //   }
 }
 
 void TrackingWindow::OnClearBox( wxTreeEvent&    event )
@@ -440,10 +401,6 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
 
         //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-        //m_pSliderStep->SetValue( step * 10.0f );
-        //m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
-
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
@@ -479,10 +436,6 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
 
         //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-        //m_pSliderStep->SetValue( step * 10.0f );
-        //m_pTxtStepBox->SetValue( wxString::Format( wxT( "%.1f mm"), step) );
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( step );
-
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setIsHardi( true );
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         
@@ -683,7 +636,6 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert fibers
 	DatasetIndex index = DatasetManager::getInstance()->createFibers( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
-	//DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( index );
 
 	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
     {
