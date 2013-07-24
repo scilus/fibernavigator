@@ -20,7 +20,7 @@ class RTTFibers
 {
 public:
     RTTFibers(); //Constructor
-    ~RTTFibers(); //Destructor
+	~RTTFibers(); //Destructor
 
     //RTT functions
     void seed();
@@ -54,18 +54,21 @@ public:
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
-    void setMapInfo( Anatomy* info )                                  { m_pMapInfo = info; m_usingMap = true; }
+    void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
+	void setSeedMapInfo( Anatomy* info );							  
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
     float getStep()                              { return m_step; }
     float getNbMeshPoint()                       { return m_nbMeshPt; }
-	float getShellSeedNb();						 
+	float getShellSeedNb();		
+	float getSeedMapNb();
 
     float getPuncture()                          { return m_puncture; }
     float getVinVout()                           { return m_vinvout; }
     float getMinFiberLength()                    { return m_minFiberLength; } 
     float getMaxFiberLength()                    { return m_maxFiberLength; }
+	void insert(std::vector<Vector> pointsF, std::vector<Vector> pointsB, std::vector<Vector> colorF, std::vector<Vector> colorB);
 
     bool isHardiSelected()                       { return m_isHARDI;}
     
@@ -80,53 +83,8 @@ public:
 
 	unsigned int  m_trackActionStep;
 	float m_timerStep;
+	std::vector<Vector> m_pSeedMap;
 	
-    
-
-    //GPGPU functions
-    bool checkFramebufferStatus(void);
-    void checkGLErrors(const char *label);
-    void compareResults(void);
-    void createTextures(void);
-    void createAllTextureParameters(void);
-    void initGLSL(void);
-    void initFBO(void);
-    void initGLEW(void);
-    void initGLUT(int argc, char** argv);
-    void performComputation(void);
-    void printProgramInfoLog(GLuint obj);
-    void printShaderInfoLog(GLuint obj);
-    void printVector(const float *p, const int N);
-    void setupTexture(const GLuint texID);
-    void swap(void);
-    void transferFromTexture(float* data);
-    void transferToTexture(float* data, GLuint texID);
-    void setupALL();
-
-    //GPGPU vars
-    // problem size, texture size, number of iterations (set from command line)
-    int N;
-    int texSize;
-    int numIterations;
-
-    // texture identifiers
-    GLuint yTexID[2];
-    GLuint xTexID;
-    // ping pong management vars
-    int writeTex;
-    int readTex;
-    GLenum attachmentpoints[2];
-
-
-    // FBO identifier
-    GLuint fb;
-    GLint yParam;
-    GLuint fbo;
-
-    float* seeds;
-    float* result;
-    float* xValues;
-
 private:
     float       m_FAThreshold;
     float       m_angleThreshold;
@@ -138,12 +96,11 @@ private:
     float       m_minFiberLength;
     float       m_maxFiberLength;
     bool        m_isHARDI;
-    bool        m_usingMap;
     Tensors     *m_pTensorsInfo;
     Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
-    Anatomy     *m_pMapInfo;
-
+    Anatomy     *m_pMaskInfo;
+	Anatomy     *m_pSeedMapInfo;
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;

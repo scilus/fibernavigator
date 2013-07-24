@@ -10,6 +10,7 @@ public:
 
     bool isFileSelected() const { return m_isFileSelected; }
     bool isShellSeeds() const  { return m_isShellSeeds; }
+	bool isSeedMap() const { return m_isSeedMap; }
     bool isRTTReady() const     { return m_isRTTReady; }
     bool isRTTDirty() const     { return m_isRTTDirty; }
     bool isRTTActive() const    { return m_isRTTActive; }
@@ -23,6 +24,7 @@ public:
 
     bool toggleInterpolateTensors() { return m_interpolateTensors = !m_interpolateTensors; }
     bool toggleShellSeeds()        { return m_isShellSeeds = !m_isShellSeeds; }
+	bool toggleSeedMap()           { return m_isSeedMap = !m_isSeedMap; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
     
     bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
@@ -30,6 +32,8 @@ public:
     bool isTrackActionPaused() const { return m_isPaused;}
     void setTrackAction(bool enabled) {m_isTrackActionPlaying = enabled;}
     void setTrackActionPause(bool paused) {m_isPaused = paused;}
+	void setShellSeed(bool enabled) {m_isShellSeeds = enabled;}
+	void setSeedMap(bool enabled) {m_isSeedMap = enabled;}
 	
 
 protected:
@@ -45,6 +49,7 @@ private:
     bool m_interpolateTensors;
     bool m_isFileSelected;
     bool m_isShellSeeds;
+	bool m_isSeedMap;
     bool m_isRTTActive;
     bool m_isRTTDirty;
     bool m_isRTTReady;

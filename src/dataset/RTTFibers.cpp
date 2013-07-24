@@ -38,15 +38,36 @@ RTTFibers::RTTFibers()
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
     m_isHARDI( false ),
-    m_usingMap( false ),
 	m_trackActionStep(std::numeric_limits<unsigned int>::max()),
 	m_timerStep( 0 )
 {
-    //GPGPU
-    writeTex = 0;
-    readTex = 1;
 }
 
+void RTTFibers::setSeedMapInfo(Anatomy *info)
+{
+	m_pSeedMap.clear();
+	m_pSeedMapInfo = info; 
+	if( m_pSeedMapInfo != NULL )
+	{
+		int cols = DatasetManager::getInstance()->getColumns();
+		int rows = DatasetManager::getInstance()->getRows();
+		int frames = DatasetManager::getInstance()->getFrames();
+
+        for( int f = 0; f < frames; ++f )
+		{
+			for( int r = 0; r < rows; ++r )
+			{
+				for( int c = 0; c < cols; ++c )
+				{
+					if ( m_pSeedMapInfo->at(f * rows * cols + r * cols + c) > 0.0f)
+					{
+						m_pSeedMap.push_back( Vector(c, r, f) );
+					}
+				}
+			}
+		}
+	}
+}
 ///////////////////////////////////////////////////////////////////////////
 // Generate random seeds
 ///////////////////////////////////////////////////////////////////////////
@@ -80,6 +101,29 @@ float RTTFibers::getShellSeedNb()
 	}
     return pts;
 }
+
+void RTTFibers::insert(std::vector<Vector> pointsF, std::vector<Vector> pointsB, std::vector<Vector> colorF, std::vector<Vector> colorB)
+{
+	if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+	{
+		m_fibersRTT.push_back( pointsF ); 
+		m_colorsRTT.push_back( colorF );
+		m_fibersRTT.push_back( pointsB ); 
+		m_colorsRTT.push_back( colorB );
+	}
+}
+///////////////////////////////////////////////////////////////////////////
+// Returns the nb of seeds for Map seeding
+///////////////////////////////////////////////////////////////////////////
+float RTTFibers::getSeedMapNb()
+{
+	float pts = m_nbSeed*m_nbSeed*m_nbSeed;
+	if( m_pSeedMapInfo != NULL )
+	{
+		pts *= m_pSeedMap.size();
+	}
+    return pts;
+}
 ///////////////////////////////////////////////////////////////////////////
 // Generate seeds and tracks
 ///////////////////////////////////////////////////////////////////////////
@@ -96,7 +140,7 @@ void RTTFibers::seed()
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	//Evenly distanced seeds
-    if( !RTTrackingHelper::getInstance()->isShellSeeds() )
+    if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap())
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
@@ -147,10 +191,59 @@ void RTTFibers::seed()
 							m_fibersRTT.push_back( pointsB ); 
 							m_colorsRTT.push_back( colorB );
 						}
+					}
+				}
+			}
+		}
+	}
+	else if ( RTTrackingHelper::getInstance()->isSeedMap())
+	{
+		for( unsigned int s = 0; s < m_pSeedMap.size(); s++ )
+		{ 
+			Vector val = m_pSeedMap[s];	
+			
+			minCorner.x = val.x * xVoxel;
+			minCorner.y = val.y * yVoxel;
+			minCorner.z = val.z * zVoxel;
+			maxCorner.x = val.x * xVoxel + xVoxel;
+			maxCorner.y = val.y * yVoxel + yVoxel;
+			maxCorner.z = val.z * zVoxel + zVoxel;
 
-						//glColor3f(1,0,0);
-						//SceneManager::getInstance()->getScene()->drawSphere( x, y ,z, 0.2 );
+			float xstep =  xVoxel / float( m_nbSeed - 1.0f );
+			float ystep =  yVoxel / float( m_nbSeed - 1.0f );
+			float zstep =  zVoxel / float( m_nbSeed - 1.0f );
 
+			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
+			{
+				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
+				{
+					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
+					{
+						vector<Vector> pointsF; // Points to be rendered Forward
+						vector<Vector> colorF; //Color (local directions)Forward
+						vector<Vector> pointsB; // Points to be rendered Backward
+						vector<Vector> colorB; //Color (local directions) Backward
+                        
+                        if(m_isHARDI)
+                        {
+						    //Track both sides
+							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+                        }
+                        else
+                        {
+						    //Track both sides
+						    performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+                        }
+                        
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						{
+							m_fibersRTT.push_back( pointsF ); 
+							m_colorsRTT.push_back( colorF );
+							m_fibersRTT.push_back( pointsB ); 
+							m_colorsRTT.push_back( colorB );
+						}
 					}
 				}
 			}
@@ -420,7 +513,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = m_vinvout;
-    float fa = m_pMapInfo->at(s_number);
+    float fa = m_pMaskInfo->at(s_number);
 	vin.normalize();
 
     for(unsigned int i=0; i < sticks.size()/3; i++)
@@ -763,15 +856,10 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
 ///////////////////////////////////////////////////////////////////////////
 bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 {
-    bool isOk = true;
-
-    if(m_usingMap)
+    bool isOk = false;
+	if(m_pMaskInfo->at(sticksNumber) > m_FAThreshold)
     {
-        isOk = false;
-        if(m_pMapInfo->at(sticksNumber) > m_FAThreshold)
-        {
-            isOk = true;
-        }
+       isOk = true;
     }
 
     return isOk;
@@ -907,321 +995,6 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 angle = 180 * acos / M_PI;
             }
         }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////
-//////////////  GPU-GPU SECTION - NOT IMPLEMENTED   ///////////////////////
-///////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-// GPGPU: Init FBO
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::initFBO()
-{
-    // create FBO (off-screen framebuffer)
-    glGenFramebuffersEXT(1, &fb); 
-    // bind offscreen framebuffer (that is, skip the window-specific render target)
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-
-    //BUG IS HERE
-
-    //glGetIntegerv( GL_VIEWPORT,m_pDatasetHelper->m_mainFrame->m_pMainGL->m_viewport );
-    //viewport for 1:1 pixel=texture mapping
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(0, texSize, 0, texSize);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glViewport(0, 0, texSize, texSize);
-}
-
-///////////////////////////////////////////////////////////////////////////
-// GPGPU: Create Textures
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::createTextures(void)
-{
-    // create textures 
-    // y gets two textures, alternatingly read-only and write-only, 
-    // x is just read-only
-    glGenTextures (2, yTexID);
-    glGenTextures (1, &xTexID);
-    // set up textures
-    setupTexture (yTexID[readTex]);
-    transferToTexture(seeds,yTexID[readTex]);
-    setupTexture (yTexID[writeTex]);
-    transferToTexture(seeds,yTexID[writeTex]);
-
-    setupTexture (xTexID);
-    transferToTexture(xValues,xTexID);
-    // set texenv mode from modulate (the default) to replace
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    // check if something went completely wrong
-    checkGLErrors ("createFBOandTextures()");
-}
-
-///////////////////////////////////////////////////////////////////////////
-// GPGPU: Computation
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::performComputation(void) 
-{
-    // attach two textures to FBO
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentpoints[writeTex], GL_TEXTURE_RECTANGLE_ARB, yTexID[writeTex], 0);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachmentpoints[readTex], GL_TEXTURE_RECTANGLE_ARB, yTexID[readTex], 0);
-    // check if that worked
-    if (!checkFramebufferStatus())
-    {
-        printf("glFramebufferTexture2DEXT():\t [FAIL]\n");
-        exit (-5);
-    }
-
-    // enable GLSL program
-    ShaderHelper::getInstance()->getRTTShader()->bind();
-
-    glActiveTexture(GL_TEXTURE1);    
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB,xTexID);
-    ShaderHelper::getInstance()->getRTTShader()->setUniSampler("xValues", 1);
-    glFinish();
-
-    for (int i=0; i<1; i++) 
-    {
-        // set render destination
-        glDrawBuffer (attachmentpoints[writeTex]);
-        // enable texture y_old (read-only)
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB,yTexID[readTex]);
-
-
-        ShaderHelper::getInstance()->getRTTShader()->setUniSampler("inSeed", 0);
-        ShaderHelper::getInstance()->getRTTShader()->setUniInt("color", 1);
-        // and render multitextured viewport-sized quad
-        // depending on the texture target, switch between 
-        // normalised ([0,1]^2) and unnormalised ([0,w]x[0,h])
-        // texture coordinates
-
-        // make quad filled to hit every pixel/texel 
-        // (should be default but we never know)
-        glPolygonMode(GL_FRONT,GL_FILL);
-
-        // render with unnormalized texcoords
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0, 0.0); 
-        glVertex2f(-1, -1);
-        glTexCoord2f(texSize, 0.0); 
-        glVertex2f(1, -1);
-        glTexCoord2f(texSize,texSize ); 
-        glVertex2f(1, 1);
-        glTexCoord2f(0.0, texSize); 
-        glVertex2f(-1, 1);
-        glEnd();
-
-        // swap role of the two textures (read-only source becomes 
-        // write-only target and the other way round):
-        //compareResults();
-        swap();
-    }
-    // done, stop timer, calc MFLOP/s if neccessary
-
-    // done, just do some checks if everything went smoothly.
-    checkFramebufferStatus();
-    checkGLErrors("render()");
-}
-
-///////////////////////////////////////////////////////////////////////////
-// GPGPU: Compare
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::compareResults()
-{
-    transferFromTexture (result);
-    //std::cout << "AFTER: " << result[0] << " " << result[1] << " " << result[2] << " " << result[3] << "\n";
-    for(int k=0; k<4*N; k+=4)
-    {
-        std::cout << "AFTER: " << result[k] << " " << result[k+1] << " " << result[k+2] << " " << result[k+3] << "\n";
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////
-// GPGPU: Textures Functions
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::transferFromTexture(float* data) 
-{
-    // version (a): texture is attached
-    // recommended on both NVIDIA and ATI
-    glReadBuffer(attachmentpoints[readTex]);
-    glReadPixels(0, 0, texSize, texSize,GL_RGBA,GL_FLOAT,data);
-    // version b: texture is not necessarily attached
-    //glBindTexture(GL_TEXTURE_RECTANGLE_ARB,yTexID[readTex]);
-    //glGetTexImage(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGBA,GL_FLOAT,data);
-}
-
-void RTTFibers::transferToTexture (float* data, GLuint texID) {
-    // version (a): HW-accelerated on NVIDIA 
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texID);
-    glTexSubImage2D(GL_TEXTURE_RECTANGLE_ARB,0,0,0,texSize,texSize,GL_RGBA,GL_FLOAT,data);
-    // version (b): HW-accelerated on ATI 
-    //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, texID, 0);
-    //glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    //glRasterPos2i(0,0);
-    //glDrawPixels(texSize,texSize*texSize,GL_RGBA,GL_FLOAT,data);
-    //glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
-}
-
-void RTTFibers::setupTexture (const GLuint texID) 
-{
-    // make active and bind
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB,texID);
-    // turn off filtering and wrap modes
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    // define texture with floating point format
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB,0,GL_RGBA32F_ARB,texSize,texSize,0,GL_RGBA,GL_FLOAT,0);
-    // check if that worked
-    if (glGetError() != GL_NO_ERROR)
-    {
-        printf("glTexImage2D():\t\t\t [FAIL]\n");
-        exit (-3);
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////
-// GPGPU
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::setupALL()
-{
-    attachmentpoints[0] = GL_COLOR_ATTACHMENT0_EXT;
-    attachmentpoints[1] = GL_COLOR_ATTACHMENT1_EXT;
-
-    // init offscreen framebuffer
-    initFBO();
-
-    //FgeOffscreen fbo( texSize, texSize, false );
-
-    //fbo.setClearColor( 1.0f, 1.0f, 1.0f);
-
-
-/*  glMatrixMode( GL_PROJECTION );
-    glLoadIdentity();
-    gluOrtho2D(0.0, texSize, 0.0, texSize);
-
-
-    glViewport( 0, 0, texSize, texSize );*/
-
-
-    // create textures for vectors
-    createTextures();
-
-    // init shader runtime
-    // and start computation
-    performComputation();
-
-    // compare results
-    compareResults();
-
-    // and clean up
-    ShaderHelper::getInstance()->getRTTShader()->release();
-
-    //fbo.deactivate();
-    glDeleteFramebuffersEXT(1,&fb);
-
-
-
-    ////ROUNDTRIP BACK
-    //for(int j = 0; j < 4*texSize*texSize*texSize; j+=4)
-    //{
-    //    glColor3f(1.0,1.0,0.0);
-    //     m_pDatasetHelper->m_theScene->drawSphere( result[j], result[j+1], result[j+2], 0.2);
-    //    // glBegin( GL_LINES );
-    //    //    glVertex3f( seeds[j], seeds[j+1],seeds[j+2]);
-    //    //    glVertex3f( result[j], result[j+1], result[j+2]);
-    //    //glEnd();
-    //}
-
-
-    free(seeds);
-    free(result);
-    free(xValues);
-    glDeleteTextures(2,yTexID);
-    glDeleteTextures (1,&xTexID);
-
-
-    //Restore Matrix parameters
-    //glMatrixMode( GL_PROJECTION );
-    //glLoadIdentity();
-    //glOrtho( -m_pDatasetHelper->m_mainFrame->m_pMainGL->m_orthoModX, m_pDatasetHelper->m_mainFrame->m_pMainGL->m_orthoSizeNormal + m_pDatasetHelper->m_mainFrame->m_pMainGL->m_orthoModX,
-    //    -m_pDatasetHelper->m_mainFrame->m_pMainGL->m_orthoModY, m_pDatasetHelper->m_mainFrame->m_pMainGL->m_orthoSizeNormal + m_pDatasetHelper->m_mainFrame->m_pMainGL->m_orthoModY, -500, 500 );
-
-    //glViewport(m_pDatasetHelper->m_mainFrame->m_pMainGL->m_viewport[0], m_pDatasetHelper->m_mainFrame->m_pMainGL->m_viewport[1], m_pDatasetHelper->m_mainFrame->m_pMainGL->m_viewport[2], m_pDatasetHelper->m_mainFrame->m_pMainGL->m_viewport[3]);
-}
-
-/**
- * Checks framebuffer status.
- * Copied directly out of the spec, modified to deliver a return value.
- */
-bool RTTFibers::checkFramebufferStatus() {
-    GLenum status;
-    status = (GLenum) glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    switch(status) {
-        case GL_FRAMEBUFFER_COMPLETE_EXT:
-            return true;
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-        printf("Framebuffer incomplete, incomplete attachment\n");
-            return false;
-        case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-        printf("Unsupported framebuffer format\n");
-            return false;
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-        printf("Framebuffer incomplete, missing attachment\n");
-            return false;
-        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-        printf("Framebuffer incomplete, attached images must have same dimensions\n");
-            return false;
-        case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-        printf("Framebuffer incomplete, attached images must have same format\n");
-            return false;
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-        printf("Framebuffer incomplete, missing draw buffer\n");
-            return false;
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-        printf("Framebuffer incomplete, missing read buffer\n");
-            return false;
-    }
-    return false;
-}
-
-
-void RTTFibers::checkGLErrors( const char *label )
-{
-    Logger::getInstance()->printIfGLError( wxString( label, wxConvUTF8 ) );
-//     GLenum errCode;
-//     const GLubyte *errStr;
-//     
-//     if ((errCode = glGetError()) != GL_NO_ERROR) 
-//     {
-//  errStr = gluErrorString(errCode);
-//     printf("OpenGL ERROR: ");
-//     printf((char*)errStr);
-//     printf("(Label: ");
-//     printf(label);
-//     printf(")\n.");
-//     }
-}
-
-///////////////////////////////////////////////////////////////////////////
-// GPGPU swap framebuffers
-///////////////////////////////////////////////////////////////////////////
-void RTTFibers::swap(void) 
-{
-    if (writeTex == 0)
-    {
-        writeTex = 1;
-        readTex = 0;
-    } 
-    else 
-    {
-        writeTex = 0;
-        readTex = 1;
     }
 }
 
