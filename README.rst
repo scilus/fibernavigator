@@ -20,11 +20,10 @@ How to get the application
 --------------------------
 
 - `Build instructions for Ubuntu`_ and other Linux distros are provided
-- A `Windows build`_ and a `Mac OSX build`_ are provided on the old site.
+- Windows and OSX builds are available on the Releases_ page.
 
 .. _Fibernavigator: http://code.google.com/p/fibernavigator/
 .. _tracker: https://github.com/scilus/fibernavigator/issues
 .. _video tutorial: https://github.com/scilus/fibernavigator/wiki/Video-tutorial
 .. _Build instructions for Ubuntu: https://github.com/scilus/fibernavigator/wiki/Ubuntu-build-instructions
-.. _Windows build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator-f4a102c420.zip
-.. _Mac OSX build: http://code.google.com/p/fibernavigator/downloads/detail?name=FiberNavigator_f4a102c420.dmg
+.. _Releases: https://github.com/scilus/fibernavigator/releases
