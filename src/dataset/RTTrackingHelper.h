@@ -34,7 +34,7 @@ public:
     void setTrackActionPause(bool paused) {m_isPaused = paused;}
 	void setShellSeed(bool enabled) {m_isShellSeeds = enabled;}
 	void setSeedMap(bool enabled) {m_isSeedMap = enabled;}
-	
+	int generateId() {return (++m_id);}
 
 protected:
     RTTrackingHelper(void);
@@ -55,6 +55,7 @@ private:
     bool m_isRTTReady;
     bool m_isTrackActionPlaying;
     bool m_isPaused;
+	int m_id;
 
 };
 
