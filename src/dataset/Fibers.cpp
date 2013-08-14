@@ -3564,7 +3564,12 @@ void Fibers::updatePropertiesSizer()
 bool Fibers::toggleShow()
 {
     SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
-    return DatasetInfo::toggleShow();
+	DatasetInfo::toggleShow();
+	if(getShow())
+	{
+		SceneManager::getInstance()->setSelBoxChanged(true);
+	}
+	return getShow();
 }
 
 //////////////////////////////////////////////////////////////////////////
