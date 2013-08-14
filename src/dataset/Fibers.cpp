@@ -1,4 +1,5 @@
 /*
+
  *  The Fibers class implementation.
  *
  */
@@ -1349,26 +1350,25 @@ bool Fibers::loadDmri( const wxString &filename )
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
-    res = fscanf( pFile, "%d %f", &m_countLines, &f2 );
+    res = fscanf( pFile, "%s %s", pS1, pS2 );
+    m_countLines = std::atof(pS1);
     
-    delete[] pS1;
-    delete[] pS2;
-    delete[] pS3;
-    delete[] pS4;
-    
-    pS1 = NULL;
-    pS2 = NULL;
-    pS3 = NULL;
-    pS4 = NULL;
-    
-    // the list of points
     vector< vector< float > > lines;
     m_countPoints = 0;
     float back, front;
+    stringstream ss;
 
     for( int i = 0; i < m_countLines; i++ )
     {
-        res = fscanf( pFile, "%f %f %f", &back, &front, &f1 );
+        res = fscanf( pFile, "%s %s %s", pS1, pS2, pS3 );
+
+        ss << pS1;
+        ss >> back;
+        ss.clear();
+        ss << pS2;
+        ss >> front;
+        ss.clear();
+        
         int nbpoints = back + front;
 
         if( back != 0 && front != 0 )
@@ -1384,7 +1384,21 @@ bool Fibers::loadDmri( const wxString &filename )
             //back
             for( int j = back - 1; j >= 0; j-- )
             {
-                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
+                
+              
+                ss << pS1;
+                ss >> f1;
+                ss.clear();
+
+                ss << pS2;
+                ss >> f2;
+                ss.clear();
+                
+                ss << pS3;
+                ss >> f3;
+                ss.clear();
+                
                 curLine[j * 3]  = f1;
                 curLine[j * 3 + 1] = f2;
                 curLine[j * 3 + 2] = f3;
@@ -1393,13 +1407,26 @@ bool Fibers::loadDmri( const wxString &filename )
             if( back != 0 && front != 0 )
             {
                 //repeated pts
-                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
             }
 
             //front
             for( int j = back; j < nbpoints; j++ )
             {
-                res = fscanf( pFile, "%f %f %f %f", &f1, &f2, &f3, &f4 );
+                res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
+                
+                ss << pS1;
+                ss >> f1;
+                ss.clear();
+
+                ss << pS2;
+                ss >> f2;
+                ss.clear();
+                
+                ss << pS3;
+                ss >> f3;
+                ss.clear();
+                
                 curLine[j * 3]  = f1;
                 curLine[j * 3 + 1] = f2;
                 curLine[j * 3 + 2] = f3;
@@ -1411,6 +1438,15 @@ bool Fibers::loadDmri( const wxString &filename )
     }
 
     fclose( pFile );
+    
+    delete[] pS1;
+    delete[] pS2;
+    delete[] pS3;
+    delete[] pS4;
+    pS1 = NULL;
+    pS2 = NULL;
+    pS3 = NULL;
+    pS4 = NULL;
     
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
