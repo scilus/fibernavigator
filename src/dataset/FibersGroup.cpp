@@ -10,6 +10,7 @@
 #include "../Logger.h"
 #include "../main.h"
 #include "../gui/MainFrame.h"
+#include "../gui/SceneManager.h"
 #include "../misc/XmlHelper.h"
 
 #include <wx/tglbtn.h>
@@ -439,6 +440,11 @@ void FibersGroup::OnToggleVisibleBtn()
     {
         (*it)->setShow( show );
     }
+
+	if(getShow())
+	{
+		SceneManager::getInstance()->setSelBoxChanged(true);
+	}
 }
 
 void FibersGroup::OnToggleIntensityBtn()

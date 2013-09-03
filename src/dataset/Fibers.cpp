@@ -8,6 +8,7 @@
 
 #include "Anatomy.h"
 #include "DatasetManager.h"
+#include "RTTrackingHelper.h"
 
 #include "../main.h"
 #include "../Logger.h"
@@ -3599,7 +3600,12 @@ void Fibers::updatePropertiesSizer()
 bool Fibers::toggleShow()
 {
     SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
-    return DatasetInfo::toggleShow();
+	DatasetInfo::toggleShow();
+	if(getShow())
+	{
+		SceneManager::getInstance()->setSelBoxChanged(true);
+	}
+	return getShow();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -3858,13 +3864,9 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
-
-    // TODO what is the use of this?
-#ifdef __WXMSW__
-    m_name = wxT( "RTTFibers" );
-#else
-    m_name = wxT( "RTTFibers" );
-#endif
+	
+	wxString id = wxString::Format(_T("%d"), RTTrackingHelper::getInstance()->generateId());
+    m_name = wxT( "RTTFibers" + id );
 
 	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
 }
