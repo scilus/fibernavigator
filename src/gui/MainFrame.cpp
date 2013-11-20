@@ -26,6 +26,7 @@
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../version/VersionString.h"
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
@@ -40,6 +41,9 @@
 
 #include <algorithm>
 using std::for_each;
+#include <iostream>
+#include <sstream>
+using std::ostringstream;
 
 #include <cmath>
 
@@ -1675,15 +1679,20 @@ void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 /**/
 void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 {
-    wxString rev = _T( "ea8312dd52" );
-    rev = rev.AfterFirst('$');
-    rev = rev.BeforeLast('$');
-    wxString date = _T( "2013-04-15" );
-    date = date.AfterFirst( '$' );
-    date = date.BeforeLast( '$' );
-    (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
-                        + rev + _T( "\n" ) + date, _T( "About Fiber Navigator" ) );
+    std::string fullSha1( VERSION_GIT_SHA1 );
+    std::string buildDate( VERSION_BUILD_DATE );
+    std::string buildTime( VERSION_BUILD_TIME );
     
+    ostringstream oss;
+    oss << "Fibernavigator: a tool for interactive MRI images and streamlines exploration." << std::endl << std::endl;
+    oss << "For documentation and release information, please visit our website: " << "http://scilus.github.io/fibernavigator/" << std::endl << std::endl;
+    oss << "Current contributors: https://github.com/scilus/fibernavigator/wiki/Current-contributors" << std::endl;
+    oss << "Past contributors: https://github.com/scilus/fibernavigator/wiki/Past-contributors" << std::endl << std::endl;
+    oss << "Built on Git revision: " << fullSha1.substr(0, 10) << std::endl;
+    oss << "Build date: " << buildDate << ", " << buildTime << std::endl;
+    
+    wxString wxMes( oss.str().c_str() );
+    (void)wxMessageBox(wxMes, _T( "About the Fibernavigator" ) );
 }
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )

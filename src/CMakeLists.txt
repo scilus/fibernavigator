@@ -15,7 +15,14 @@ MARK_AS_ADVANCED( CMAKE_CONFIGURATION_TYPES )
 
 
 # Include local CMake modules
-LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../tools/CMakeModules )
+LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../tools/CMakeModules ${PROJECT_SOURCE_DIR}/../tools/rpavlik_cmake_modules )
+
+# Version configuration
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/VersionString.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/version/VersionString.cpp" @ONLY)
+SET( VERSION_HDR "${CMAKE_CURRENT_SOURCE_DIR}/version/VersionString.h")
+SET( VERSION_SRC "${CMAKE_CURRENT_BINARY_DIR}/version/VersionString.cpp")
 
 # First of all find out which platform we are on and set our own platform variable
 SET( FIBERNAVIGATOR_PLATFORM_LINUX "Linux" )
@@ -172,11 +179,13 @@ file( GLOB LIC_SRC "misc/lic/*.cpp" )
 file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 IF( WIN32 )
- ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC} 
-                                          ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${MISC_HDR} ${NIFTI_HDR} )
+ ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp 
+                 ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC} ${VERSION_SRC}
+                 ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${MISC_HDR} ${NIFTI_HDR} ${VERSION_HDR} )
 ELSE( WIN32 )
- ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC}
-                                    ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR}  ${MISC_HDR}  ${NIFTI_HDR} )
+ ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp 
+                 ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC} ${VERSION_SRC}
+                 ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${MISC_HDR} ${NIFTI_HDR} ${VERSION_HDR} )
 ENDIF( WIN32 )
 
 IF( WIN32 )
