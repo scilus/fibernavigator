@@ -15,7 +15,7 @@ MARK_AS_ADVANCED( CMAKE_CONFIGURATION_TYPES )
 
 
 # Include local CMake modules
-LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../tools/CMakeModules ${PROJECT_SOURCE_DIR}/../tools/rpavlik_cmake_modules )
+LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../tools/CMakeModules ${PROJECT_SOURCE_DIR}/../tools/rpavlik_cmakemodules )
 
 # Version configuration
 include(GetGitRevisionDescription)
