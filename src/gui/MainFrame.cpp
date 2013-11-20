@@ -1818,8 +1818,25 @@ void MainFrame::refreshViews()
 
 void MainFrame::updateStatusBar()
 {
+	float value = 0.0f;
+    
+	if( m_pCurrentSceneObject != NULL && m_currentListIndex != -1 )
+	{
+	    float voxelX = DatasetManager::getInstance()->getVoxelX();
+		float voxelY = DatasetManager::getInstance()->getVoxelY();
+		float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+        // Select in the list
+		Anatomy *pCurrentAnatomy = (Anatomy*)m_pCurrentSceneObject;
+		int ind = ( floor( m_pXSlider->GetValue() /  voxelX ) +
+                           floor( m_pYSlider->GetValue() / voxelY ) * pCurrentAnatomy->getColumns() +
+                           floor( m_pZSlider->GetValue() / voxelZ ) * pCurrentAnatomy->getColumns() * pCurrentAnatomy->getRows() );
+
+		value = (* ( pCurrentAnatomy->getFloatDataset() ) )[ind * pCurrentAnatomy->getBands()];
+    }
+	
     GetStatusBar()->SetStatusText( wxString::Format( 
-        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ), 0 );
+        wxT("Position: %d  %d  %d Value %f" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue(), value ), 0 );
     Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateStatusBar" ) );
 }
 
