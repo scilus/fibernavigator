@@ -254,29 +254,33 @@ void PropertiesWindow::OnMergeVisibleFibers( wxEvent& WXUNUSED(event) )
     // Search for currently visible bundles (Fibers objects)
     for( uint index= m_pMainFrame->m_pListCtrl->GetItemCount()-1; index > 0; --index )
     {
-        DatasetInfo* dataset = DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
+        DatasetInfo* pDatasetInfo = DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
 
         // Check if the list item is a currently visible Fibers object
-        if( dataset->getType() == FIBERS && dataset->getShow() )
+        if( pDatasetInfo->getType() == FIBERS && pDatasetInfo->getShow() )
         {
-            bundles.push_back( (Fibers*)dataset );
+            bundles.push_back( (Fibers*)pDatasetInfo );
             indicesToRemove.push_back( index );
         }
     }
 
     if( bundles.empty() )
+    {
         return;
+    }
 
     // Create merged bundle (Fibers object)
-    Fibers* fibers = new Fibers();
-    fibers->createFrom( bundles, wxT("Merged") );
+    Fibers* pFibers = new Fibers();
+    pFibers->createFrom( bundles, wxT("Merged") );
 
     // Remove bundles (Fibers objects) being merged
     for (std::vector<long>::iterator it = indicesToRemove.begin(); it != indicesToRemove.end(); ++it)
+    {
         m_pMainFrame->m_pListCtrl->DeleteItem( *it );
+    }
 
     // Insert the merged bundle (Fibers object)
-    DatasetIndex index = DatasetManager::getInstance()->addFibers( fibers );
+    DatasetIndex index = DatasetManager::getInstance()->addFibers( pFibers );
     m_pMainFrame->m_pListCtrl->InsertItem( index );
 
     m_pMainFrame->refreshAllGLWidgets();

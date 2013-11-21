@@ -1524,7 +1524,9 @@ bool Fibers::createFrom( const vector<Fibers*>& bundles, wxString name )
             int length = (*it)->m_linePointers[i] - (*it)->m_linePointers[i-1];
 
             for( int j=0; j < length; ++j )
+            {
                 m_reverse.push_back( m_linePointers.size()-1 );
+            }
 
             m_linePointers.push_back( m_linePointers.back() + length );
         }
