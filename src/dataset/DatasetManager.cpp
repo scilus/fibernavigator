@@ -623,7 +623,24 @@ DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RT
 
     SceneManager::getInstance()->setSelBoxChanged( true );
 
-	return index;
+    return index;
+}
+
+DatasetIndex DatasetManager::addFibers( Fibers* fibers )
+{
+    SceneManager::getInstance()->getSelectionTree().addFiberDataset( fibers->getName(), fibers->getLineCount() );
+
+    fibers->setThreshold( THRESHOLD );
+    fibers->setShow     ( SHOW );
+    fibers->setShowFS   ( SHOW_FS );
+    fibers->setUseTex   ( USE_TEX );
+
+    DatasetIndex index = insert( fibers );
+    fibers->updateLinesShown();
+
+    SceneManager::getInstance()->setSelBoxChanged( true );
+
+    return index;
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -48,6 +48,7 @@ public:
     void OnToggleLocalColoringBtn           ( wxEvent& event );
     void OnToggleNormalColoringBtn          ( wxEvent& event );
     void OnApplyDifferentColors             ( wxEvent& event );
+    void OnMergeVisibleFibers               ( wxEvent& event );
 
     void OnClickGenerateFiberVolumeBtn      ( wxEvent& event );
     void OnClickApplyBtn                    ( wxEvent& event );

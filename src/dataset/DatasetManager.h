@@ -82,6 +82,7 @@ public:
 
     void remove( const DatasetIndex index );
 	DatasetIndex createFibers( std::vector<std::vector<Vector> >* RTT );
+    DatasetIndex addFibers( Fibers* fibers );
 
 protected:
     DatasetManager(void);
