@@ -1502,6 +1502,51 @@ bool Fibers::loadDmri( const wxString &filename )
     return true;
 }
 
+bool Fibers::createFrom( const vector<Fibers*>& bundles, wxString name )
+{
+    m_pointArray.clear();
+    m_colorArray.clear();
+    m_linePointers.clear();
+    m_reverse.clear();
+
+    m_linePointers.push_back(0);
+    // Copy points, copy colors, set line pointers and set reverse lookup
+    for( vector<Fibers *>::const_iterator it = bundles.begin(); it != bundles.end(); ++it )
+    {
+        for( int i=0; i < (*it)->m_countPoints * 3; ++i )
+        {
+            m_pointArray.push_back( (*it)->m_pointArray[i] );
+            m_colorArray.push_back( (*it)->m_colorArray[i] );
+        }
+
+        for( int i=1; i <= (*it)->m_countLines; ++i )
+        {
+            int length = (*it)->m_linePointers[i] - (*it)->m_linePointers[i-1];
+
+            for( int j=0; j < length; ++j )
+            {
+                m_reverse.push_back( m_linePointers.size()-1 );
+            }
+
+            m_linePointers.push_back( m_linePointers.back() + length );
+        }
+    }
+
+    m_countPoints = m_pointArray.size() / 3;
+    m_countLines  = m_linePointers.size() - 1;
+    m_selected.resize( m_countLines, false );
+    m_filtered.resize( m_countLines, false );
+
+    createColorArray( false );
+    m_type = FIBERS;
+    m_fullPath = wxString(name);
+    m_name = wxString(name);
+
+    m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+
+    return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This function was made for debug purposes, it will create a fake set of
 // fibers with hardcoded value to be able to test different things.

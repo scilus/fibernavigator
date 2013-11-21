@@ -303,11 +303,12 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 0,       0,     100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
-    m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
-    m_pApplyDifferentColors = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
-    m_pToggleInterFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
-    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    m_pToggleLocalColoring   = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
+    m_pToggleNormalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
+    m_pBtnMergeVisibleFibers = new wxButton(         pParent, wxID_ANY, wxT( "Merge visible bundles" ) );
+    m_pToggleInterFibers     = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
+    m_pApplyDifferentColors  = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
+    m_pRadNormalColoring     = new wxRadioButton(    pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
 
 #if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
@@ -397,12 +398,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxMain->Add( m_pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 #endif
     
-    pBoxMain->Add( m_pToggleInterFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pToggleInterFibers,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pBtnMergeVisibleFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY , wxT( "\n Warning: initial state of \n settings may not represent \n the current state of all fibers bundles."), DEF_POS, wxSize( 100, -1 ), wxALIGN_CENTER ),
-        0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY,
+                                     wxT( "\n Warning: initial state of \n settings may not represent \n the current state of all fibers bundles."),
+                                     DEF_POS, wxSize( 100, -1 ), wxALIGN_CENTER ), 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -424,6 +427,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnSubsampling->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleSubsamplingBtn ) );
     pParent->Connect( m_pToggleInterFibers->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibersBtn ) );
     pParent->Connect( m_pBtnColorMode->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleColorModeBtn ) );
+    pParent->Connect( m_pBtnMergeVisibleFibers->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnMergeVisibleFibers ) );
     
 #if !_USE_LIGHT_GUI
     pParent->Connect( m_pBtnGeneratesDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickGenerateFiberVolumeBtn ) );
