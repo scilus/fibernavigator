@@ -183,26 +183,20 @@ private:
     void            setShader();
     void            releaseShader();
 
-
-public:
-    std::vector< int >    m_linePointers;
-    std::vector< float >  m_pointArray;
-    std::vector< float >  m_colorArray;
-    int                   m_countLines;
 private:
     // Variables
     bool                  m_isSpecialFiberDisplay;
     Vector                m_barycenter;
     std::vector< float >  m_boxMax;
     std::vector< float >  m_boxMin;
-    
+    std::vector< float >  m_colorArray;
     int                   m_count;
-    
+    int                   m_countLines;
     int                   m_countPoints;
     bool                  m_isInitialized;
     std::vector< int >    m_lineArray;
-    
-    
+    std::vector< int >    m_linePointers;
+    std::vector< float >  m_pointArray;
     std::vector< float >  m_normalArray;
     bool                  m_normalsPositive;
     std::vector< int >    m_reverse;
