@@ -1828,10 +1828,6 @@ void MainFrame::updateStatusBar()
 		
 		if( pAnat != NULL )
 		{
-			float voxelX = DatasetManager::getInstance()->getVoxelX();
-			float voxelY = DatasetManager::getInstance()->getVoxelY();
-			float voxelZ = DatasetManager::getInstance()->getVoxelZ();
-
 			// Select in the list
 			int ind = ( m_pXSlider->GetValue()   +
 						m_pYSlider->GetValue()   * pAnat->getColumns() +
