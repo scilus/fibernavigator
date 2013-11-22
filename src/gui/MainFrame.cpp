@@ -1691,7 +1691,7 @@ void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
     oss << "Built on Git revision: " << fullSha1.substr(0, 10) << std::endl;
     oss << "Build date: " << buildDate << ", " << buildTime << std::endl;
     
-    wxString wxMes( oss.str().c_str() );
+    wxString wxMes( oss.str().c_str(), wxConvUTF8 );
     (void)wxMessageBox(wxMes, _T( "About the Fibernavigator" ) );
 }
 
