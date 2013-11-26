@@ -91,8 +91,10 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
     // Insert item before the Fibersgroup's item if it exists, if not append it to the list.
     // NB. Always append Fibers object to the list.
     if( FIBERS != pDataset->getType() && FIBERSGROUP != pDataset->getType() && DatasetManager::getInstance()->isFibersGroupLoaded() )
+    {
         pos = FindFiberGroupPosition();
-	
+    }
+    
     wxListCtrl::InsertItem( index, pDataset->getShow() ? 0 : 1 );
     SetItemData( index, datasetIndex );
 
@@ -104,7 +106,9 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
 
     // When adding a lot of Fibers object, selecting each is really slow.
     if( FIBERS != pDataset->getType() )
+    {
         SetItemState( pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
+    }
 
     Update( pos );
 }
@@ -114,7 +118,9 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
 void ListCtrl::InsertItemRange( const vector<DatasetIndex> &items )
 {
     for( vector<DatasetIndex>::const_iterator it = items.begin(); it != items.end(); ++it )
+    {
         InsertItem( *it );
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
