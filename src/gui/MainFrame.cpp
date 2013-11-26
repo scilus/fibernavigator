@@ -354,6 +354,37 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
+int compareInputFile(const wxString &first, const wxString &second)
+{
+    wxArrayString l_extensions;
+    l_extensions.Add( wxString( wxT("*.nii") ) );
+    l_extensions.Add( wxString( wxT("*.nii.gz") ) );
+    l_extensions.Add( wxString( wxT("*.mesh") ) );
+    l_extensions.Add( wxString( wxT("*.surf") ) );
+    l_extensions.Add( wxString( wxT("*.dip") ) );
+    l_extensions.Add( wxString( wxT("*.fib") ) );
+    l_extensions.Add( wxString( wxT("*.bundlesdata") ) );
+    l_extensions.Add( wxString( wxT("*.trk") ) );
+    l_extensions.Add( wxString( wxT("*.tck") ) );
+    l_extensions.Add( wxString( wxT("*.scn") ) );
+
+    uint idxFirst, idxSecond;
+
+    for( uint i= 0; i < l_extensions.GetCount(); ++i )
+    {
+        if( first.Matches(l_extensions[i]) )
+        {
+            idxFirst = i;
+        }
+
+        if( second.Matches(l_extensions[i]) )
+        {
+            idxSecond = i;
+        }
+    }
+
+    return idxFirst - idxSecond;
+}
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
@@ -370,6 +401,9 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         m_lastPath = dialog.GetDirectory();
         dialog.GetPaths( l_fileNames );
     }
+
+    // Order list of files so fibers files will be at the end of the list.
+    l_fileNames.Sort( compareInputFile );
 
     unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl ) ).getNbErrors();
     if ( nbErrors )
