@@ -271,7 +271,8 @@ void PropertiesWindow::OnMergeVisibleFibers( wxEvent& WXUNUSED(event) )
 
     // Create merged bundle (Fibers object)
     Fibers* pFibers = new Fibers();
-    pFibers->createFrom( bundles, wxT("Merged") );
+    pFibers->createFrom( bundles, wxT("Merged.trk") );
+    m_pMainFrame->m_pListCtrl->SelectItem( m_pMainFrame->m_pListCtrl->FindFiberGroupPosition() );
 
     // Remove bundles (Fibers objects) being merged
     for (std::vector<long>::iterator it = indicesToRemove.begin(); it != indicesToRemove.end(); ++it)
