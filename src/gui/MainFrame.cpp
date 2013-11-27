@@ -354,30 +354,21 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
+const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
+const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
+
 int compareInputFile( const wxString &first, const wxString &second )
 {
-    wxArrayString extensions;
-    extensions.Add( wxString( wxT("*.nii") ) );
-    extensions.Add( wxString( wxT("*.nii.gz") ) );
-    extensions.Add( wxString( wxT("*.mesh") ) );
-    extensions.Add( wxString( wxT("*.surf") ) );
-    extensions.Add( wxString( wxT("*.dip") ) );
-    extensions.Add( wxString( wxT("*.fib") ) );
-    extensions.Add( wxString( wxT("*.bundlesdata") ) );
-    extensions.Add( wxString( wxT("*.trk") ) );
-    extensions.Add( wxString( wxT("*.tck") ) );
-    extensions.Add( wxString( wxT("*.scn") ) );
+    int idxFirst, idxSecond;
 
-    unsigned int idxFirst, idxSecond;
-
-    for( unsigned int i= 0; i < l_extensions.GetCount(); ++i )
+    for( int i= 0; i < NB_EXTENSIONS; ++i )
     {
-        if( first.Matches(l_extensions[i]) )
+        if( first.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
         {
             idxFirst = i;
         }
 
-        if( second.Matches(l_extensions[i]) )
+        if( second.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
         {
             idxSecond = i;
         }
