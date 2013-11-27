@@ -354,6 +354,28 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
+const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
+const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
+
+int compareInputFile( const wxString &first, const wxString &second )
+{
+    int idxFirst, idxSecond;
+
+    for( int i= 0; i < NB_EXTENSIONS; ++i )
+    {
+        if( first.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
+        {
+            idxFirst = i;
+        }
+
+        if( second.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
+        {
+            idxSecond = i;
+        }
+    }
+
+    return idxFirst - idxSecond;
+}
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
@@ -370,6 +392,9 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         m_lastPath = dialog.GetDirectory();
         dialog.GetPaths( l_fileNames );
     }
+
+    // Order list of files so fibers files will be at the end of the list.
+    l_fileNames.Sort( compareInputFile );
 
     unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl ) ).getNbErrors();
     if ( nbErrors )
