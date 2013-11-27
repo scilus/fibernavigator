@@ -94,6 +94,7 @@ public:
 
     void setDataType( const int type) { m_dataType = type; }
     int  getDataType()                { return m_dataType; }
+	bool usingEqualizedDataset() { return m_useEqualizedDataset; }
 
     virtual void createPropertiesSizer( PropertiesWindow *pParentWindow );
     virtual void updatePropertiesSizer();

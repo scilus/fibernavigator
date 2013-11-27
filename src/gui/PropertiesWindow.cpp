@@ -252,7 +252,7 @@ void PropertiesWindow::OnMergeVisibleFibers( wxEvent& WXUNUSED(event) )
     vector<long> indicesToRemove;
     
     // Search for currently visible bundles (Fibers objects)
-    for( uint index= m_pMainFrame->m_pListCtrl->GetItemCount()-1; index > 0; --index )
+    for( unsigned int index= m_pMainFrame->m_pListCtrl->GetItemCount()-1; index > 0; --index )
     {
         DatasetInfo* pDatasetInfo = DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( index ) );
 
