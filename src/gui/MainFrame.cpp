@@ -1849,21 +1849,21 @@ void MainFrame::updateStatusBar()
                 switch( pAnat->getType() )
                 {
                     case HEAD_BYTE:
-                {
-                    maxValue = 255.0;
-                    break;
+                    {
+                        maxValue = 255.0;
+                        break;
+                    }
+                    case HEAD_SHORT:
+                    {
+                        maxValue = pAnat->getNewMax();
+                        break;
+                    }
+                    case OVERLAY:
+                    {
+                        maxValue = pAnat->getOldMax();
+                        break;
+                    }
                 }
-                case HEAD_SHORT:
-                {
-                    maxValue = pAnat->getNewMax();
-                    break;
-                }
-                case OVERLAY:
-                {
-                    maxValue = pAnat->getOldMax();
-                    break;
-                }
-            }
                 //Denormalize
                 value = (* ( pAnat->getFloatDataset() ) )[ind] * maxValue;
             }
