@@ -354,7 +354,7 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
-int compareInputFile(const wxString &first, const wxString &second)
+int compareInputFile( const wxString &first, const wxString &second )
 {
     wxArrayString l_extensions;
     l_extensions.Add( wxString( wxT("*.nii") ) );
