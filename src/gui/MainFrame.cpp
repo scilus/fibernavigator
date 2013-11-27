@@ -356,21 +356,21 @@ void MainFrame::initLayout()
 
 int compareInputFile( const wxString &first, const wxString &second )
 {
-    wxArrayString l_extensions;
-    l_extensions.Add( wxString( wxT("*.nii") ) );
-    l_extensions.Add( wxString( wxT("*.nii.gz") ) );
-    l_extensions.Add( wxString( wxT("*.mesh") ) );
-    l_extensions.Add( wxString( wxT("*.surf") ) );
-    l_extensions.Add( wxString( wxT("*.dip") ) );
-    l_extensions.Add( wxString( wxT("*.fib") ) );
-    l_extensions.Add( wxString( wxT("*.bundlesdata") ) );
-    l_extensions.Add( wxString( wxT("*.trk") ) );
-    l_extensions.Add( wxString( wxT("*.tck") ) );
-    l_extensions.Add( wxString( wxT("*.scn") ) );
+    wxArrayString extensions;
+    extensions.Add( wxString( wxT("*.nii") ) );
+    extensions.Add( wxString( wxT("*.nii.gz") ) );
+    extensions.Add( wxString( wxT("*.mesh") ) );
+    extensions.Add( wxString( wxT("*.surf") ) );
+    extensions.Add( wxString( wxT("*.dip") ) );
+    extensions.Add( wxString( wxT("*.fib") ) );
+    extensions.Add( wxString( wxT("*.bundlesdata") ) );
+    extensions.Add( wxString( wxT("*.trk") ) );
+    extensions.Add( wxString( wxT("*.tck") ) );
+    extensions.Add( wxString( wxT("*.scn") ) );
 
-    uint idxFirst, idxSecond;
+    unsigned int idxFirst, idxSecond;
 
-    for( uint i= 0; i < l_extensions.GetCount(); ++i )
+    for( unsigned int i= 0; i < l_extensions.GetCount(); ++i )
     {
         if( first.Matches(l_extensions[i]) )
         {
