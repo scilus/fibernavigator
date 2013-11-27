@@ -1827,53 +1827,53 @@ void MainFrame::refreshViews()
 
 void MainFrame::updateStatusBar()
 {
-	float value( 0 );
-	long index = getCurrentListIndex();
-	if( index != -1)
-	{
-		DatasetIndex idx = m_pListCtrl->GetItem( index );
-		DatasetInfo* pDataset = DatasetManager::getInstance()->getDataset( idx );
-		Anatomy* pAnat = dynamic_cast<Anatomy*>( pDataset );
+    float value( 0 );
+    long index = getCurrentListIndex();
+    if( index != -1)
+    {
+        DatasetIndex idx = m_pListCtrl->GetItem( index );
+        DatasetInfo* pDataset = DatasetManager::getInstance()->getDataset( idx );
+        Anatomy* pAnat = dynamic_cast<Anatomy*>( pDataset );
 		
-		if( pAnat != NULL && pAnat->getType() != RGB )
-		{
-			//Picked position
-			int rows = pAnat->getRows();
-			int columns = pAnat->getColumns();
-			int ind = ( m_pXSlider->GetValue() + m_pYSlider->GetValue() * columns + m_pZSlider->GetValue() * columns * rows );
+        if( pAnat != NULL && pAnat->getType() != RGB )
+        {
+            //Picked position
+            int rows = pAnat->getRows();
+            int columns = pAnat->getColumns();
+            int ind = ( m_pXSlider->GetValue() + m_pYSlider->GetValue() * columns + m_pZSlider->GetValue() * columns * rows );
 			
-			//Float dataset
-			if( !pAnat->usingEqualizedDataset() )
-			{
-				float maxValue( 1.0f );
-				switch( pAnat->getType() )
-				{
-					case HEAD_BYTE:
-					{
-						maxValue = 255.0;
-						break;
-					}
-					case HEAD_SHORT:
-					{
-						maxValue = pAnat->getNewMax();
-						break;
-					}
-					case OVERLAY:
-					{
-						maxValue = pAnat->getOldMax();
-						break;
-					}
-				}
-				//Denormalize
-				value = (* ( pAnat->getFloatDataset() ) )[ind] * maxValue;
-			}
-			//Equalized dataset
-			else
-			{
-				value = (* ( pAnat->getEqualizedDataset() ) )[ind];
-			}
-		}
-	}
+            //Float dataset
+            if( !pAnat->usingEqualizedDataset() )
+            {
+                float maxValue( 1.0f );
+                switch( pAnat->getType() )
+                {
+                    case HEAD_BYTE:
+                {
+                    maxValue = 255.0;
+                    break;
+                }
+                case HEAD_SHORT:
+                {
+                    maxValue = pAnat->getNewMax();
+                    break;
+                }
+                case OVERLAY:
+                {
+                    maxValue = pAnat->getOldMax();
+                    break;
+                }
+            }
+                //Denormalize
+                value = (* ( pAnat->getFloatDataset() ) )[ind] * maxValue;
+            }
+            //Equalized dataset
+            else
+            {
+                value = (* ( pAnat->getEqualizedDataset() ) )[ind];
+            }
+        }
+    }
 	
     GetStatusBar()->SetStatusText( wxString::Format(wxT("Pos: %d  %d  %d Value %.2f" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue(), value ), 0 );
     Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateStatusBar" ) );
