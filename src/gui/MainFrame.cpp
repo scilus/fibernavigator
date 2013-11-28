@@ -355,7 +355,7 @@ void MainFrame::initLayout()
 }
 
 const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
-const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
+const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( EXTENSIONS[0] );
 
 int compareInputFile( const wxString &first, const wxString &second )
 {
