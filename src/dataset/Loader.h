@@ -108,6 +108,11 @@ public:
 
                     m_pListCtrl->InsertItem( result );
 
+                    if( pDataset->getType() == FIBERS )
+                    {
+                       m_pMainFrame->m_pListCtrl->SelectItem( m_pMainFrame->m_pListCtrl->FindFiberGroupPosition() );
+                    }
+
                     m_pMainFrame->GetStatusBar()->SetStatusText( wxT( "Ready" ), 1 );
                     m_pMainFrame->GetStatusBar()->SetStatusText( wxString::Format( wxT( "%s loaded" ), name.c_str() ), 2 );
                 }

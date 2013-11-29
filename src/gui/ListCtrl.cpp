@@ -104,7 +104,7 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
         Update( i );
     }
 
-    // When adding a lot of Fibers object, selecting each is really slow.
+    // When adding a lot of Fibers object, selecting each one is really slow.
     if( FIBERS != pDataset->getType() )
     {
         SetItemState( pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );

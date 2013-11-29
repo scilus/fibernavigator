@@ -644,6 +644,7 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
     }
 
 	m_pMainFrame->m_pListCtrl->InsertItem( index );
+    m_pMainFrame->m_pListCtrl->SelectItem( m_pMainFrame->m_pListCtrl->FindFiberGroupPosition() );
 
     RTTrackingHelper::getInstance()->setRTTReady(false);
 

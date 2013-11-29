@@ -283,6 +283,7 @@ void PropertiesWindow::OnMergeVisibleFibers( wxEvent& WXUNUSED(event) )
     // Insert the merged bundle (Fibers object)
     DatasetIndex index = DatasetManager::getInstance()->addFibers( pFibers );
     m_pMainFrame->m_pListCtrl->InsertItem( index );
+    m_pMainFrame->m_pListCtrl->SelectItem( m_pMainFrame->m_pListCtrl->FindFiberGroupPosition() );
 
     m_pMainFrame->refreshAllGLWidgets();
 }
