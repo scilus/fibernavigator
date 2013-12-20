@@ -301,7 +301,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLblColoring    = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0,       0, INT_MAX, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 0,       0,     100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    // We don't set the initial value of this slider to the START value because
+    // it is not used the same way when in the FibersGroup context.
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 
+                                             FIBERS_SUBSAMPLING_RANGE_MIN,
+                                             FIBERS_SUBSAMPLING_RANGE_MIN,
+                                             FIBERS_SUBSAMPLING_RANGE_MAX,
+                                             DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pToggleLocalColoring   = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
@@ -509,9 +516,12 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
         minLength = std::min( minLength, (*it)->getMinFibersLength() );
         maxLength = std::max( maxLength, (*it)->getMaxFibersLength() );
     }
+    
+    int floorMinLength = static_cast<int>( std::floor( minLength ) );
+    int ceilMaxLength = static_cast<int>( std::ceil( maxLength ) );
 
-    m_pSliderFibersFilterMin->SetRange( minLength, maxLength );
-    m_pSliderFibersFilterMax->SetRange( minLength, maxLength );
+    m_pSliderFibersFilterMin->SetRange( floorMinLength, ceilMaxLength );
+    m_pSliderFibersFilterMax->SetRange( floorMinLength, ceilMaxLength );
 
     // Show Min / Max Length controls
     m_pLblMinLength->Show();
@@ -649,8 +659,8 @@ void FibersGroup::updateGroupFilters()
     vector<Fibers *> fibers = DatasetManager::getInstance()->getFibers();
     for( vector<Fibers *>::const_iterator it = fibers.begin(); it != fibers.end(); ++it )
     {
-        int minLength = std::max( min, (int)(*it)->getMinFibersLength() );
-        int maxLength = std::min( max, (int)(*it)->getMaxFibersLength() );
+        int minLength = std::max( min, static_cast<int>( std::floor( (*it)->getMinFibersLength() ) ) );
+        int maxLength = std::min( max, static_cast<int>( std::ceil( (*it)->getMaxFibersLength() ) ) );
         (*it)->updateFibersFilters( minLength, maxLength, subSampling, maxSubSampling );
         (*it)->updateSliderMinLength( minLength );
         (*it)->updateSliderMaxLength( maxLength );

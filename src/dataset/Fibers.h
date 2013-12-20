@@ -24,6 +24,10 @@ enum FiberFileType
     BINARY_VTK  = 2,
 };
 
+const int FIBERS_SUBSAMPLING_RANGE_MIN(0);
+const int FIBERS_SUBSAMPLING_RANGE_MAX(99);
+const int FIBERS_SUBSAMPLING_RANGE_START(0);
+
 /**
  * This class represents a set of fibers.
  * It supports loading different fibers file types.
