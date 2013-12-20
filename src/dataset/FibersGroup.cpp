@@ -308,7 +308,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
                                              FIBERS_SUBSAMPLING_RANGE_MIN,
                                              FIBERS_SUBSAMPLING_RANGE_MIN,
                                              FIBERS_SUBSAMPLING_RANGE_MAX,
-                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+                                             DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pToggleLocalColoring   = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
