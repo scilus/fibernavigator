@@ -301,7 +301,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLblColoring    = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0,       0, INT_MAX, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 0,       0,     100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    // We don't set the initial value of this slider to the START value because
+    // it is not used the same way when in the FibersGroup context.
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 
+                                             FIBERS_SUBSAMPLING_RANGE_MIN,
+                                             FIBERS_SUBSAMPLING_RANGE_MIN,
+                                             FIBERS_SUBSAMPLING_RANGE_MAX,
+                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pToggleLocalColoring   = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );

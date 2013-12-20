@@ -3440,7 +3440,12 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 
+                                            FIBERS_SUBSAMPLING_RANGE_START, 
+                                            FIBERS_SUBSAMPLING_RANGE_MIN,
+                                            FIBERS_SUBSAMPLING_RANGE_MAX , 
+                                            DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
@@ -3544,6 +3549,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     m_pRadNormalColoring->SetValue( true );
+    
+    updateFibersFilters();
 }
 
 void Fibers::updatePropertiesSizer()
