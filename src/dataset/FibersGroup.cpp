@@ -509,9 +509,12 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
         minLength = std::min( minLength, (*it)->getMinFibersLength() );
         maxLength = std::max( maxLength, (*it)->getMaxFibersLength() );
     }
+    
+    int floorMinLength = static_cast<int>( std::floor( minLength ) );
+    int ceilMaxLength = static_cast<int>( std::ceil( maxLength ) );
 
-    m_pSliderFibersFilterMin->SetRange( minLength, maxLength );
-    m_pSliderFibersFilterMax->SetRange( minLength, maxLength );
+    m_pSliderFibersFilterMin->SetRange( floorMinLength, ceilMaxLength );
+    m_pSliderFibersFilterMax->SetRange( floorMinLength, ceilMaxLength );
 
     // Show Min / Max Length controls
     m_pLblMinLength->Show();
@@ -649,8 +652,8 @@ void FibersGroup::updateGroupFilters()
     vector<Fibers *> fibers = DatasetManager::getInstance()->getFibers();
     for( vector<Fibers *>::const_iterator it = fibers.begin(); it != fibers.end(); ++it )
     {
-        int minLength = std::max( min, (int)(*it)->getMinFibersLength() );
-        int maxLength = std::min( max, (int)(*it)->getMaxFibersLength() );
+        int minLength = std::max( min, static_cast<int>( std::floor( (*it)->getMinFibersLength() ) ) );
+        int maxLength = std::min( max, static_cast<int>( std::ceil( (*it)->getMaxFibersLength() ) ) );
         (*it)->updateFibersFilters( minLength, maxLength, subSampling, maxSubSampling );
         (*it)->updateSliderMinLength( minLength );
         (*it)->updateSliderMaxLength( maxLength );

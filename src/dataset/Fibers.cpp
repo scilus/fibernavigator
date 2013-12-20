@@ -3433,8 +3433,10 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     wxBoxSizer *pBoxMain = new wxBoxSizer( wxVERTICAL );
 
     //////////////////////////////////////////////////////////////////////////
-    float minLength = getMinFibersLength();
-    float maxLength = getMaxFibersLength();
+
+    // Round to make sure the min and max length sliders reach the real maximal values.
+    int minLength = static_cast<int>( std::floor( getMinFibersLength() ) );
+    int maxLength = static_cast<int>( std::ceil( getMaxFibersLength() ) );
 
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
