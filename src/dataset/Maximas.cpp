@@ -37,7 +37,7 @@ m_displayType( SLICES ),
 m_dataType( 16 )
 {
     m_fullPath = filename;
-    m_scalingFactor = 5.0f;
+    m_scalingFactor = 3.0f;
 
 
 #ifdef __WXMSW__

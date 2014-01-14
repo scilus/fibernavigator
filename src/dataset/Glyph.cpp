@@ -708,7 +708,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     // Need to track it to be able to hide it for Maximas.
     m_pLabelDisplay        = new wxStaticText( pParent, wxID_ANY, wxT( "Display" ) );
     m_pSliderDisplay       = new wxSlider( pParent, wxID_ANY,  0,    1,  20 );
-    m_pSliderScalingFactor = new wxSlider( pParent, wxID_ANY, 50,    1, 200 );
+    m_pSliderScalingFactor = new wxSlider( pParent, wxID_ANY, 30,    1, 200 );
     
     // Need to track it to be able to hide it for Maximas.
     m_pLabelLOD           = new wxStaticText( pParent, wxID_ANY, wxT( "Details" ) );
@@ -724,7 +724,7 @@ void Glyph::createPropertiesSizer( PropertiesWindow *pParent )
     m_pToggleColorWithPosition = new wxToggleButton( pParent, wxID_ANY, wxT( "Color with Position" ), DEF_POS, wxSize( 80, -1 ) );
 #endif
     
-    m_pTxtBoxScalingFactor  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.1f" ), 5.0f ), DEF_POS, wxSize( 50, -1 ) );
+    m_pTxtBoxScalingFactor  = new wxTextCtrl( pParent, wxID_ANY, wxString::Format( wxT( "%.1f" ), 3.0f ), DEF_POS, wxSize( 50, -1 ) );
 
     m_pRadNormal->SetValue(      isDisplayShape( NORMAL ) );
     m_pRadMapOnSphere->SetValue( isDisplayShape( SPHERE ) );
