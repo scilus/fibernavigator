@@ -77,7 +77,7 @@ ODFs::ODFs( const wxString &filename )
     m_nbors          ( NULL ),
 	m_sh_basis       ( SH_BASIS_DESCOTEAUX )
 {
-    m_scalingFactor = 5.0f;
+    m_scalingFactor = 3.0f;
     m_fullPath = filename;
 
 #ifdef __WXMSW__
@@ -87,7 +87,7 @@ ODFs::ODFs( const wxString &filename )
 #endif
 
     // Generating hemispheres
-    generateSpherePoints( m_scalingFactor );
+    generateSpherePoints( m_scalingFactor / 5);
 }
 
 ODFs::~ODFs()
@@ -284,6 +284,9 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
     
     // We need to reload the buffer in video memory.
     loadBuffer();
+
+	// We need to reset the scaling factor
+	setScalingFactor( 3.0f );
 
     return true;
 }
