@@ -41,7 +41,7 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 
 .. _original Fibernavigator: http://code.google.com/p/fibernavigator/
 .. _issue tracker: https://github.com/scilus/fibernavigator/issues
-.. _video tutorials: https://github.com/scilus/fibernavigator/wiki/Video-tutorial
+.. _video tutorials: https://github.com/scilus/fibernavigator/wiki/Video-tutorials
 .. _Build instructions for Ubuntu: https://github.com/scilus/fibernavigator/wiki/Ubuntu-build-instructions
 .. _Releases: https://github.com/scilus/fibernavigator/releases
 .. _wiki: https://github.com/scilus/fibernavigator/wiki/_pages
