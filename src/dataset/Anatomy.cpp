@@ -863,12 +863,45 @@ void Anatomy::saveNifti( wxString fileName )
     char fn[1024];
     strcpy( fn, (const char*)fileName.mb_str( wxConvUTF8 ) );
 
-    pImage->qform_code = 1;    
     pImage->datatype   = m_dataType;
     pImage->fname = fn;
     pImage->dx = m_voxelSizeX;
     pImage->dy = m_voxelSizeY;
     pImage->dz = m_voxelSizeZ;
+    
+    // Prepare for transform saving.
+    pImage->qform_code = 1;
+    float qb(0.0f), qc(0.0f), qd(0.0f);
+    float qx(0.0f), qy(0.0f), qz(0.0f);
+    float dx(0.0f), dy(0.0f), dz(0.0f);
+    float qfac(0.0f);
+    
+    FMatrix &system_transform = DatasetManager::getInstance()->getNiftiTransform();
+    mat44 tempTransfo;
+    
+    // Create a temp transform in the type that nifti functions expect,
+    // and set the qto_xyz transform at the same time.
+    for( int i(0); i < 4; ++i)
+    {
+        for( int j(0); j < 4; ++j)
+        {
+            tempTransfo.m[i][j] = system_transform(i, j);
+            pImage->qto_xyz.m[i][j] = tempTransfo.m[i][j];
+        }
+    }
+
+    // The nifti library uses the quatern_x, qoffset_x and qfac field to 
+    // decide the orientation and transform, when saving with a qform_code >= 1.
+    // We get the quaternion params from the transformation matrix.
+    nifti_mat44_to_quatern(tempTransfo, &qb, &qc, &qd, &qx, &qy, &qz, &dx, &dy, &dz, &qfac);
+    
+    pImage->quatern_b = qb;
+    pImage->quatern_c = qc;
+    pImage->quatern_d = qd;
+    pImage->qoffset_x = qx;
+    pImage->qoffset_y = qy;
+    pImage->qoffset_z = qz;
+    pImage->qfac = qfac;
 
     if( m_type == HEAD_BYTE )
     {
