@@ -33,18 +33,18 @@ wxString    MyApp::shaderPath;
 wxString    MyApp::iconsPath;
 MainFrame * MyApp::frame = NULL;
 
-const wxString MyApp::APP_NAME   = _T( "main" );
-const wxString MyApp::APP_VENDOR = _T( "Ralph S. & Mario H." );
+const wxString MyApp::APP_NAME   = wxT( "Fibernavigator" );
+const wxString MyApp::APP_VENDOR = wxT( "The Fibernavigator team." );
 
 IMPLEMENT_APP( MyApp )
 
 static const wxCmdLineEntryDesc desc[] =
 {
-    { wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("help yourself") },
-    { wxCMD_LINE_SWITCH, _T("p"), _T("screenshot"), _T("screenshot") },
-    { wxCMD_LINE_SWITCH, _T("d"), _T("dmap"), _T("create a distance map on the first loaded dataset") },
-    { wxCMD_LINE_SWITCH, _T("e"), _T("exit"), _T("exit after executing the command line") },
-    { wxCMD_LINE_PARAM, NULL, NULL, _T("scene file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
+    { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("help yourself") },
+    { wxCMD_LINE_SWITCH, wxT("p"), wxT("screenshot"), wxT("screenshot") },
+    { wxCMD_LINE_SWITCH, wxT("d"), wxT("dmap"), wxT("create a distance map on the first loaded dataset") },
+    { wxCMD_LINE_SWITCH, wxT("e"), wxT("exit"), wxT("exit after executing the command line") },
+    { wxCMD_LINE_PARAM, NULL, NULL, wxT("scene file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
     { wxCMD_LINE_NONE } 
 };
 
