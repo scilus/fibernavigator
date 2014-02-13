@@ -10,6 +10,7 @@
 #include "Logger.h"
 #include "dataset/DatasetManager.h"
 #include "dataset/Loader.h"
+#include "gfx/RenderManager.h"
 #include "gfx/ShaderHelper.h"
 #include "gui/MainFrame.h"
 #include "gui/MenuBar.h"
@@ -164,6 +165,9 @@ bool MyApp::OnInit( void )
         {
             exit( 0 );
         }
+        
+        RenderManager::getInstance()->queryGPUCapabilities();
+        
         return true;
 
     }
@@ -172,6 +176,7 @@ bool MyApp::OnInit( void )
         Logger::getInstance()->print( wxT( "Something went wrong, terribly wrong" ), LOGLEVEL_ERROR );
         return false;
     }
+    
     Logger::getInstance()->print( wxT( "End on init main" ), LOGLEVEL_DEBUG );
 }
 
@@ -264,6 +269,7 @@ int MyApp::OnExit()
 
     // Deleting singletons
     delete ShaderHelper::getInstance();
+    delete RenderManager::getInstance();
     delete DatasetManager::getInstance();
     delete SceneManager::getInstance();
     delete Logger::getInstance();

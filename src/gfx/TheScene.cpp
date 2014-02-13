@@ -21,6 +21,7 @@
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/Maximas.h"
+#include "../gfx/RenderManager.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/ArcBall.h"
 #include "../gui/MainFrame.h"
@@ -176,11 +177,15 @@ void TheScene::initGL( int whichView )
 
 void TheScene::bindTextures()
 {
+    static bool overflowMessageRecentlySent = false;
+    
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
     Logger::getInstance()->printIfGLError( wxT( "TheScene::bindtextures - glTexEnvf") );
     
     int allocatedTextureCount = 0;
+    
+    int maxTextureNb = RenderManager::getInstance()->getNbMaxTextures();
 
     for( int i = 0; i < MyApp::frame->m_pListCtrl->GetItemCount(); ++i )
     {
@@ -205,12 +210,27 @@ void TheScene::bindTextures()
             
             Logger::getInstance()->printIfGLError( wxT( "TheScene::bindTextures - glTexParameteri") );
             
-            if ( ++allocatedTextureCount == 10 )
+            if ( ++allocatedTextureCount >= maxTextureNb )
             {
-                Logger::getInstance()->print( wxT( "Reached 10 textures!" ), LOGLEVEL_WARNING );
+                if( !overflowMessageRecentlySent )
+                {
+                    wxString mes( wxT("Maximum number of textures: ") );
+                    mes << maxTextureNb << wxT(" reached. The last ones in the list are not displayed.");
+                    Logger::getInstance()->print( mes , LOGLEVEL_WARNING );
+                    overflowMessageRecentlySent = true;
+                }
+                
                 break;
             }
         }
+    }
+    
+    // In case the number of anatomies to show goes back down under the
+    // maximum number of texture units, we reset the overflow message variable.
+    // That way, we can show the message again if the problem rehappens.
+    if( allocatedTextureCount < maxTextureNb )
+    {
+        overflowMessageRecentlySent = false;
     }
 
     Logger::getInstance()->printIfGLError( wxT( "Bind textures") );
