@@ -1193,21 +1193,7 @@ void MainCanvas::drawOnAnatomy()
 
     if( DRAWMODE_PEN == MyApp::frame->getDrawMode() )
     {
-		float x = xClick * DatasetManager::getInstance()->getVoxelX() ;
-		float y = yClick * DatasetManager::getInstance()->getVoxelY() ;
-		float z = zClick * DatasetManager::getInstance()->getVoxelZ() ;
-
         l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), MyApp::frame->getDrawColor() );
-		//vector<Vector> pointsF; // Points to be rendered Forward
-		//vector<Vector> colorF; //Color (local directions)Forward
-		//vector<Vector> pointsB; // Points to be rendered Backward
-		//vector<Vector> colorB; //Color (local directions) Backward
-		//m_pRealTimeFibers->performHARDIRTT(Vector(x,y,z),1,pointsF,colorF);
-		//m_pRealTimeFibers->performHARDIRTT(Vector(x,y,z),-1,pointsB,colorB);
-		//m_pRealTimeFibers->insert(pointsF, pointsB, colorF, colorB);
-		//m_pRealTimeFibers->renderRTTFibers(false);
-		//RTTrackingHelper::getInstance()->setRTTDirty( true );
-
     }
     else if( DRAWMODE_ERASER == MyApp::frame->getDrawMode() )
     {
