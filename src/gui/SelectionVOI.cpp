@@ -37,6 +37,11 @@ SelectionObject( i_center, i_size, i_datasetHelper )
     
 }*/
 
+wxString SelectionVOI::getTypeTag() const
+{
+    return wxT( "voi" );
+}
+
 SelectionVOI::SelectionVOI( /*DatasetHelper *pDH, */Anatomy *pSourceAnatomy, const float threshold, const ThresholdingOperationType opType )
     : SelectionObject( Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0) ),
       m_voiSize( 0 )
@@ -379,11 +384,6 @@ bool SelectionVOI::isPointInside( const float xPos, const float yPos, const floa
     unsigned int dataCoord( zVoxelCoord * m_nbCols * m_nbRows + yVoxelCoord * m_nbCols + xVoxelCoord );
     
     return m_includedVoxels.at( dataCoord );
-}
-
-wxString SelectionVOI::getTypeTag() const
-{
-    return wxT( "selectionVOI" );
 }
 
 void SelectionVOI::flipNormals()

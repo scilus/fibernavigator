@@ -41,6 +41,18 @@ using std::vector;
 #define DEF_POS   wxDefaultPosition
 #define DEF_SIZE  wxDefaultSize
 
+namespace
+{
+    wxString wxStrFormat( int val, wxString precision = wxT( "" ) )
+    {
+        return wxString::Format( wxT( "%" ) + precision + wxT( "d" ), val );
+    }
+    wxString wxStrFormat( double val, wxString precision = wxT( "" ) )
+    {
+        return wxString::Format( wxT( "%" ) + precision + wxT( "f" ), val );
+    }
+}
+
 SelectionObject::SelectionObject( Vector i_center, Vector i_size )
 :   m_pLabelAnatomy   ( NULL ),
     m_pCBSelectDataSet( NULL ),
@@ -53,14 +65,11 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
     m_center                = i_center;
     m_color                 = l_color;
     m_gfxDirty              = false;
-    m_handleRadius          = 3.0f;
     m_hitResult             = l_hr;
     m_isActive              = true;
     m_objectType            = DEFAULT_TYPE;
     m_isLockedToCrosshair   = false;
-    m_isFirstLevel          = false;
     m_isNOT                 = false;
-    m_isosurface            = NULL;
     m_isSelected            = false;
     m_isVisible             = true;
     m_maxCrossSectionIndex  = 0;
@@ -442,16 +451,6 @@ int SelectionObject::getIcon()
         return -1;
     else
         return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Sets an object to master or not.
-//
-// i_isMaster       : Indicates if we want to set this object as a master or not.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::setIsFirstLevel( bool i_isFirstLevel )
-{
-    m_isFirstLevel = i_isFirstLevel;
 }
 
 bool SelectionObject::toggleIsNOT()
@@ -1600,27 +1599,17 @@ void SelectionObject::draw()
 
     GLfloat l_color[] = { 0.5f, 0.5f, 0.5f, 0.5f };
 
-    // TODO not now do we really need a different color?
-    if( m_isFirstLevel )
+    if ( ! m_isNOT )
     {
         l_color[0] = 0.0f; // Red
         l_color[1] = 1.0f; // Green
-        l_color[2] = 1.0f; // Blue
+        l_color[2] = 0.0f; // Blue
     }
-    else 
+    else
     {
-        if ( ! m_isNOT )
-        {
-            l_color[0] = 0.0f; // Red
-            l_color[1] = 1.0f; // Green
-            l_color[2] = 0.0f; // Blue
-        }
-        else
-        {
-            l_color[0] = 1.0f; // Red
-            l_color[1] = 0.0f; // Green
-            l_color[2] = 0.0f; // Blue
-        }
+        l_color[0] = 1.0f; // Red
+        l_color[1] = 0.0f; // Green
+        l_color[2] = 0.0f; // Blue
     }
 
     if( m_isSelected )
@@ -1633,7 +1622,8 @@ void SelectionObject::draw()
     drawObject( l_color );
 }
 
-void SelectionObject::drawIsoSurface()
+// TODO selection remove
+/*void SelectionObject::drawIsoSurface()
 {
     if( ! m_isActive || ! m_isVisible ) 
         return;
@@ -1647,7 +1637,7 @@ void SelectionObject::drawIsoSurface()
 
     glColor3ub( m_color.Red(), m_color.Green(), m_color.Blue() );
     m_isosurface->draw();
-}
+}*/
 
 ///////////////////////////////////////////////////////////////////////////
 // Updates the status bar at the button of the application window.
@@ -1885,7 +1875,51 @@ SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &f
     return m_selectionStates[ fiberId ];
 }
 
-// TODO selection tree saving
+bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode )
+{
+    wxString floatPrecision = wxT( ".8" );
+    
+    wxXmlNode *pState = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "state" ) );
+    pCurNode->AddChild( pState );
+    
+    pState->AddProperty( new wxXmlProperty( wxT( "type" ), getTypeTag() ) );
+    pState->AddProperty( new wxXmlProperty( wxT( "name" ), m_name) );
+    pState->AddProperty( new wxXmlProperty( wxT( "active" ), m_isActive? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddProperty( new wxXmlProperty( wxT( "visible" ), m_isVisible? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddProperty( new wxXmlProperty( wxT( "isNOT" ), m_isNOT? wxT( "yes" ) : wxT( "no" ) ) );
+    
+    
+    wxXmlNode *pCenter = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "center" ) );
+    pCenter->AddProperty( new wxXmlProperty( wxT( "posX" ), wxStrFormat( m_center.x, floatPrecision ) ) );
+    pCenter->AddProperty( new wxXmlProperty( wxT( "posY" ), wxStrFormat( m_center.y, floatPrecision ) ) );
+    pCenter->AddProperty( new wxXmlProperty( wxT( "posZ" ), wxStrFormat( m_center.z, floatPrecision ) ) );
+    pCurNode->AddChild( pCenter );
+    
+    wxXmlNode *pSize = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "size" ) );
+    pSize->AddProperty( new wxXmlProperty( wxT( "sizeX" ), wxStrFormat( m_size.x, floatPrecision ) ) );
+    pSize->AddProperty( new wxXmlProperty( wxT( "sizeY" ), wxStrFormat( m_size.y, floatPrecision ) ) );
+    pSize->AddProperty( new wxXmlProperty( wxT( "sizeZ" ), wxStrFormat( m_size.z, floatPrecision ) ) );
+    pCurNode->AddChild( pSize );
+    
+    // Color is currently only used by VOI, but let's save it anyway. We want to support it later on.
+    wxXmlNode *pColor = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "color" ) );
+    pColor->AddProperty( new wxXmlProperty( wxT( "colorHTML" ), m_color.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    pColor->AddProperty( new wxXmlProperty( wxT( "colorAlpha" ), wxStrFormat( m_color.Alpha() ) ) );
+    pCurNode->AddChild( pColor );
+    
+    wxXmlNode *pDistanceColoring = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "distance_coloring_state" ) );
+    pDistanceColoring->AddProperty( new wxXmlProperty( wxT( "used" ), m_DistColoring ? wxT( "yes") : wxT( "no" ) ) );
+    pCurNode->AddChild( pDistanceColoring );
+
+    wxXmlNode *pMeanFiberOptions = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "mean_fiber_options" ) );
+    pMeanFiberOptions->AddProperty( new wxXmlProperty( wxT( "colorHTML" ), m_meanFiberColor.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    pMeanFiberOptions->AddProperty( new wxXmlProperty( wxT( "opacity" ), wxStrFormat( m_meanFiberOpacity, floatPrecision ) ) );
+    pMeanFiberOptions->AddProperty( new wxXmlProperty( wxT( "colorationMode" ), Helper::getColorationModeString( m_meanFiberColorationMode ) ) );
+    pCurNode->AddChild( pMeanFiberOptions );
+
+    return true;
+}
+
 wxString SelectionObject::getTypeTag() const
 {
     return wxT( "base" );
@@ -2195,12 +2229,15 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadNormalColoring->SetValue( true );
 
 #if !_USE_LIGHT_GUI
+    // TODO select
     pBtnNewColorVolume->Enable( getIsFirstLevel() );
     pBtnNewDensityVolume->Enable( getIsFirstLevel() );
+    // TODO selection remove object type
     pBtnSetAsDistanceAnchor->Enable( m_objectType == VOI_TYPE );
 #endif
     
-    pToggleAndNot->Enable( !getIsFirstLevel() );
+    // TODO selection
+    //pToggleAndNot->Enable( !getIsFirstLevel() );
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
 

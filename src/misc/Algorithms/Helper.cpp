@@ -20,6 +20,38 @@
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
+wxString Helper::getColorationModeString( const FibersColorationMode &colMode )
+{
+    wxString modeStr;
+    
+    switch(colMode)
+    {
+        case NORMAL_COLOR:
+            modeStr = "normal";
+            break;
+        case CURVATURE_COLOR:
+            modeStr = "curvature";
+            break;
+        case TORSION_COLOR:
+            modeStr = "torsion";
+            break;
+        case DISTANCE_COLOR:
+            modeStr = "distance";
+            break;
+        case MINDISTANCE_COLOR:
+            modeStr = "mindistance";
+            break;
+        case CUSTOM_COLOR:
+            modeStr = "custom";
+            break;
+        case CONSTANT_COLOR:
+            modeStr = "constant";
+            break;
+    }
+    
+    return modeStr;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Simple function to convert a HSL color system to a RGB color system.
 //

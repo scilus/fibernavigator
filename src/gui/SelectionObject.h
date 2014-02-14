@@ -1,12 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            SelectionObject.h
-// Author:          Imagicien ->LAMIRANDE-NADEAU Julien & NAZRATI Réda<-
-// Creation Date:   10/26/2009
 //
 // Description: SelectionObject class.
 //
-// Last modifications:
-//      by : GGirard - 19/02/2011
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef SELECTIONOBJECT_H_
@@ -21,6 +16,7 @@
 
 #include <GL/glew.h>
 
+#include <wx/xml/xml.h>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -84,7 +80,8 @@ public :
     virtual void objectUpdate();
 
     void draw();
-    void drawIsoSurface();
+    // TODO selection remove
+    //void drawIsoSurface();
     void lockToCrosshair();
     void moveBack();
     void moveDown();
@@ -122,9 +119,6 @@ public :
 
     void       setName( wxString i_name )             { m_name = i_name;                       };
     wxString   getName()                              { return m_name;                         };
-
-    void       setIsFirstLevel( bool i_isFirstLevel );
-    bool       getIsFirstLevel()                          { return m_isFirstLevel;                     };
     
     bool       toggleIsNOT();
     void       setIsNOT( bool i_isNOT );
@@ -185,7 +179,7 @@ public :
     
     // Methods related to saving and loading.
     // TODO selection saving
-    //bool populateXMLNode( wxXmlNode *pCurNode );
+    virtual bool populateXMLNode( wxXmlNode *pCurNode );
     //virtual bool loadFromXMLNode( wxXmlNode *pSelObjNode );
     
     virtual wxString getTypeTag() const;
@@ -220,13 +214,10 @@ protected :
 
     bool            m_mustUpdateConvexHull;
     bool            m_gfxDirty;
-    float           m_handleRadius;
     hitResult       m_hitResult;
     bool            m_isActive;
     bool            m_isLockedToCrosshair;
-    bool            m_isFirstLevel;
     bool            m_isNOT;
-    CIsoSurface*    m_isosurface;
     bool            m_isSelected;
     bool            m_isVisible;
     wxString        m_name;

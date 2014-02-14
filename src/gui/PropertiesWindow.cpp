@@ -614,7 +614,6 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     
     if( selTree.isEmpty() || pCurObj == NULL )
     {
-        pSelectionObject->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelectionObject );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
@@ -623,8 +622,6 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     }
     else
     {
-        pSelectionObject->setIsFirstLevel( false );
-        
         int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelectionObject );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );

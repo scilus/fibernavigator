@@ -8,6 +8,8 @@
 
 #include "SelectionObject.h"
 
+#include <wx/xml/xml.h>
+
 #include <map>
 using std::map;
 #include <vector>
@@ -69,7 +71,7 @@ public:
     
     // Methods related to saving and loading.
     // TODO selection saving
-    //bool populateXMLNode( wxXmlNode *pRootSelObjNode );
+    bool populateXMLNode( wxXmlNode *pRootSelObjNode );
     //bool loadFromXMLNode( wxXmlNode *pRootSelObjNode, DatasetHelper *pDH );
     
 private:
@@ -110,7 +112,7 @@ private:
         
         // TODO selection saving
         // TODO selection set pos, size sur voi
-        //bool populateXMLNode( wxXmlNode *pParentNode );
+        bool populateXMLNode( wxXmlNode *pParentNode );
         
     private:
         SelectionTreeNode();    // Disable default constructor.

@@ -36,6 +36,11 @@ SelectionEllipsoid::~SelectionEllipsoid()
 {
 }
 
+wxString SelectionEllipsoid::getTypeTag() const
+{
+    return wxT( "ellipsoid" );
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This is the specific implementation to draw a selectionEllipsoid object.
 //
@@ -70,6 +75,7 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
 {
     hitResult hr = { false, 0.0f, 0, NULL };
 
+    // TODO selection remove objectType
     if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();

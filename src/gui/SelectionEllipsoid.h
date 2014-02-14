@@ -26,6 +26,8 @@ public:
 
     // Function from SelectionObject (virtual)
     void objectUpdate();
+    
+    wxString getTypeTag() const;
 
 private:
     // Function from SelectionObject (virtual pure)

@@ -45,6 +45,11 @@ SelectionBox::~SelectionBox()
     }
 }
 
+wxString SelectionBox::getTypeTag() const
+{
+    return wxT( "box" );
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // This is the specific implementation to draw a selectionBox object.
 //
@@ -160,6 +165,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
 {
     hitResult hr = { false, 0.0f, 0, NULL };
 
+    // TODO selection remove objectType
     if( m_isVisible && m_isActive && m_objectType == BOX_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();

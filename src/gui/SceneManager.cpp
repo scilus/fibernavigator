@@ -183,7 +183,7 @@ bool SceneManager::save( const wxString &filename )
     wxXmlNode *pRotation = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "rotation" ) );
     wxXmlNode *pData = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "data" ) );
     wxXmlNode *pPoints = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "points" ) );
-    wxXmlNode *pSelObjs = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "selection_objects" ) );
+    wxXmlNode *pSelSetup = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "selection_setup" ) );
 
     //////////////////////////////////////////////////////////////////////////
     // ROOT
@@ -191,7 +191,7 @@ bool SceneManager::save( const wxString &filename )
     pRoot->AddChild( pRotation );
     pRoot->AddChild( pData );
     pRoot->AddChild( pPoints );
-    pRoot->AddChild( pSelObjs );
+    pRoot->AddChild( pSelSetup );
 
     //////////////////////////////////////////////////////////////////////////
     // POSITION
@@ -304,6 +304,7 @@ bool SceneManager::save( const wxString &filename )
     //////////////////////////////////////////////////////////////////////////
     // SELECTION OBJECTS
     // TODO selection saving
+    bool success = m_pSelTree->populateXMLNode( pSelSetup );
     /*SelectionObjList selObjs = getSelectionObjects();
     for( SelectionObjList::const_iterator it = selObjs.begin(); it != selObjs.end(); ++it )
     {
@@ -656,11 +657,10 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
                 MyTreeCtrl *pTreeView = m_pMainFrame->m_pTreeWidget;
                 if( wxT( "MASTER" ) == type )
                 {
-                    pSelObj->setIsFirstLevel( true );
                     currentMasterId = pTreeView->AppendItem( m_pMainFrame->m_tSelectionObjectsId, name, 0, -1, pSelObj );
                     pTreeView->EnsureVisible( currentMasterId );
                     pTreeView->SetItemImage( currentMasterId, pSelObj->getIcon() );
-                    pTreeView->SetItemBackgroundColour( currentMasterId, *wxCYAN );
+                    pTreeView->SetItemBackgroundColour( currentMasterId, *wxGREEN );
                     pSelObj->setTreeId( currentMasterId );
                 }
                 else

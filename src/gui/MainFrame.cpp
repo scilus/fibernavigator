@@ -1349,7 +1349,6 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     
     if( selTree.isEmpty() || pCurObj == NULL )
     {
-        pSelObj->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
@@ -1358,8 +1357,6 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     }
     else
     {
-        pSelObj->setIsFirstLevel( false );
-
         int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );

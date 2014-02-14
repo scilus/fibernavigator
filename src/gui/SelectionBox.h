@@ -25,6 +25,8 @@ public:
 
     // Function from SelectionObject (pure virtual)
     hitResult hitTest( Ray* i_ray );
+    
+    wxString getTypeTag() const;
 
 private:
     // Function from SelectionObject (pure virtual)
