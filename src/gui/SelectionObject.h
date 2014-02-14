@@ -82,7 +82,6 @@ public :
     void draw();
     // TODO selection remove
     //void drawIsoSurface();
-    void lockToCrosshair();
     void moveBack();
     void moveDown();
     void moveForward();
@@ -216,7 +215,6 @@ protected :
     bool            m_gfxDirty;
     hitResult       m_hitResult;
     bool            m_isActive;
-    bool            m_isLockedToCrosshair;
     bool            m_isNOT;
     bool            m_isSelected;
     bool            m_isVisible;

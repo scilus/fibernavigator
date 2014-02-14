@@ -39,10 +39,6 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
 ///////////////////////////////////////////////////////////////////////////
 SelectionBox::~SelectionBox()
 {
-    if( m_isLockedToCrosshair )
-    {
-        SceneManager::getInstance()->setBoxLock( false );
-    }
 }
 
 wxString SelectionBox::getTypeTag() const

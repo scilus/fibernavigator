@@ -68,7 +68,6 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
     m_hitResult             = l_hr;
     m_isActive              = true;
     m_objectType            = DEFAULT_TYPE;
-    m_isLockedToCrosshair   = false;
     m_isNOT                 = false;
     m_isSelected            = false;
     m_isVisible             = true;
@@ -93,27 +92,6 @@ SelectionObject::SelectionObject( Vector i_center, Vector i_size )
 
 SelectionObject::~SelectionObject( )
 {
-}
-
-// TODO check this and all relations to crosshair
-void SelectionObject::lockToCrosshair()
-{
-    if( m_isLockedToCrosshair )
-    {
-        m_isLockedToCrosshair          = false;
-        SceneManager::getInstance()->setBoxLock( false );
-    }
-    else
-    {
-        m_isLockedToCrosshair             = true;
-        SceneManager::getInstance()->setBoxLock( true );
-        SceneManager::getInstance()->setBoxAtCrosshair( this );
-        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
-        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
-        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
-        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
-        MyApp::frame->refreshAllGLWidgets();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -356,14 +334,6 @@ void SelectionObject::select()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::update()
 {
-    if( m_isLockedToCrosshair )
-    {
-        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
-        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
-        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
-        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
-    }
-
     updateStatusBar();
     SceneManager::getInstance()->setSelBoxChanged( true );
     MyApp::frame->refreshAllGLWidgets();

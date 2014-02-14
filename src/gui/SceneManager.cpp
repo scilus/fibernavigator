@@ -84,7 +84,6 @@ SceneManager::SceneManager(void)
     m_clearToBlack( true ),
     m_colorMap( 0 ),
     m_filterIsoSurface( false ),
-    m_isBoxLocked( false ),
     m_pSelTree( NULL ),
     m_selBoxChanged( true ),
     m_isRulerActive( false ),
@@ -363,11 +362,6 @@ void SceneManager::updateView( const float x, const float y, const float z, bool
     m_sliceX = x;
     m_sliceY = y;
     m_sliceZ = z;
-
-    if( m_isBoxLocked && !semaphore )
-    {
-        m_pBoxAtCrosshair->setCenter( x, y, z );
-    }
 
     vector<ODFs *> odfs = DatasetManager::getInstance()->getOdfs();
     for( vector<ODFs *>::iterator it = odfs.begin(); it != odfs.end(); ++it )
