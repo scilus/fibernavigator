@@ -986,7 +986,7 @@ vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
 {
     vector< bool > filteredFiber = pFibers->getFilteredFibers();
     
-    SelectionState &curState = getState( pFibers->getName() );
+    SelectionState &curState = getState( pFibers->getDatasetIndex() );
     
     vector< bool > branchToUse;
     SelectionTree &selTree( SceneManager::getInstance()->getSelectionTree() );
@@ -1003,7 +1003,7 @@ vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
         if( pParentObj != NULL )
         {
             // OPTIM: this could be optimized
-            SelectionState &parentState = pParentObj->getState( pFibers->getName() );
+            SelectionState &parentState = pParentObj->getState( pFibers->getDatasetIndex() );
             branchToUse.assign( curState.m_inBranch.size(), false );
             
             bool parentIsNot( pParentObj->getIsNOT() );

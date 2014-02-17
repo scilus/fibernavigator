@@ -10,6 +10,7 @@
 #include "BoundingBox.h"
 #include "SceneObject.h"
 
+#include "../dataset/DatasetIndex.h"
 #include "../misc/Algorithms/Face3D.h"
 #include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
@@ -161,8 +162,7 @@ public :
     FibersColorationMode getMeanFiberColorMode()     { return m_meanFiberColorationMode;        };
     
     // Methods related to the different fiber bundles selection.
-    // TODO selection change that to an int...
-    typedef    wxString FiberIdType;
+    typedef DatasetIndex FiberIdType;
     struct SelectionState
     {
         public: 

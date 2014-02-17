@@ -582,7 +582,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
         vector< Fibers* > curFibers = DatasetManager::getInstance()->getFibers();
         for( vector< Fibers* >::iterator fibIt( curFibers.begin() ); fibIt != curFibers.end(); ++fibIt )
         {
-            m_pSelTree->addFiberDataset( (*fibIt)->getName(), (*fibIt)->getLineCount() );
+            m_pSelTree->addFiberDataset( (*fibIt)->getDatasetIndex(), (*fibIt)->getLineCount() );
         }
     }
 

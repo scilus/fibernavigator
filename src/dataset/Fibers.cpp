@@ -111,8 +111,8 @@ Fibers::Fibers()
 Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
-
-    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getName() );
+    
+    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getDatasetIndex() );
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {

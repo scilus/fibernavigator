@@ -714,7 +714,7 @@ vector< bool > SelectionTree::getSelectedFibers( const Fibers* const pFibers )
     
     Octree *pCurOctree( pFibers->getOctree() );
     
-    SelectionObject::FiberIdType fiberId = const_cast< Fibers* >(pFibers)->getName();
+    SelectionObject::FiberIdType fiberId = pFibers->getDatasetIndex();
     
     // Update all selection objects to make sure that each of them knows which 
     // fibers is in it.
@@ -743,10 +743,9 @@ vector< bool > SelectionTree::getSelectedFibersInBranch( const Fibers *const pFi
         // TODO determine what to do.
     }
     
-    SelectionObject::FiberIdType fiberId = const_cast< Fibers* >(pFibers)->getName();
-    
     // Find the intersection of the root selection and the selection object's
     // inBranch.
+    SelectionObject::FiberIdType fiberId = pFibers->getDatasetIndex();
     SelectionObject::SelectionState &childState = pSelObj->getState( fiberId );
     vector< bool > &rootSel = m_rootSelectionStatus[ fiberId ];
     
