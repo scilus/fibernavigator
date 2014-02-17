@@ -72,7 +72,9 @@ struct FibersInfoGridParams
 class SelectionObject : public SceneObject, public wxTreeItemData
 {
 public :
+    // TODO selection should be pure virtual
     SelectionObject( Vector i_center, Vector i_size );
+    SelectionObject( const wxXmlNode selObjNode );
     virtual ~SelectionObject();
 
     virtual hitResult hitTest( Ray* i_ray ) = 0;
@@ -159,6 +161,7 @@ public :
     FibersColorationMode getMeanFiberColorMode()     { return m_meanFiberColorationMode;        };
     
     // Methods related to the different fiber bundles selection.
+    // TODO selection change that to an int...
     typedef    wxString FiberIdType;
     struct SelectionState
     {
@@ -177,9 +180,7 @@ public :
     SelectionState& getState(           const FiberIdType &fiberId );
     
     // Methods related to saving and loading.
-    // TODO selection saving
     virtual bool populateXMLNode( wxXmlNode *pCurNode );
-    //virtual bool loadFromXMLNode( wxXmlNode *pSelObjNode );
     
     virtual wxString getTypeTag() const;
 
@@ -205,24 +206,23 @@ protected :
     void  updateStatusBar();
     float getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] );
     
+    wxString        m_name;
+    ObjectType      m_objectType;
     Vector          m_center;
-    
-    std::list< Face3D >  m_hullTriangles;
-
-    wxColour        m_color;         // Used for coloring the isosurface.
-
-    bool            m_mustUpdateConvexHull;
-    bool            m_gfxDirty;
-    hitResult       m_hitResult;
+    Vector          m_size;
     bool            m_isActive;
     bool            m_isNOT;
     bool            m_isSelected;
     bool            m_isVisible;
-    wxString        m_name;
-    ObjectType      m_objectType;
-    Vector          m_size;
     int             m_stepSize;
+
+    wxColour        m_color;         // Used for coloring the isosurface.
+    
+    hitResult       m_hitResult;
+
+    bool            m_gfxDirty;
     float           m_threshold;
+    
     wxTreeItemId    m_treeId;
     
     bool            m_statsAreBeingComputed;
@@ -233,6 +233,9 @@ protected :
 
     wxColour m_convexHullColor;
     float    m_convexHullOpacity; //Between 0 and 1
+    bool     m_mustUpdateConvexHull;
+    std::list< Face3D >  m_hullTriangles;
+
     
     //Mean fiber coloring variables
     wxColour m_meanFiberColor; //Custom color chose by the user
@@ -253,6 +256,11 @@ protected :
     
     void notifyInBoxNeedsUpdating();
     void notifyInBranchNeedsUpdating();
+    
+    SelectionObject();
+
+private:
+    void doBasicInit();
 
     /******************************************************************************************
     * Functions/variables related to the fiber info calculation.

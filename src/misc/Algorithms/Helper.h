@@ -173,6 +173,7 @@ private:
 public:
     
     static wxString getColorationModeString( const FibersColorationMode &colMode );
+    static FibersColorationMode getColorationModeFromString( const wxString &modeStr );
     
     // Color conversion
     static void     HSLtoRGB                 ( float  i_hue, 

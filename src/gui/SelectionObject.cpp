@@ -51,43 +51,150 @@ namespace
     {
         return wxString::Format( wxT( "%" ) + precision + wxT( "f" ), val );
     }
+    bool parseXmlString( wxString &str )
+    {
+        return str == wxT("yes") ? true : false;
+    }
 }
 
-SelectionObject::SelectionObject( Vector i_center, Vector i_size )
-:   m_pLabelAnatomy   ( NULL ),
-    m_pCBSelectDataSet( NULL ),
-    m_displayCrossSections ( CS_NOTHING   ),
-    m_displayDispersionCone( DC_NOTHING   )
+// Protected. Should only be used to create an empty object when loading a scene.
+// Should only be called by children object.
+SelectionObject::SelectionObject()
 {
-    wxColour  l_color( 240, 30, 30 );
-    hitResult l_hr = { false, 0.0f, 0, NULL };
+    doBasicInit();
+    
+    m_sourceAnatomy         = NULL;
+}
 
-    m_center                = i_center;
-    m_color                 = l_color;
-    m_gfxDirty              = false;
-    m_hitResult             = l_hr;
-    m_isActive              = true;
-    m_objectType            = DEFAULT_TYPE;
-    m_isNOT                 = false;
-    m_isSelected            = false;
-    m_isVisible             = true;
+void SelectionObject::doBasicInit()
+{
+    hitResult hr = { false, 0.0f, 0, NULL };
+    m_hitResult = hr;
+    
+    m_name = wxT("object");
+    m_objectType = DEFAULT_TYPE;   // TODO selection to remove
+    m_center = Vector( 0.0f, 0.0f, 0.0f );
+    m_size = Vector( 0.0f, 0.0f, 0.0f );
+    m_isActive = true;
+    m_isNOT = false;
+    m_isSelected = false;
+    m_isVisible = true;
+    m_stepSize = 9;
+    m_color = wxColour( 0, 0, 0 );
+    m_gfxDirty = false;
+    m_threshold = 0.0f;
+    m_treeId = NULL;
+    m_pLabelAnatomy = NULL;
+    m_pCBSelectDataSet = NULL;
+    m_displayCrossSections = CS_NOTHING;
+    m_displayDispersionCone = DC_NOTHING;
+    
     m_maxCrossSectionIndex  = 0;
     m_minCrossSectionIndex  = 0;
-    m_name                  = wxT( "object" );
-    m_size                  = i_size;
-    m_sourceAnatomy         = NULL;
-    m_stepSize              = 9;
-    m_threshold             = 0.0f;
-    m_treeId                = NULL;
+    
     m_statsNeedUpdating     = true;
     m_statsAreBeingComputed = false;
     m_meanFiberIsBeingDisplayed = false;
     m_boxMoved              = false;
     m_boxResized            = false;
     m_mustUpdateConvexHull  = true;
-
+    
     //Distance coloring
     m_DistColoring          = false;
+
+}
+
+SelectionObject::SelectionObject( Vector center, Vector size )
+{
+    doBasicInit();
+    // TODO Selection needed?
+    //wxColour  l_color( 240, 30, 30 );
+    m_sourceAnatomy         = NULL;
+    
+    m_center = center;
+    m_size = size;
+}
+
+SelectionObject::SelectionObject( const wxXmlNode selObjNode )
+{   
+    doBasicInit();
+    
+    wxXmlNode *pChildNode = selObjNode.GetChildren();
+    
+    while( pChildNode != NULL )
+    {
+        wxString nodeName = pChildNode->GetName();
+        wxString propVal;
+        
+        if( nodeName == wxT("state") )
+        {
+            pChildNode->GetPropVal( wxT("name"), &m_name );
+            pChildNode->GetPropVal( wxT("active"), &propVal );
+            m_isActive = parseXmlString( propVal );
+            pChildNode->GetPropVal( wxT("visible"), &propVal );
+            m_isVisible = parseXmlString( propVal );
+            pChildNode->GetPropVal( wxT("isNOT"), &propVal );
+            m_isNOT = parseXmlString( propVal );
+        }
+        else if( nodeName == wxT("center") )
+        {
+            double x, y, z;
+            pChildNode->GetPropVal( wxT("posX"), &propVal );
+            propVal.ToDouble( &x );
+            pChildNode->GetPropVal( wxT("posY"), &propVal );
+            propVal.ToDouble( &y );
+            pChildNode->GetPropVal( wxT("posZ"), &propVal );
+            propVal.ToDouble( &z );
+            m_center.x = x;
+            m_center.y = y;
+            m_center.z = z;
+        }
+        else if( nodeName == wxT("size") )
+        {
+            double x, y, z;
+            pChildNode->GetPropVal( wxT("sizeX"), &propVal );
+            propVal.ToDouble( &x );
+            pChildNode->GetPropVal( wxT("sizeY"), &propVal );
+            propVal.ToDouble( &y );
+            pChildNode->GetPropVal( wxT("sizeZ"), &propVal );
+            propVal.ToDouble( &z );
+            m_size.x = x;
+            m_size.y = y;
+            m_size.z = z;
+        }
+        else if( nodeName == wxT("color") )
+        {
+            pChildNode->GetPropVal( wxT("colorHTML"), &propVal );
+            m_color.Set( propVal );
+
+            long alpha;
+            pChildNode->GetPropVal( wxT("colorAlpha"), &propVal );
+            propVal.ToLong( &alpha );
+
+            // Need to repeat it, there is no Alpha setter in wxWidgets.
+            m_color.Set( m_color.Red(), m_color.Green(), m_color.Blue(), alpha );
+        }
+        else if( nodeName == wxT("distance_coloring_state") )
+        {
+            pChildNode->GetPropVal( wxT("used"), &propVal );
+            m_DistColoring = parseXmlString( propVal );
+        }
+        else if( nodeName == wxT("mean_fiber_options") )
+        {
+            pChildNode->GetPropVal( wxT("colorHTML"), &propVal );
+            m_meanFiberColor.Set( propVal );
+            
+            double opacity;
+            pChildNode->GetPropVal( wxT("opacity"), &propVal );
+            propVal.ToDouble( &opacity );
+            m_meanFiberOpacity = opacity;
+            
+            pChildNode->GetPropVal( wxT("colorationMode"), &propVal );
+            m_meanFiberColorationMode = Helper::getColorationModeFromString( propVal );
+        }
+        
+        pChildNode = pChildNode->GetNext();
+    }
 }
 
 SelectionObject::~SelectionObject( )
@@ -1849,10 +1956,11 @@ bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode )
 {
     wxString floatPrecision = wxT( ".8" );
     
+    pCurNode->AddProperty( new wxXmlProperty( wxT( "type" ), getTypeTag() ) );
+    
     wxXmlNode *pState = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "state" ) );
     pCurNode->AddChild( pState );
     
-    pState->AddProperty( new wxXmlProperty( wxT( "type" ), getTypeTag() ) );
     pState->AddProperty( new wxXmlProperty( wxT( "name" ), m_name) );
     pState->AddProperty( new wxXmlProperty( wxT( "active" ), m_isActive? wxT( "yes" ) : wxT( "no" ) ) );
     pState->AddProperty( new wxXmlProperty( wxT( "visible" ), m_isVisible? wxT( "yes" ) : wxT( "no" ) ) );

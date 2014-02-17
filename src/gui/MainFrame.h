@@ -21,6 +21,7 @@ class ToolBar;
 class MenuBar;
 class SceneObject;
 class SelectionObject;
+class SelectionTree;
 class TrackingWindow;
 
 enum DrawMode
@@ -75,7 +76,7 @@ public:
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
     SelectionObject* getCurrentSelectionObject();
-
+    bool buildSelectionViewFromSelectionTree( SelectionTree *pSelTree );
 
 public:
     PropertiesWindow    *m_pPropertiesWindow;
@@ -194,6 +195,7 @@ private:
     void onTimerEvent                       ( wxTimerEvent&   evt );
     void setTimerSpeed();
     void createNewSelectionObject( ObjectType i_newSelectionObjectType );
+    bool buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj );
 
     void onSelectDrawer                     ( wxCommandEvent& evt );
     void onSwitchDrawer                     ( wxCommandEvent& evt );

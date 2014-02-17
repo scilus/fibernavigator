@@ -34,6 +34,14 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
     update();
 }
 
+SelectionBox::SelectionBox( const wxXmlNode selObjNode )
+: SelectionObject( selObjNode )
+{
+    m_objectType = BOX_TYPE;
+    
+    update();
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Destructor
 ///////////////////////////////////////////////////////////////////////////

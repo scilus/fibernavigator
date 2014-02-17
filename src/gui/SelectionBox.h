@@ -21,13 +21,13 @@ class SelectionBox : public SelectionObject
 public:
     // Constructor / Destructor
     SelectionBox( Vector i_center, Vector i_size );
+    SelectionBox( const wxXmlNode selObjNode );
     virtual ~SelectionBox();
 
     // Function from SelectionObject (pure virtual)
     hitResult hitTest( Ray* i_ray );
     
     wxString getTypeTag() const;
-
 private:
     // Function from SelectionObject (pure virtual)
     void     drawObject( GLfloat* i_color );

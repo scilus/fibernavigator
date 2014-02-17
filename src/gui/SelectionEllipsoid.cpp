@@ -22,10 +22,16 @@
 SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
 :   SelectionObject( i_center, i_size )
 {
-    m_gfxDirty   = true;
     m_name       = wxT( "ellipsoid" );
     m_objectType = ELLIPSOID_TYPE;
 
+    update();
+}
+
+SelectionEllipsoid::SelectionEllipsoid( const wxXmlNode selObjNode )
+: SelectionObject( selObjNode )
+{
+    m_objectType = ELLIPSOID_TYPE;
     update();
 }
 

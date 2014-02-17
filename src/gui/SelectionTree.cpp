@@ -97,6 +97,21 @@ SelectionTree::SelectionObjectVector SelectionTree::SelectionTreeNode::getAllChi
     return objs;
 }
 
+SelectionTree::SelectionObjectVector SelectionTree::SelectionTreeNode::getDirectChildrenSelectionObjects() const
+{
+    SelectionObjectVector objs;
+    
+    if( !m_children.empty() )
+    {
+        for( unsigned int childIdx( 0 ); childIdx < m_children.size(); ++childIdx )
+        {            
+            objs.push_back( m_children[childIdx]->m_pSelObject );
+        }
+    }
+    
+    return objs;
+}
+
 int SelectionTree::SelectionTreeNode::getActiveDirectChildrenCount() const
 {
     int count( 0 );
@@ -369,20 +384,14 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
         m_pSelObject->populateXMLNode( pSelObjNode );
         
         pParentNode->AddChild( pSelObjNode );
+        pParentNode = pSelObjNode;
     }
     
     if( hasChildren() )
     {
         // Create "children" node
-        wxXmlNode *pChildNode( pParentNode );
-        
-        // The root object is the only SelectionTreeNode which is still valid
-        // without a Selection Object
-        if( pSelObjNode != NULL )
-        {
-            pChildNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "children_objects" ) );
-            pParentNode->AddChild( pChildNode );
-        }
+        wxXmlNode *pChildNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "children_objects" ) );
+        pParentNode->AddChild( pChildNode );
         
         // Call this method for each child
         for( unsigned int childIdx( 0 ); childIdx < m_children.size(); ++childIdx )
@@ -394,56 +403,64 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
     return true;
 }
 
-// This assumes that the selection tree has been emptied.
-/*bool SelectionTree::loadFromXMLNode( wxXmlNode *pRootSelObjNode, DatasetHelper *pDH )
+bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode, SelectionTree *pSelTree )
 {
-    wxXmlNode *pRootChildNode = pRootSelObjNode->GetChildren();
-    
-    while( pRootChildNode != NULL )
+    if( pChildContainingNode->GetName() != wxT( "children_objects" ) )
     {
-        // Check if valid selection object node.
-        if( !pRootChildNode->HasProp( wxT( "name" ) ) || !pRootChildNode->HasProp( wxT( "type" ) ) )
+        return false;
+    }
+    
+    // Iterate over children selection objects
+    wxXmlNode *pSelObjNode = pChildContainingNode->GetChildren();
+    while( pSelObjNode != NULL )
+    {
+        SelectionObject *pLoadedObj;
+        
+        // Check for node validity
+        wxString objType;
+        if( !pSelObjNode->GetPropVal( wxT("type"), &objType ) )
         {
-            // TODO, how do we react if that is not the case?
+            return false;
         }
         
-        // Get the type.
-        wxString selObjType = pRootChildNode->GetPropVal( wxT( "type" ), wxT( "invalid" ) );
+        // Build node and load content
+        if( objType == wxT("box") )
+        {
+            pLoadedObj = new SelectionBox( wxXmlNode( *pSelObjNode ) );
+        }
+        else if( objType == wxT("ellipsoid") )
+        {
+            pLoadedObj = new SelectionEllipsoid( wxXmlNode( *pSelObjNode ) );
+        }
+        else
+        {
+            // For now, skip VOI.
+            pSelObjNode = pSelObjNode->GetNext();
+            continue;
+        }
         
-        SelectionObject *pNewSelObj( NULL );
-        if( selObjType == "selectionBox" )
+        // Add to children of current node
+        int newNodeId = pSelTree->addChildrenObject( m_nodeId, pLoadedObj );
+
+        // If current object has children in the hierarchy, populate them.
+        wxXmlNode *pSelObjNodeChildNode = pSelObjNode->GetChildren();
+        while(pSelObjNodeChildNode != NULL )
         {
-            pNewSelObj = new SelectionBox( pDH );
-        }
-        else if( selObjType == "selectionEllipsoid" )
-        {
-            pNewSelObj = new SelectionEllipsoid( pDH );
-        }
-        else if( selObjType == "selectionVOI" )
-        {
-            // TODO implement
-        }
-        
-        if( pNewSelObj != NULL )
-        {
-            // TODO check return value
-            if( pNewSelObj->loadFromXMLNode( pRootChildNode ) )
+            wxString childName = pSelObjNodeChildNode->GetName();
+            if( childName == wxT("children_objects") )
             {
-                addChildrenObject( -1, pNewSelObj );
-                // TODO add to the tree widget
+                SelectionTreeNode *childTreeNode = findNode( newNodeId );
+                childTreeNode->loadChildrenFromXMLNode( pSelObjNodeChildNode, pSelTree );
             }
-            else
-            {
-                delete pNewSelObj;
-                pNewSelObj = NULL;
-            }
+            pSelObjNodeChildNode = pSelObjNodeChildNode->GetNext();
         }
         
-        pRootChildNode = pRootChildNode->GetNext();
+        // Get next children
+        pSelObjNode = pSelObjNode->GetNext();
     }
     
     return true;
-}*/
+}
 
 SelectionTree::SelectionTreeNode::~SelectionTreeNode()
 {
@@ -616,6 +633,20 @@ SelectionTree::SelectionObjectVector SelectionTree::getChildrenObjects( Selectio
     return selObjs;
 }
 
+SelectionTree::SelectionObjectVector SelectionTree::getDirectChildrenObjects( const int itemId ) const
+{
+    SelectionObjectVector selObjs;
+    
+    SelectionTreeNode *pNode = m_pRootNode->findNode( itemId );
+    
+    if( pNode != NULL )
+    {
+        selObjs = pNode->getDirectChildrenSelectionObjects();
+    }
+    
+    return selObjs;
+}
+
 int SelectionTree::getActiveChildrenObjectsCount( SelectionObject *pSelObj ) const
 {
     int activeChildrenCount( 0 );
@@ -780,7 +811,6 @@ void SelectionTree::notifyStatsNeedUpdating( SelectionObject *pSelObject )
     }
 }
 
-// TODO selection saving
 bool SelectionTree::populateXMLNode( wxXmlNode *pRootSelObjNode )
 {
     if( !m_pRootNode->hasChildren() )
@@ -789,6 +819,24 @@ bool SelectionTree::populateXMLNode( wxXmlNode *pRootSelObjNode )
     }
     
     return m_pRootNode->populateXMLNode( pRootSelObjNode );
+}
+
+bool SelectionTree::loadFromXMLNode( wxXmlNode *pRootSelObjNode )
+{
+    if( m_pRootNode->hasChildren() )
+    {
+        return false;
+    }
+    
+    wxXmlNode *pRootChildNode = pRootSelObjNode->GetChildren();
+    if( pRootChildNode == NULL )
+    {
+        return true;
+    }
+    
+    m_pRootNode->loadChildrenFromXMLNode( pRootChildNode, this );
+    
+    return true;
 }
 
 vector< SelectionObject* > SelectionTree::findGenealogy( SelectionObject *pSelObject )

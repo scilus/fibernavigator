@@ -1374,6 +1374,80 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
+bool MainFrame::buildSelectionViewFromSelectionTree( SelectionTree *pSelTree )
+{
+    if( pSelTree->isEmpty() )
+    {
+        return true;
+    }
+    
+    // Add selection objects to the list.
+    wxTreeItemId newSelectionObjectId;
+    
+    SelectionTree::SelectionObjectVector rootObjs = pSelTree->getDirectChildrenObjects( 0 );
+    for( SelectionTree::SelectionObjectVector::iterator objIt(rootObjs.begin()); objIt != rootObjs.end(); ++objIt )
+    {
+        int itemId = pSelTree->getId( *objIt );
+        CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, (*objIt)->getName(), 0, -1, pTreeItem );
+        
+        m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+        m_pTreeWidget->SetItemImage( newSelectionObjectId, (*objIt)->getIcon() );
+        
+        // Choose item color depending on state.
+        if( (*objIt)->getIsNOT() )
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxRED );
+        }
+        else
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+        }
+        
+        (*objIt)->setTreeId( newSelectionObjectId );    
+        
+        buildChildrenList( pSelTree, *objIt );
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return true;
+}
+
+bool MainFrame::buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj )
+{
+    // Add selection objects to the list.
+    wxTreeItemId newSelectionObjectId;
+    
+    int curSelObjTreeId = pSelTree->getId( pCurSelObj );
+    SelectionTree::SelectionObjectVector childObjs = pSelTree->getDirectChildrenObjects( curSelObjTreeId );
+    for( SelectionTree::SelectionObjectVector::iterator objIt(childObjs.begin()); objIt != childObjs.end(); ++objIt )
+    {
+        int childItemId = pSelTree->getId( *objIt );
+        CustomTreeItem *pTreeItem = new CustomTreeItem( childItemId );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( pCurSelObj->getTreeId(), (*objIt)->getName(), 0, -1, pTreeItem );
+        
+        m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+        m_pTreeWidget->SetItemImage( newSelectionObjectId, (*objIt)->getIcon() );
+        
+        // Choose item color depending on state.
+        if( (*objIt)->getIsNOT() )
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxRED );
+        }
+        else
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+        }
+        
+        (*objIt)->setTreeId( newSelectionObjectId );
+        
+        buildChildrenList( pSelTree, *objIt );
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return true;
+}
+
 
 void MainFrame::onHideSelectionObjects( wxCommandEvent& WXUNUSED(event) )
 {

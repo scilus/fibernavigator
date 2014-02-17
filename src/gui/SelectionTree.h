@@ -43,6 +43,8 @@ public:
     SelectionObjectVector getChildrenObjects( const int itemId ) const;
     SelectionObjectVector getChildrenObjects( SelectionObject *pSelObj ) const;
     
+    SelectionObjectVector getDirectChildrenObjects( const int itemId ) const;
+    
     int getActiveChildrenObjectsCount( SelectionObject *pSelObject ) const;
     
     bool isEmpty() const
@@ -70,9 +72,8 @@ public:
     void notifyStatsNeedUpdating( SelectionObject *pSelObject );
     
     // Methods related to saving and loading.
-    // TODO selection saving
     bool populateXMLNode( wxXmlNode *pRootSelObjNode );
-    //bool loadFromXMLNode( wxXmlNode *pRootSelObjNode, DatasetHelper *pDH );
+    bool loadFromXMLNode( wxXmlNode *pRootSelObjNode );
     
 private:
     class SelectionTreeNode
@@ -86,6 +87,7 @@ private:
         
         SelectionObjectVector getAllSelectionObjects() const;
         SelectionObjectVector getAllChildrenSelectionObjects() const;
+        SelectionObjectVector getDirectChildrenSelectionObjects() const;
         
         int getActiveDirectChildrenCount() const;
 
@@ -110,9 +112,8 @@ private:
         
         int getId() const;
         
-        // TODO selection saving
-        // TODO selection set pos, size sur voi
         bool populateXMLNode( wxXmlNode *pParentNode );
+        bool loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode, SelectionTree *pSelTree );
         
     private:
         SelectionTreeNode();    // Disable default constructor.

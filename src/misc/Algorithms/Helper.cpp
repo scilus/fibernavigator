@@ -52,6 +52,28 @@ wxString Helper::getColorationModeString( const FibersColorationMode &colMode )
     return modeStr;
 }
 
+FibersColorationMode Helper::getColorationModeFromString( const wxString &modeStr )
+{
+    FibersColorationMode curMode;
+    
+    if( modeStr == wxT("normal") )
+        curMode = NORMAL_COLOR;
+    else if( modeStr == wxT("curvature") )
+        curMode = CURVATURE_COLOR;
+    else if( modeStr == wxT("torsion") )
+        curMode = TORSION_COLOR;
+    else if( modeStr == wxT("distance") )
+        curMode = DISTANCE_COLOR;
+    else if( modeStr == wxT("mindistance") )
+        curMode = MINDISTANCE_COLOR;
+    else if( modeStr == wxT("custom") )
+        curMode = CUSTOM_COLOR;
+    else if( modeStr == wxT("constant") )
+        curMode = CONSTANT_COLOR;
+    
+    return curMode;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Simple function to convert a HSL color system to a RGB color system.
 //

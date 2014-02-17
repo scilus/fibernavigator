@@ -126,6 +126,8 @@ bool SceneManager::load(const wxString &filename)
         }
 
         m_pMainFrame->m_pListCtrl->Clear();
+        
+        // TODO selection clear obj list.
         if( 0 != DatasetManager::getInstance()->getDatasetCount() )
         {
             Logger::getInstance()->print( wxT( "Some datasets haven't been deleted when clearing the list for some reason. LOOK INTO IT!" ), LOGLEVEL_DEBUG );
@@ -302,50 +304,7 @@ bool SceneManager::save( const wxString &filename )
 
     //////////////////////////////////////////////////////////////////////////
     // SELECTION OBJECTS
-    // TODO selection saving
-    bool success = m_pSelTree->populateXMLNode( pSelSetup );
-    /*SelectionObjList selObjs = getSelectionObjects();
-    for( SelectionObjList::const_iterator it = selObjs.begin(); it != selObjs.end(); ++it )
-    {
-        for( vector<SelectionObject *>::const_iterator childIt = it->begin(); childIt != it->end(); ++childIt )
-        {
-            wxXmlNode *pObjectNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "object" ) );
-
-            wxXmlNode *pStatus = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "status" ) );
-            wxXmlNode *pName   = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "name" ) );
-            wxXmlNode *pSize   = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "size" ) );
-            wxXmlNode *pCenter = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "center" ) );
-
-            pObjectNode->AddChild( pStatus );
-            pObjectNode->AddChild( pName );
-            pObjectNode->AddChild( pSize );
-            pObjectNode->AddChild( pCenter );
-
-            pStatus->AddProperty( new wxXmlProperty( wxT( "isBox" ), BOX_TYPE == (*childIt)->getSelectionType() ? wxT( "yes" ) : wxT( "no" ) ) );
-            pStatus->AddProperty( new wxXmlProperty( wxT( "visible" ), (*childIt)->getIsVisible() ? wxT( "yes" ) : wxT( "no" ) ) );
-            pStatus->AddProperty( new wxXmlProperty( wxT( "active" ), (*childIt)->getIsActive() ? wxT( "yes" ) : wxT( "no" ) ) );
-            if( childIt == it->begin() )
-            {
-                pStatus->AddProperty( new wxXmlProperty( wxT( "type" ), wxT( "MASTER" ) ) );
-            } 
-            else
-            {
-                pStatus->AddProperty( new wxXmlProperty( wxT( "type" ), (*childIt)->getIsNOT() ? wxT( "NOT" ) : wxT( "AND" ) ) );
-            }
-
-            pName->AddProperty( new wxXmlProperty( wxT( "string" ), (*childIt)->getName() ) );
-
-            pSize->AddProperty( new wxXmlProperty( wxT( "x" ), wxStrFormat( (*childIt)->getSize().x ) ) );
-            pSize->AddProperty( new wxXmlProperty( wxT( "y" ), wxStrFormat( (*childIt)->getSize().y ) ) );
-            pSize->AddProperty( new wxXmlProperty( wxT( "z" ), wxStrFormat( (*childIt)->getSize().z ) ) );
-
-            pCenter->AddProperty( new wxXmlProperty( wxT( "x" ), wxStrFormat( (*childIt)->getCenter().x ) ) );
-            pCenter->AddProperty( new wxXmlProperty( wxT( "y" ), wxStrFormat( (*childIt)->getCenter().y ) ) );
-            pCenter->AddProperty( new wxXmlProperty( wxT( "z" ), wxStrFormat( (*childIt)->getCenter().z ) ) );
-
-            pSelObjs->AddChild( pObjectNode );
-        }
-    }*/
+    m_pSelTree->populateXMLNode( pSelSetup );
 
     //////////////////////////////////////////////////////////////////////////
     // SAVE DOCUMENT
@@ -589,95 +548,16 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
 
             m_pMainFrame->m_pListCtrl->InsertItemRange( v );
         }
-        else if( wxT( "selection_objects" ) == nodeName )
+        else if( wxT( "selection_setup" ) == nodeName )
         {
-            wxTreeItemId currentMasterId;
+            m_pSelTree->loadFromXMLNode( pChild );
 
-            wxXmlNode *pBoxNode = pChild->GetChildren();
-            while( pBoxNode )
+            // Build the selection tree widget content.
+            if( !m_pSelTree->isEmpty() )
             {
-                bool active;
-                bool isBox;
-                bool visible;
-                Vector size;
-                Vector center;
-                wxString name;
-                wxString type;
-
-                wxXmlNode *pInfoNode = pBoxNode->GetChildren();
-                while( pInfoNode )
-                {
-                    if( wxT( "status" ) == pInfoNode->GetName() )
-                    {
-                        type    = pInfoNode->GetPropVal( wxT( "type" ), wxT( "MASTER" ) );
-                        active  = pInfoNode->GetPropVal( wxT( "active" ), wxT( "yes" ) ) == wxT( "yes" );
-                        visible = pInfoNode->GetPropVal( wxT( "visible" ), wxT( "yes" ) ) == wxT( "yes" );
-                        isBox   = pInfoNode->GetPropVal( wxT( "isBox" ), wxT( "yes" ) ) == wxT( "yes" );
-                    }
-                    else if( wxT( "name" ) == pInfoNode->GetName() )
-                    {
-                        name = pInfoNode->GetPropVal( wxT( "string" ), wxT( "object" ) );
-                    }
-                    else if( wxT( "size" ) == pInfoNode->GetName() )
-                    {
-                        pInfoNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) ).ToDouble( &size.x );
-                        pInfoNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) ).ToDouble( &size.y );
-                        pInfoNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) ).ToDouble( &size.z );
-                    }
-                    else if( wxT( "center" ) == pInfoNode->GetName() )
-                    {
-                        pInfoNode->GetPropVal( wxT( "x" ), wxT( "0.0" ) ).ToDouble( &center.x );
-                        pInfoNode->GetPropVal( wxT( "y" ), wxT( "0.0" ) ).ToDouble( &center.y );
-                        pInfoNode->GetPropVal( wxT( "z" ), wxT( "0.0" ) ).ToDouble( &center.z );
-                    }
-
-                    pInfoNode = pInfoNode->GetNext();
-                }
-
-                SelectionObject *pSelObj;
-                if( isBox )
-                {
-                    pSelObj = new SelectionBox( center, size );
-                }
-                else
-                {
-                    pSelObj = new SelectionEllipsoid( center, size );
-                }
-
-                pSelObj->setName( name );
-                pSelObj->setIsActive( active );
-                pSelObj->setIsVisible( visible );
-
-                MyTreeCtrl *pTreeView = m_pMainFrame->m_pTreeWidget;
-                if( wxT( "MASTER" ) == type )
-                {
-                    currentMasterId = pTreeView->AppendItem( m_pMainFrame->m_tSelectionObjectsId, name, 0, -1, pSelObj );
-                    pTreeView->EnsureVisible( currentMasterId );
-                    pTreeView->SetItemImage( currentMasterId, pSelObj->getIcon() );
-                    pTreeView->SetItemBackgroundColour( currentMasterId, *wxGREEN );
-                    pSelObj->setTreeId( currentMasterId );
-                }
-                else
-                {
-                    pSelObj->setIsNOT( wxT( "NOT" ) == type );
-                    wxTreeItemId boxId = pTreeView->AppendItem( currentMasterId, name, 0, -1, pSelObj );
-                    pTreeView->EnsureVisible( boxId );
-                    pTreeView->SetItemImage( boxId, pSelObj->getIcon() );
-
-                    if( pSelObj->getIsNOT() )
-                    {
-                        pTreeView->SetItemBackgroundColour( boxId, *wxRED );
-                    }
-                    else
-                    {
-                        pTreeView->SetItemBackgroundColour( boxId, *wxGREEN );
-                    }
-
-                    pSelObj->setTreeId( boxId );
-                }
-
-                pBoxNode = pBoxNode->GetNext();
+                m_pMainFrame->buildSelectionViewFromSelectionTree( m_pSelTree );
             }
+            
         }
         else
         {
@@ -694,6 +574,16 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
         m_pMainFrame->m_pYSlider->SetValue( sliceY );
         m_pMainFrame->m_pZSlider->SetValue( sliceZ );
         updateView( sliceX, sliceY, sliceZ );
+    }
+    
+    // Add fiber datasets to the selection tree.
+    if( DatasetManager::getInstance()->isFibersLoaded() )
+    {
+        vector< Fibers* > curFibers = DatasetManager::getInstance()->getFibers();
+        for( vector< Fibers* >::iterator fibIt( curFibers.begin() ); fibIt != curFibers.end(); ++fibIt )
+        {
+            m_pSelTree->addFiberDataset( (*fibIt)->getName(), (*fibIt)->getLineCount() );
+        }
     }
 
 //     m_transform.s.M00 = rotationMatrix[0];
