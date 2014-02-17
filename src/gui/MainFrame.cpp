@@ -614,7 +614,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             if( dialog.ShowModal() == wxID_OK )
             {
                 m_lastPath = dialog.GetDirectory();
-                l_anatomy->saveNifti( dialog.GetPath() );
+                l_anatomy->saveToNewFilename( dialog.GetPath() );
             }
         }
         else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == MAXIMAS )
@@ -2247,9 +2247,6 @@ void MainFrame::onTreeChange()
     SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
-
-// TODO selection ICI still needed? Les types still requis?
-
 
 void MainFrame::onRotateZ( wxCommandEvent& event )
 {

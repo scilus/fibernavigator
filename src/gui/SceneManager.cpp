@@ -18,27 +18,17 @@
 #include "../gfx/TheScene.h"
 #include "../misc/XmlHelper.h"
 
+#include <wx/filefn.h>
 #include <wx/xml/xml.h>
 #include <algorithm>
 #include <assert.h>
 #include <map>
 using std::map;
 
+#include <stdlib.h>
+#include <time.h>
 #include <vector>
 using std::vector;
-
-
-namespace
-{
-    wxString wxStrFormat( int val, wxString precision = wxT( "" ) )
-    {
-        return wxString::Format( wxT( "%" ) + precision + wxT( "d" ), val );
-    }
-    wxString wxStrFormat( double val, wxString precision = wxT( "" ) )
-    {
-        return wxString::Format( wxT( "%" ) + precision + wxT( "f" ), val );
-    }
-}
 
 
 SceneManager * SceneManager::m_pInstance = NULL;
@@ -179,6 +169,31 @@ bool SceneManager::load(const wxString &filename)
 
 bool SceneManager::save( const wxString &filename )
 {
+    // Make sure that all anatomies have a path, or, if not the case, give the choice
+    // to save them to the same directory as the scene file.
+    bool unsavedAnat( false );
+    vector<Anatomy *> anatomies = DatasetManager::getInstance()->getAnatomies();
+    for( vector<Anatomy *>::const_iterator it = anatomies.begin(); it != anatomies.end(); ++it )
+    {
+        Anatomy * pAnatomy = *it;
+        if( pAnatomy->getPath() == wxT("") )
+        {
+            unsavedAnat = true;
+        }
+    }
+    
+    if( unsavedAnat )
+    {
+        int answer = wxMessageBox( wxT("Some anatomy datasets are not saved on disk. If you choose to continue saving, they will be saved to the same directory as the scene file." ), 
+                                  wxT( "Confirmation" ), 
+                                  wxYES_NO | wxICON_QUESTION );
+        
+        if( answer == wxNO )
+        {
+            return false;
+        }
+    }
+    
     wxXmlNode *pRoot = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "theScene" ) );
     wxXmlNode *pSlidersPosition = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "position" ) );
     wxXmlNode *pRotation = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "rotation" ) );
@@ -216,15 +231,32 @@ bool SceneManager::save( const wxString &filename )
     //////////////////////////////////////////////////////////////////////////
     // PREPARE DATASETS NODES
     map< DatasetIndex, wxXmlNode * > datasets;
-
     int count = m_pMainFrame->m_pListCtrl->GetItemCount();
+    
     for( int i = 0; i < count; ++i )
     {
         wxXmlNode *pNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "" ) );
         DatasetIndex index = m_pMainFrame->m_pListCtrl->GetItem( i );
         datasets[index] = pNode;
 
-        DatasetManager::getInstance()->getDataset( index )->save( pNode );
+        DatasetInfo *pDS = DatasetManager::getInstance()->getDataset( index );
+        if( pDS->getPath() == wxT("") )
+        {
+            Anatomy *pAnat = dynamic_cast< Anatomy* >(pDS);
+            if( pAnat )
+            {
+                // Create filename and save the anatomy to it.
+                srand( time( NULL ) );
+                int suffix( rand() % 10000000 );
+
+                wxString path = wxPathOnly( filename );
+                path += wxT("/") + pDS->getName() + wxT("_") + wxStrFormat( suffix ) + wxT(".nii.gz");
+                
+                pAnat->saveToNewFilename( path );
+            }
+        }
+        
+        pDS->save( pNode );
 
         wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
         pStatus->AddProperty( new wxXmlProperty( wxT( "position" ), wxStrFormat( i ) ) );
@@ -234,7 +266,6 @@ bool SceneManager::save( const wxString &filename )
     // ADD DATASETS TO DATA NODE
     
     // Anatomies
-    vector<Anatomy *> anatomies = DatasetManager::getInstance()->getAnatomies();
     for( vector<Anatomy *>::const_iterator it = anatomies.begin(); it != anatomies.end(); ++it )
     {
         Anatomy * pAnatomy = *it;

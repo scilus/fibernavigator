@@ -27,7 +27,6 @@
 SelectionBox::SelectionBox( Vector i_center, Vector i_size )
 :   SelectionObject( i_center, i_size )
 {
-    m_gfxDirty   = true;
     m_name       = wxT( "box" );
     m_objectType = BOX_TYPE;
 

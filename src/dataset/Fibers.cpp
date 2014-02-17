@@ -1944,7 +1944,8 @@ void Fibers::colorWithDistance( float *pColorData )
 
         for( unsigned int j = 0; j < simplifiedList.size(); ++j )
         {
-            if( simplifiedList[j]->m_sourceAnatomy != NULL )
+            // TODO selection VOI adjust
+            /*if( simplifiedList[j]->m_sourceAnatomy != NULL )
             {
                 float curValue = simplifiedList[j]->m_sourceAnatomy->at( index );
 
@@ -1952,7 +1953,7 @@ void Fibers::colorWithDistance( float *pColorData )
                 {
                     minDistance = curValue;
                 }
-            }
+            }*/
         }
 
         float thresh = m_threshold / 2.0f;
@@ -2021,13 +2022,13 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
-                // TODO selection m_sourceanat
-                float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
+                // TODO selection VOI m_sourceanat
+                /*float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
 
                 if( curValue < minDistance )
                 {
                     minDistance = curValue;
-                }
+                }*/
             }
         }
 

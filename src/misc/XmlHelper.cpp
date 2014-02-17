@@ -14,8 +14,6 @@ wxXmlNode * getXmlNodeByName( const wxString name, wxXmlNode * pNode )
     return pChild;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 wxXmlProperty * getXmlPropertyByName( const wxString name, wxXmlNode * pNode )
 {
     assert( NULL != pNode );
@@ -26,4 +24,19 @@ wxXmlProperty * getXmlPropertyByName( const wxString name, wxXmlNode * pNode )
         pProp = pProp->GetNext();
     }
     return pProp;
+}
+
+wxString wxStrFormat( int val, wxString precision /*= wxT( "" )*/ )
+{
+    return wxString::Format( wxT( "%" ) + precision + wxT( "d" ), val );
+}
+
+wxString wxStrFormat( double val, wxString precision /*= wxT( "" )*/ )
+{
+    return wxString::Format( wxT( "%" ) + precision + wxT( "f" ), val );
+}
+
+bool parseXmlBoolString( wxString &str )
+{
+    return str == wxT("yes") ? true : false;
 }

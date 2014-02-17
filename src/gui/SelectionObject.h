@@ -12,7 +12,6 @@
 
 #include "../dataset/DatasetIndex.h"
 #include "../misc/Algorithms/Face3D.h"
-#include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
@@ -83,8 +82,7 @@ public :
     virtual void objectUpdate();
 
     void draw();
-    // TODO selection remove
-    //void drawIsoSurface();
+
     void moveBack();
     void moveDown();
     void moveForward();
@@ -132,9 +130,6 @@ public :
                                                       { setSize( Vector( sizeX, sizeY, sizeZ ) ); }
     void       setSize( Vector i_size )               { m_size = i_size; update(); notifyInBoxNeedsUpdating(); m_boxResized = true; };
     Vector     getSize()                              { return m_size;};
-
-    void       setThreshold( float i_threshold );
-    float      getThreshold()                         { return m_threshold;                    };
 
     void       setTreeId( wxTreeItemId i_treeId )     { m_treeId = i_treeId;                   };
     wxTreeItemId getTreeId()                          { return m_treeId;                       };
@@ -193,7 +188,6 @@ public :
     virtual void flipNormals() {};
 
     // Variables
-    Anatomy *           m_sourceAnatomy;
     bool                m_boxMoved;
     bool                m_boxResized;
 
@@ -219,9 +213,6 @@ protected :
     wxColour        m_color;         // Used for coloring the isosurface.
     
     hitResult       m_hitResult;
-
-    bool            m_gfxDirty;
-    float           m_threshold;
     
     wxTreeItemId    m_treeId;
     

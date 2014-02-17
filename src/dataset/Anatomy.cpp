@@ -16,6 +16,7 @@
 #include "../misc/nifti/nifti1_io.h"
 
 #include <GL/glew.h>
+#include <wx/filename.h>
 #include <wx/textfile.h>
 #include <wx/tglbtn.h>
 #include <wx/xml/xml.h>
@@ -42,7 +43,6 @@ using std::vector;
 Anatomy::Anatomy( ) 
 : DatasetInfo(),
   m_isSegmentOn( false ),  
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -58,7 +58,6 @@ Anatomy::Anatomy( )
 Anatomy::Anatomy( const wxString &filename ) 
 : DatasetInfo(),
   m_isSegmentOn( false ),  
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -83,7 +82,6 @@ Anatomy::Anatomy( const wxString &filename )
 Anatomy::Anatomy( const Anatomy * const pAnatomy )
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -107,7 +105,6 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
                   const int sample ) 
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -133,7 +130,6 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
 Anatomy::Anatomy( const int type )
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -956,6 +952,14 @@ void Anatomy::saveNifti( wxString fileName )
         pImage->data = &(*pDataset)[0];
         nifti_image_write( pImage );
     }
+}
+
+void Anatomy::saveToNewFilename( const wxString &fullPath )
+{
+    m_fullPath = fullPath;
+    wxFileName::SplitPath( fullPath, NULL, NULL, &m_name, NULL );
+    
+    saveNifti( fullPath );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1892,11 +1896,6 @@ Anatomy::~Anatomy()
     const GLuint* tex = &m_GLuint;
     glDeleteTextures( 1, tex );
     Logger::getInstance()->printIfGLError( wxT( "Anatomy::~Anatomy - glDeleteTextures") );
-
-    if( m_pRoi )
-    {
-        m_pRoi->m_sourceAnatomy = NULL;
-    }
 
     Logger::getInstance()->print( wxT( "Anatomy destructor done." ), LOGLEVEL_DEBUG );
 }

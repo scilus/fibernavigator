@@ -21,8 +21,11 @@
 #include "../gui/MainFrame.h"
 #include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/Algorithms/Helper.h"
+// TODO selection remove.
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
+#include "../misc/XmlHelper.h"
 
 #include <wx/textctrl.h>
 #include <wx/tglbtn.h>
@@ -41,29 +44,11 @@ using std::vector;
 #define DEF_POS   wxDefaultPosition
 #define DEF_SIZE  wxDefaultSize
 
-namespace
-{
-    wxString wxStrFormat( int val, wxString precision = wxT( "" ) )
-    {
-        return wxString::Format( wxT( "%" ) + precision + wxT( "d" ), val );
-    }
-    wxString wxStrFormat( double val, wxString precision = wxT( "" ) )
-    {
-        return wxString::Format( wxT( "%" ) + precision + wxT( "f" ), val );
-    }
-    bool parseXmlString( wxString &str )
-    {
-        return str == wxT("yes") ? true : false;
-    }
-}
-
 // Protected. Should only be used to create an empty object when loading a scene.
 // Should only be called by children object.
 SelectionObject::SelectionObject()
 {
     doBasicInit();
-    
-    m_sourceAnatomy         = NULL;
 }
 
 void SelectionObject::doBasicInit()
@@ -81,8 +66,6 @@ void SelectionObject::doBasicInit()
     m_isVisible = true;
     m_stepSize = 9;
     m_color = wxColour( 0, 0, 0 );
-    m_gfxDirty = false;
-    m_threshold = 0.0f;
     m_treeId = NULL;
     m_pLabelAnatomy = NULL;
     m_pCBSelectDataSet = NULL;
@@ -107,9 +90,6 @@ void SelectionObject::doBasicInit()
 SelectionObject::SelectionObject( Vector center, Vector size )
 {
     doBasicInit();
-    // TODO Selection needed?
-    //wxColour  l_color( 240, 30, 30 );
-    m_sourceAnatomy         = NULL;
     
     m_center = center;
     m_size = size;
@@ -130,11 +110,11 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
         {
             pChildNode->GetPropVal( wxT("name"), &m_name );
             pChildNode->GetPropVal( wxT("active"), &propVal );
-            m_isActive = parseXmlString( propVal );
+            m_isActive = parseXmlBoolString( propVal );
             pChildNode->GetPropVal( wxT("visible"), &propVal );
-            m_isVisible = parseXmlString( propVal );
+            m_isVisible = parseXmlBoolString( propVal );
             pChildNode->GetPropVal( wxT("isNOT"), &propVal );
-            m_isNOT = parseXmlString( propVal );
+            m_isNOT = parseXmlBoolString( propVal );
         }
         else if( nodeName == wxT("center") )
         {
@@ -177,7 +157,7 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
         else if( nodeName == wxT("distance_coloring_state") )
         {
             pChildNode->GetPropVal( wxT("used"), &propVal );
-            m_DistColoring = parseXmlString( propVal );
+            m_DistColoring = parseXmlBoolString( propVal );
         }
         else if( nodeName == wxT("mean_fiber_options") )
         {
@@ -540,19 +520,6 @@ void SelectionObject::setIsNOT( bool i_isNOT )
 {
     m_isNOT = i_isNOT;
     SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );
-    SceneManager::getInstance()->setSelBoxChanged( true );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Sets the threshold of the object.
-//
-// i_threshold      : The new threshold value.
-///////////////////////////////////////////////////////////////////////////
-// TODO selection anat threshold
-void SelectionObject::setThreshold( float i_threshold )
-{
-    m_threshold = i_threshold;
-    m_gfxDirty  = true;
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
@@ -1698,23 +1665,6 @@ void SelectionObject::draw()
     // draw the selection object according to its specifications.
     drawObject( l_color );
 }
-
-// TODO selection remove
-/*void SelectionObject::drawIsoSurface()
-{
-    if( ! m_isActive || ! m_isVisible ) 
-        return;
-
-    if( m_gfxDirty )
-    {
-        m_isosurface->setThreshold( m_threshold );
-        m_isosurface->GenerateWithThreshold();
-        m_gfxDirty = false;
-    }
-
-    glColor3ub( m_color.Red(), m_color.Green(), m_color.Blue() );
-    m_isosurface->draw();
-}*/
 
 ///////////////////////////////////////////////////////////////////////////
 // Updates the status bar at the button of the application window.
