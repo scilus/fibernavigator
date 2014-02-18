@@ -6,6 +6,7 @@
 #include "SelectionTree.h"
 #include "SelectionObject.h"
 
+#include "../Logger.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/Octree.h"
 #include "../gui/SelectionBox.h"
@@ -435,29 +436,39 @@ bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChil
         }
         else if( objType == wxT("voi") )
         {
-            pLoadedObj = new SelectionVOI( wxXmlNode( *pSelObjNode ) );
+            try
+            {
+                pLoadedObj = new SelectionVOI( wxXmlNode( *pSelObjNode ) );
+            }
+            catch( wxString &err )
+            {
+                Logger::getInstance()->print( err, LOGLEVEL_ERROR );
+                pLoadedObj = NULL;
+            }
         }
         else
         {
-            // TODO selection log error
-            pSelObjNode = pSelObjNode->GetNext();
-            continue;
+            Logger::getInstance()->print( wxT( "A selection object was skipped, it had an invalid type." ), LOGLEVEL_WARNING );
+            pLoadedObj = NULL;
         }
         
-        // Add to children of current node
-        int newNodeId = pSelTree->addChildrenObject( m_nodeId, pLoadedObj );
-
-        // If current object has children in the hierarchy, populate them.
-        wxXmlNode *pSelObjNodeChildNode = pSelObjNode->GetChildren();
-        while(pSelObjNodeChildNode != NULL )
+        if( pLoadedObj != NULL )
         {
-            wxString childName = pSelObjNodeChildNode->GetName();
-            if( childName == wxT("children_objects") )
+            // Add to children of current node
+            int newNodeId = pSelTree->addChildrenObject( m_nodeId, pLoadedObj );
+
+            // If current object has children in the hierarchy, populate them.
+            wxXmlNode *pSelObjNodeChildNode = pSelObjNode->GetChildren();
+            while(pSelObjNodeChildNode != NULL )
             {
-                SelectionTreeNode *childTreeNode = findNode( newNodeId );
-                childTreeNode->loadChildrenFromXMLNode( pSelObjNodeChildNode, pSelTree );
+                wxString childName = pSelObjNodeChildNode->GetName();
+                if( childName == wxT("children_objects") )
+                {
+                    SelectionTreeNode *childTreeNode = findNode( newNodeId );
+                    childTreeNode->loadChildrenFromXMLNode( pSelObjNodeChildNode, pSelTree );
+                }
+                pSelObjNodeChildNode = pSelObjNodeChildNode->GetNext();
             }
-            pSelObjNodeChildNode = pSelObjNodeChildNode->GetNext();
         }
         
         // Get next children

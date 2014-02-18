@@ -76,7 +76,9 @@ SelectionVOI::SelectionVOI( const wxXmlNode selObjNode )
                 
                 if( !m_sourceAnatIndex.isOk() )
                 {
-                    // TODO selection throw, 
+                    wxString err( wxT("Anatomy: ") );
+                    err << anatPath << " does not exist when creating VOI called: " << getName() << ".";
+                    throw  err;
                 }
                 
                 Anatomy *pCurAnat = dynamic_cast< Anatomy* >( DatasetManager::getInstance()->getDataset( m_sourceAnatIndex ) );
