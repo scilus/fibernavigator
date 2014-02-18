@@ -27,25 +27,25 @@ wxString Helper::getColorationModeString( const FibersColorationMode &colMode )
     switch(colMode)
     {
         case NORMAL_COLOR:
-            modeStr = "normal";
+            modeStr = wxT("normal");
             break;
         case CURVATURE_COLOR:
-            modeStr = "curvature";
+            modeStr = wxT("curvature");
             break;
         case TORSION_COLOR:
-            modeStr = "torsion";
+            modeStr = wxT("torsion");
             break;
         case DISTANCE_COLOR:
-            modeStr = "distance";
+            modeStr = wxT("distance");
             break;
         case MINDISTANCE_COLOR:
-            modeStr = "mindistance";
+            modeStr = wxT("mindistance");
             break;
         case CUSTOM_COLOR:
-            modeStr = "custom";
+            modeStr = wxT("custom");
             break;
         case CONSTANT_COLOR:
-            modeStr = "constant";
+            modeStr = wxT("constant");
             break;
     }
     
@@ -81,22 +81,22 @@ wxString Helper::getThresholdingTypeString( const ThresholdingOperationType &opT
     switch(opType)
     {
         case THRESHOLD_EQUAL:
-            opStr = "equal";
+            opStr = wxT("equal");
             break;
         case THRESHOLD_SMALLER:
-            opStr = "smaller";
+            opStr = wxT("smaller");
             break;
         case THRESHOLD_SMALLER_EQUAL:
-            opStr = "smaller_equal";
+            opStr = wxT("smaller_equal");
             break;
         case THRESHOLD_GREATER:
-            opStr = "greater";
+            opStr = wxT("greater");
             break;
         case THRESHOLD_GREATER_EQUAL:
-            opStr = "greater_equal";
+            opStr = wxT("greater_equal");
             break;
         case THRESHOLD_INVALID:
-            opStr = "invalid";      // Should never happen.
+            opStr = wxT("invalid");      // Should never happen.
             break;
     }
     
