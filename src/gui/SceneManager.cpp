@@ -18,7 +18,7 @@
 #include "../gfx/TheScene.h"
 #include "../misc/XmlHelper.h"
 
-#include <wx/filefn.h>
+#include <wx/filename.h>
 #include <wx/xml/xml.h>
 #include <algorithm>
 #include <assert.h>
@@ -132,6 +132,9 @@ bool SceneManager::load(const wxString &filename)
 
     bool result = true;
     m_scnLoading = true;
+    
+    wxString scnFilename, scnPath;
+    wxFileName::SplitPath( filename, NULL, &scnPath, &scnFilename, NULL );
 
     wxXmlNode *pRoot = doc.GetRoot();
     if( NULL != pRoot )
@@ -139,7 +142,7 @@ bool SceneManager::load(const wxString &filename)
         if( pRoot->GetName() == wxT( "theScene" ) )
         {
             // Support of the old version
-            if( !loadOldVersion( pRoot ) )
+            if( !loadOldVersion( pRoot, scnPath ) )
             {
                 Logger::getInstance()->print( wxString::Format( wxT( "An error occured while trying to load the scene: \"%s\"" ), filename.c_str() ), LOGLEVEL_ERROR );
                 result = false;
@@ -151,14 +154,8 @@ bool SceneManager::load(const wxString &filename)
 
     if( result )
     {
-#ifdef __WXMSW__
-        char separator = '\\';
-#else
-        char separator = '/';
-#endif // __WXMSW__
-
-        m_scnFilename = filename.AfterLast( separator );
-        m_scnPath = filename.BeforeLast( separator );
+        m_scnFilename = scnFilename;
+        m_scnPath = scnPath;
         m_scnFileLoaded = true;
     }
 
@@ -233,6 +230,9 @@ bool SceneManager::save( const wxString &filename )
     map< DatasetIndex, wxXmlNode * > datasets;
     int count = m_pMainFrame->m_pListCtrl->GetItemCount();
     
+    wxString sceneRootPath;
+    wxFileName::SplitPath( filename, NULL, &sceneRootPath, NULL, NULL );
+    
     for( int i = 0; i < count; ++i )
     {
         wxXmlNode *pNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "" ) );
@@ -249,14 +249,14 @@ bool SceneManager::save( const wxString &filename )
                 srand( time( NULL ) );
                 int suffix( rand() % 10000000 );
 
-                wxString path = wxPathOnly( filename );
-                path += wxT("/") + pDS->getName() + wxT("_") + wxStrFormat( suffix ) + wxT(".nii.gz");
+                wxString path = sceneRootPath + wxFileName::GetPathSeparator();
+                path += pDS->getName() + wxT("_") + wxStrFormat( suffix ) + wxT(".nii.gz");
                 
                 pAnat->saveToNewFilename( path );
             }
         }
         
-        pDS->save( pNode );
+        pDS->save( pNode, sceneRootPath );
 
         wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
         pStatus->AddProperty( new wxXmlProperty( wxT( "position" ), wxStrFormat( i ) ) );
@@ -429,7 +429,7 @@ void SceneManager::doMatrixManipulation()
 
 //////////////////////////////////////////////////////////////////////////
 
-bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
+bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  )
 {
     Logger::getInstance()->print( wxT( "Loading format 1.0" ), LOGLEVEL_DEBUG );
 
@@ -543,12 +543,14 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot )
                 }
                 else
                 {
-                    index = DatasetManager::getInstance()->load( path, extension );
+                    wxFileName fullDatasetPath( rootPath + wxFileName::GetPathSeparator() + path );
+                    index = DatasetManager::getInstance()->load( fullDatasetPath.GetFullPath(), extension );
                 }
 
                 if( index.isOk() )
                 {
                     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( index );
+                    pDataset->setName( name );
                     pDataset->setShow( active );
                     pDataset->setShowFS( showFS );
                     pDataset->setUseTex( useTex );

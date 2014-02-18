@@ -59,7 +59,7 @@ public:
     virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
     virtual bool save( wxString filename ) const { return false; }
-    virtual bool save( wxXmlNode *node ) const;
+    virtual bool save( wxXmlNode *node, const wxString &rootPath ) const;
 
     // Functions
     wxString getName() const                     { return m_name;               };

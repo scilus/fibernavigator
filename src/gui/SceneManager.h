@@ -157,7 +157,7 @@ private:
     SceneManager( const SceneManager & );
     SceneManager &operator=( const SceneManager & );
 
-    bool loadOldVersion( wxXmlNode * pRoot );
+    bool loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath );
 
 private:
     static SceneManager *m_pInstance;

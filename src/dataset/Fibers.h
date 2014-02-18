@@ -53,7 +53,7 @@ public:
     void    loadDMRIFibersInFile( std::ofstream &myfile );
 
     void    save( wxString filename );
-    bool    save( wxXmlNode *pNode ) const;
+    bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
     void    saveDMRI( wxString filename );
 
     int     getPointsPerLine(     const int lineId );

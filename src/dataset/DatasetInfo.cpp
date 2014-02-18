@@ -3,6 +3,7 @@
 #include "../main.h"
 #include "../gui/MainFrame.h"
 
+#include <wx/filename.h>
 #include <wx/tglbtn.h>
 #include <wx/xml/xml.h>
 
@@ -160,7 +161,7 @@ void DatasetInfo::updatePropertiesSizer()
 
 //////////////////////////////////////////////////////////////////////////
 
-bool DatasetInfo::save( wxXmlNode *pNode ) const
+bool DatasetInfo::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
@@ -178,7 +179,10 @@ bool DatasetInfo::save( wxXmlNode *pNode ) const
     pStatus->AddProperty( new wxXmlProperty( wxT( "useTex" ), m_useTex ? wxT( "yes" ) : wxT( "no" ) ) );
     pStatus->AddProperty( new wxXmlProperty( wxT( "isFiberGroup" ), wxT( "no" ) ) );
 
-    pPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), m_fullPath ) );
+    wxFileName tempName( m_fullPath );
+    tempName.MakeRelativeTo( rootPath );
+    
+    pPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), tempName.GetFullPath() ) );
 
     return true;
 }

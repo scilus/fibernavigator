@@ -1100,12 +1100,12 @@ bool CIsoSurface::save( wxString filename ) const
 
 //////////////////////////////////////////////////////////////////////////
 
-bool CIsoSurface::save( wxXmlNode *pNode ) const
+bool CIsoSurface::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
 
     return true;
 }

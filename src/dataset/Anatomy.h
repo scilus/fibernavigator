@@ -89,7 +89,7 @@ public:
     void draw(){};
 
     bool load( nifti_image *pHeader, nifti_image *pBody );
-    virtual bool save( wxXmlNode *pNode ) const;
+    virtual bool save( wxXmlNode *pNode, const wxString &rootPath ) const;
     void saveNifti( wxString fileName );
     void saveToNewFilename( const wxString &fullPath );
 

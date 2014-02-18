@@ -830,12 +830,12 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Anatomy::save( wxXmlNode *pNode ) const
+bool Anatomy::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
 
     return true;
 }
@@ -957,8 +957,6 @@ void Anatomy::saveNifti( wxString fileName )
 void Anatomy::saveToNewFilename( const wxString &fullPath )
 {
     m_fullPath = fullPath;
-    wxFileName::SplitPath( fullPath, NULL, NULL, &m_name, NULL );
-    
     saveNifti( fullPath );
 }
 

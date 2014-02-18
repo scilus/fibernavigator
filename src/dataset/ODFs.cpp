@@ -165,12 +165,12 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool ODFs::save( wxXmlNode *pNode ) const
+bool ODFs::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
 
     return true;
 }

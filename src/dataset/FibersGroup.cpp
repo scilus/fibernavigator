@@ -228,12 +228,12 @@ void FibersGroup::save( wxString filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool FibersGroup::save( wxXmlNode *pNode ) const
+bool FibersGroup::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
     wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
 
     if( NULL != pStatus )
