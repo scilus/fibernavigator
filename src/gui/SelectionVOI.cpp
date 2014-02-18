@@ -77,7 +77,7 @@ SelectionVOI::SelectionVOI( const wxXmlNode selObjNode )
                 if( !m_sourceAnatIndex.isOk() )
                 {
                     wxString err( wxT("Anatomy: ") );
-                    err << anatPath << " does not exist when creating VOI called: " << getName() << ".";
+                    err << anatPath << wxT(" does not exist when creating VOI called: ") << getName() << wxT(".");
                     throw  err;
                 }
                 
