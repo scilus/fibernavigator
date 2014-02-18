@@ -1419,7 +1419,7 @@ void PropertiesWindow::OnDisplayMeanFiber( wxCommandEvent& WXUNUSED(event) )
 // This function will be triggered when the user click on the display convex hull
 // button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection convex hull test
+// TODO convex hull test
 void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
 {
     SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
@@ -1434,7 +1434,7 @@ void PropertiesWindow::OnDisplayConvexHull( wxCommandEvent& WXUNUSED(event) )
 // This function will be triggered when the user click on the color button
 // beside the display convex hull button that is located in the m_fibersInfoSizer.
 ///////////////////////////////////////////////////////////////////////////
-// TODO selection convex hull test
+// TODO convex hull test
 void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullColorChange" ), LOGLEVEL_DEBUG );
@@ -1459,7 +1459,7 @@ void PropertiesWindow::OnConvexHullColorChange( wxCommandEvent& WXUNUSED(event) 
     }
 }
 
-// TODO selection convex hull test
+// TODO convex hull test
 void PropertiesWindow::OnConvexHullOpacityChange( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnConvexHullOpacityChange" ), LOGLEVEL_DEBUG );

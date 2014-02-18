@@ -116,8 +116,12 @@ bool SceneManager::load(const wxString &filename)
         }
 
         m_pMainFrame->m_pListCtrl->Clear();
+        m_pMainFrame->clearCachedSceneInfo();
         
-        // TODO selection clear obj list.
+        // Clear the tree widget and the selection tree.
+        m_pMainFrame->m_pTreeWidget->DeleteChildren( m_pMainFrame->m_tSelectionObjectsId );
+        m_pSelTree->clear();
+        
         if( 0 != DatasetManager::getInstance()->getDatasetCount() )
         {
             Logger::getInstance()->print( wxT( "Some datasets haven't been deleted when clearing the list for some reason. LOOK INTO IT!" ), LOGLEVEL_DEBUG );

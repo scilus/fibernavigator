@@ -683,11 +683,10 @@ void SelectionTree::unselectAll()
     }
 }
 
-/* TODO remove if not needed
-void SelectionTree::removeAllObjects()
+void SelectionTree::clear()
 {
     m_pRootNode->removeAllChildren();
-}*/
+}
 
 void SelectionTree::notifyAllObjectsNeedUpdating()
 {

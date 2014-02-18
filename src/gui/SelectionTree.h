@@ -55,9 +55,8 @@ public:
     bool containsId( const int itemId ) const;
     
     void unselectAll();
+    void clear();
     
-    // TODO selection remove if not needed
-    //void removeAllObjects();
     void notifyAllObjectsNeedUpdating();
     
     // Methods related to fiber selection.

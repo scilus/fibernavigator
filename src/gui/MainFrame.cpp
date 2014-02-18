@@ -487,6 +487,13 @@ void MainFrame::updateSliders()
     m_pGL2->changeOrthoSize();
 }
 
+void MainFrame::clearCachedSceneInfo()
+{
+    m_pCurrentSceneObject = NULL;
+    m_pCurrentSizer = NULL;
+    m_currentListIndex = -1;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )

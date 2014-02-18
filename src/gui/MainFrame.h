@@ -61,6 +61,8 @@ public:
     long getCurrentListIndex() const         { return m_currentListIndex; }
     void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
+    
+    void clearCachedSceneInfo();
 
     bool canDraw3D() const          { return m_draw3d; }
     bool canDrawRound() const       { return m_drawRound; }
@@ -223,9 +225,7 @@ private:
     MenuBar             *m_pMenuBar;       
     wxSizer             *m_pCurrentSizer;
     SceneObject         *m_pCurrentSceneObject;
-//     SceneObject         *m_pLastSelectedSceneObject;
     long                m_currentListIndex;
-//     long                m_lastSelectedListItem;
 
     wxString            m_lastPath;
 
