@@ -6,6 +6,7 @@
 #include "../dataset/DatasetManager.h"
 
 #include "../misc/XmlHelper.h"
+#include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/CBoolIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
@@ -17,8 +18,78 @@ SelectionVOI::SelectionVOI( Anatomy *pSourceAnatomy, const float threshold, cons
     : SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) ),
       m_voiSize( 0 ),
       m_generationThreshold( threshold ),
+      m_thresType( opType ),
+      m_pIsoSurface( NULL ),
       m_sourceAnatIndex( pSourceAnatomy->getDatasetIndex() )
-{    
+{   
+    wxString mystring(wxT("[VOI] - ") + pSourceAnatomy->getName());
+    m_name          = mystring;
+    m_objectType    = VOI_TYPE;
+    
+    buildSurface( pSourceAnatomy );
+    
+    setColor( wxColour( 240, 30, 30 ) );
+}
+
+SelectionVOI::SelectionVOI( const wxXmlNode selObjNode )
+: SelectionObject( selObjNode ),
+  m_voiSize( 0 ),
+  m_generationThreshold( 0.0f ),
+  m_thresType( THRESHOLD_INVALID ),
+  m_pIsoSurface( NULL ),
+  m_sourceAnatIndex( 0 )
+{
+    m_objectType = VOI_TYPE;
+    
+    wxXmlNode *pChildNode = selObjNode.GetChildren();
+    
+    while( pChildNode != NULL )
+    {
+        wxString nodeName = pChildNode->GetName();
+        wxString propVal;
+        
+        if( nodeName == wxT("voi_properties") )
+        {
+            double temp;
+            pChildNode->GetPropVal( wxT("gen_threshold"), &propVal );
+            propVal.ToDouble(&temp);
+            m_generationThreshold = temp;
+            
+            pChildNode->GetPropVal( wxT("thres_op_type"), &propVal );
+            m_thresType = Helper::getThresholdingTypeFromString( propVal );
+            
+            wxXmlNode *pAnatNode = pChildNode->GetChildren();
+            if( pAnatNode->GetName() == wxT("generation_anatomy") )
+            {
+                wxString anatPath = pAnatNode->GetNodeContent();
+                
+                // Find the anatomy related to this file.
+                vector< Anatomy* > anats = DatasetManager::getInstance()->getAnatomies();
+                for( vector< Anatomy* >::iterator anatIt( anats.begin() ); anatIt != anats.end(); ++anatIt )
+                {
+                    if( (*anatIt)->getPath() == anatPath )
+                    {
+                        m_sourceAnatIndex = (*anatIt)->getDatasetIndex();
+                        break;
+                    }
+                }
+                
+                if( !m_sourceAnatIndex.isOk() )
+                {
+                    // TODO selection throw, 
+                }
+                
+                Anatomy *pCurAnat = dynamic_cast< Anatomy* >( DatasetManager::getInstance()->getDataset( m_sourceAnatIndex ) );
+                buildSurface( pCurAnat );
+            }
+        }
+        
+        pChildNode = pChildNode->GetNext();
+    }
+}
+
+void SelectionVOI::buildSurface( Anatomy *pSourceAnatomy )
+{
     m_nbRows   = pSourceAnatomy->getRows();
     m_nbCols   = pSourceAnatomy->getColumns();
     m_nbFrames = pSourceAnatomy->getFrames();
@@ -27,42 +98,35 @@ SelectionVOI::SelectionVOI( Anatomy *pSourceAnatomy, const float threshold, cons
     
     m_includedVoxels.assign( pAnatDataset->size(), false );
     
-    if( opType == THRESHOLD_EQUAL )
+    if( m_thresType == THRESHOLD_EQUAL )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
                        m_includedVoxels.begin(), bind2nd( std::equal_to< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_GREATER )
+    else if( m_thresType == THRESHOLD_GREATER )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
                        m_includedVoxels.begin(), bind2nd( std::greater< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_GREATER_EQUAL )
+    else if( m_thresType == THRESHOLD_GREATER_EQUAL )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
                        m_includedVoxels.begin(), bind2nd( std::greater_equal< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_SMALLER )
+    else if( m_thresType == THRESHOLD_SMALLER )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
                        m_includedVoxels.begin(), bind2nd( std::less< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_SMALLER_EQUAL )
+    else if( m_thresType == THRESHOLD_SMALLER_EQUAL )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
                        m_includedVoxels.begin(), bind2nd( std::less_equal< float >(), m_generationThreshold ) );
     }
-
-    //m_isosurface    = new CIsoSurface( m_datasetHelper, pSourceAnatomy );
+    
     m_pIsoSurface = new CBoolIsoSurface( m_includedVoxels );
-    //m_isosurface->setThreshold( threshold );
-    //m_isosurface->GenerateWithThreshold();
     m_pIsoSurface->GenerateSurface();
     
-    wxString mystring(wxT("[VOI] - ") + pSourceAnatomy->getName());
-    m_name          = mystring;
-    m_objectType    = VOI_TYPE;
-
     // Compute the size and position of the bounding box of the VOI.
     unsigned int xIdxMin( m_nbCols );
     unsigned int yIdxMin( m_nbRows );
@@ -106,14 +170,12 @@ SelectionVOI::SelectionVOI( Anatomy *pSourceAnatomy, const float threshold, cons
     float spaceZMax( ( zIdxMax + 1 ) * pDM->getVoxelZ() - 0.1 * pDM->getVoxelZ() );
     
     setCenter( ( spaceXMax + spaceXMin ) / 2.0f, 
-               ( spaceYMax + spaceYMin ) / 2.0f, 
-               ( spaceZMax + spaceZMin ) / 2.0f );
+              ( spaceYMax + spaceYMin ) / 2.0f, 
+              ( spaceZMax + spaceZMin ) / 2.0f );
     
     setSize( spaceXMax - spaceXMin, spaceYMax - spaceYMin, spaceZMax - spaceZMin );
     
     m_voiSize = std::count( m_includedVoxels.begin(), m_includedVoxels.end(), true );
-    
-    setColor( wxColour( 240, 30, 30 ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -202,6 +264,7 @@ bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode )
         pCurNode->AddChild( pVoiNode );
         
         pVoiNode->AddProperty( new wxXmlProperty( wxT( "gen_threshold" ), wxStrFormat( m_generationThreshold, floatPrecision ) ) );
+        pVoiNode->AddProperty( new wxXmlProperty( wxT( "thres_op_type" ), Helper::getThresholdingTypeString( m_thresType ) ) );
         
         wxXmlNode *pVoiGenAnatPath = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "generation_anatomy" ) );
         pVoiNode->AddChild( pVoiGenAnatPath );

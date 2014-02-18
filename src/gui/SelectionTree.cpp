@@ -10,6 +10,7 @@
 #include "../dataset/Octree.h"
 #include "../gui/SelectionBox.h"
 #include "../gui/SelectionEllipsoid.h"
+#include "../gui/SelectionVOI.h"
 
 #include <algorithm>
 #include <utility>
@@ -432,9 +433,13 @@ bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChil
         {
             pLoadedObj = new SelectionEllipsoid( wxXmlNode( *pSelObjNode ) );
         }
+        else if( objType == wxT("voi") )
+        {
+            pLoadedObj = new SelectionVOI( wxXmlNode( *pSelObjNode ) );
+        }
         else
         {
-            // For now, skip VOI.
+            // TODO selection log error
             pSelObjNode = pSelObjNode->GetNext();
             continue;
         }

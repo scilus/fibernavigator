@@ -19,7 +19,6 @@ public:
     // Constructor / Destructor
     // Probably not needed.
     SelectionVOI( Anatomy *pSourceAnatomy, const float threshold, const ThresholdingOperationType opType );
-    //SelectionVoi();
     virtual ~SelectionVOI();
     
     // Fonctions from SelectionObject (virtual pure)
@@ -36,11 +35,14 @@ public:
     // Methods related to loading and saving.
     virtual wxString getTypeTag() const;
     bool populateXMLNode( wxXmlNode *pCurNode );
+    SelectionVOI( const wxXmlNode selObjNode );
     
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();
     
 private:
+    void buildSurface( Anatomy *pSourceAnatomy );
+    
     // Fonction from SelectionObject (virtual pure)
     void drawObject( GLfloat* i_color );
     
@@ -54,7 +56,8 @@ private:
     // TODO compute on construction
     unsigned int m_voiSize;
     
-    float        m_generationThreshold;
+    float                     m_generationThreshold;
+    ThresholdingOperationType m_thresType;
     
     CBoolIsoSurface *m_pIsoSurface;
     

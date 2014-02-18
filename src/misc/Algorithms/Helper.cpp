@@ -74,6 +74,55 @@ FibersColorationMode Helper::getColorationModeFromString( const wxString &modeSt
     return curMode;
 }
 
+wxString Helper::getThresholdingTypeString( const ThresholdingOperationType &opType )
+{
+    wxString opStr;
+    
+    switch(opType)
+    {
+        case THRESHOLD_EQUAL:
+            opStr = "equal";
+            break;
+        case THRESHOLD_SMALLER:
+            opStr = "smaller";
+            break;
+        case THRESHOLD_SMALLER_EQUAL:
+            opStr = "smaller_equal";
+            break;
+        case THRESHOLD_GREATER:
+            opStr = "greater";
+            break;
+        case THRESHOLD_GREATER_EQUAL:
+            opStr = "greater_equal";
+            break;
+        case THRESHOLD_INVALID:
+            opStr = "invalid";      // Should never happen.
+            break;
+    }
+    
+    return opStr;
+}
+
+ThresholdingOperationType Helper::getThresholdingTypeFromString( const wxString &opStr )
+{
+    ThresholdingOperationType curType;
+    
+    if( opStr == wxT("equal") )
+        curType = THRESHOLD_EQUAL;
+    else if( opStr == wxT("smaller") )
+        curType = THRESHOLD_SMALLER;
+    else if( opStr == wxT("smaller_equal") )
+        curType = THRESHOLD_SMALLER_EQUAL;
+    else if( opStr == wxT("greater") )
+        curType = THRESHOLD_GREATER;
+    else if( opStr == wxT("greater_equal") )
+        curType = THRESHOLD_GREATER_EQUAL;
+    else if( opStr == wxT("invalid") )
+        curType = THRESHOLD_INVALID;
+    
+    return curType;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Simple function to convert a HSL color system to a RGB color system.
 //
