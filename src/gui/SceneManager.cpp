@@ -208,7 +208,8 @@ bool SceneManager::save( const wxString &filename )
     pRoot->AddChild( pRotation );
     pRoot->AddChild( pData );
     pRoot->AddChild( pPoints );
-    pRoot->AddChild( pSelSetup );
+    
+    // Do not currently add the pSelSetup node. Will be added only if everything was fine when saving the selection setup.
 
     //////////////////////////////////////////////////////////////////////////
     // POSITION
@@ -339,7 +340,18 @@ bool SceneManager::save( const wxString &filename )
 
     //////////////////////////////////////////////////////////////////////////
     // SELECTION OBJECTS
-    m_pSelTree->populateXMLNode( pSelSetup );
+    bool success = m_pSelTree->populateXMLNode( pSelSetup );
+    if( !success )
+    {
+        // If an error occured, reset the node to a basic content.
+        delete pSelSetup;
+        pSelSetup = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "selection_setup" ) );
+        
+        wxMessageBox( wxT("Error while saving the selection setup.\nThe scene will be saved, but without any selection object." ), 
+                      wxT( "Error" ), wxOK | wxICON_ERROR );
+    }
+    
+    pRoot->AddChild( pSelSetup );
 
     //////////////////////////////////////////////////////////////////////////
     // SAVE DOCUMENT
@@ -436,6 +448,8 @@ void SceneManager::doMatrixManipulation()
 bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  )
 {
     Logger::getInstance()->print( wxT( "Loading format 1.0" ), LOGLEVEL_DEBUG );
+    
+    wxBeginBusyCursor();
 
     unsigned int errors( 0 );
 
@@ -633,6 +647,8 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  
 //     m_transform.s.M12 = rotationMatrix[6];
 //     m_transform.s.M22 = rotationMatrix[10];
 //     m_pMainFrame->m_pMainGL->setRotation();
+    
+    wxEndBusyCursor();
 
     return 0 == errors;
 }

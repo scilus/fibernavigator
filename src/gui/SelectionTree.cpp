@@ -383,10 +383,15 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
         // Create node
         pSelObjNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "selection_object" ) );
         
-        m_pSelObject->populateXMLNode( pSelObjNode );
-        
-        pParentNode->AddChild( pSelObjNode );
-        pParentNode = pSelObjNode;
+        if( m_pSelObject->populateXMLNode( pSelObjNode ) )
+        {
+            pParentNode->AddChild( pSelObjNode );
+            pParentNode = pSelObjNode;
+        }
+        else
+        {
+            return false;
+        }
     }
     
     if( hasChildren() )
@@ -398,7 +403,10 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
         // Call this method for each child
         for( unsigned int childIdx( 0 ); childIdx < m_children.size(); ++childIdx )
         {
-            m_children[ childIdx ]->populateXMLNode( pChildNode );
+            if( !m_children[ childIdx ]->populateXMLNode( pChildNode ) )
+            {
+                return false;
+            }
         }
     }
     

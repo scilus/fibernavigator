@@ -279,7 +279,7 @@ bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode )
         }
         else
         {
-            // TODO selection how do we manage this case? Should never happen.
+            // Should never happen.
             result = false;
         }
     }
