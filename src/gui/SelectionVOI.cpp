@@ -230,10 +230,16 @@ hitResult SelectionVOI::hitTest( Ray* i_ray )
 
 bool SelectionVOI::isPointInside( const float xPos, const float yPos, const float zPos ) const
 {
+    // According to the nifti standard, a voxel index is mapped to the coordinate of the 
+    // center of that voxel in real space.
+    // Therefore, points considered in a voxel (x, y, z) range from 
+    // (x - 0.5dx, y - 0.5dy, z - 0.5dz) to (x + 0.5dx, y + 0.5dy, z + 0.5dz).
+    // That is why we need to shift the coordinates before computing the coordinate.
     DatasetManager *pDM( DatasetManager::getInstance() );
-    unsigned int xVoxelCoord( static_cast< unsigned int >( ( xPos / pDM->getVoxelX() ) ) );
-    unsigned int yVoxelCoord( static_cast< unsigned int >( ( yPos / pDM->getVoxelY() ) ) );
-    unsigned int zVoxelCoord( static_cast< unsigned int >( ( zPos / pDM->getVoxelZ() )  ) );
+    
+    unsigned int xVoxelCoord( static_cast< unsigned int >( ( xPos / pDM->getVoxelX() ) + 0.5 ) );
+    unsigned int yVoxelCoord( static_cast< unsigned int >( ( yPos / pDM->getVoxelY() ) + 0.5 ) );
+    unsigned int zVoxelCoord( static_cast< unsigned int >( ( zPos / pDM->getVoxelZ() ) + 0.5 ) );
     
     unsigned int dataCoord( zVoxelCoord * m_nbCols * m_nbRows + yVoxelCoord * m_nbCols + xVoxelCoord );
     
