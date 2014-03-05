@@ -166,8 +166,11 @@ bool Fibers::load( const wxString &filename )
         res = loadMRtrix( filename );
     }
 
-    /* OcTree points classification */
-    m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+    if (res)
+    {
+        /* OcTree points classification */
+        m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+    }
     
     return res;
 }
@@ -484,6 +487,14 @@ bool Fibers::loadTRK( const wxString &filename )
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
+
+    // If there are no streamlines to display, gently refuse to load the file.
+    if (m_countPoints == 0)
+    {
+        Logger::getInstance()->print( wxT( "File contains no streamlines." ), LOGLEVEL_ERROR );
+        return false;
+    }
+
     Logger::getInstance()->print( wxT( "Setting data in right format for the navigator..." ), LOGLEVEL_MESSAGE );
     m_countLines = lines.size();
     m_pointArray.max_size();
@@ -652,6 +663,13 @@ bool Fibers::loadCamino( const wxString &filename )
                 break;
             }
         }
+    }
+
+    // If there are no streamlines to display, gently refuse to load the file.
+    if (m_countPoints == 0)
+    {
+        Logger::getInstance()->print( wxT( "File contains no streamlines." ), LOGLEVEL_ERROR );
+        return false;
     }
 
     m_linePointers.resize( m_countLines + 1 );
@@ -835,6 +853,13 @@ bool Fibers::loadMRtrix( const wxString &filename )
 
     delete[] pBuffer;
     pBuffer = NULL;
+
+    // If there are no streamlines to display, gently refuse to load the file.
+    if (m_countPoints == 0)
+    {
+        Logger::getInstance()->print( wxT( "File contains no streamlines." ), LOGLEVEL_ERROR );
+        return false;
+    }
     
     ////
     //POST PROCESS: set all the data in the right format for the navigator
@@ -995,6 +1020,13 @@ bool Fibers::loadPTK( const wxString &filename )
             cbf.b[3] = pBuffer[pc++];
             tmpPoints.push_back( cbf.f );
         }
+    }
+
+    // If there are no streamlines to display, gently refuse to load the file.
+    if (m_countPoints == 0)
+    {
+        Logger::getInstance()->print( wxT( "File contains no streamlines." ), LOGLEVEL_ERROR );
+        return false;
     }
 
     m_linePointers.resize( m_countLines + 1 );
@@ -1279,6 +1311,13 @@ bool Fibers::loadVTK( const wxString &filename )
     Logger::getInstance()->print( wxString::Format( wxT( "Loading %d points and %d lines" ), countPoints, countLines ), LOGLEVEL_MESSAGE );
     m_countLines        = countLines;
     m_countPoints       = countPoints;
+
+    // If there are no streamlines to display, gently refuse to load the file.
+    if (m_countPoints == 0)
+    {
+        Logger::getInstance()->print( wxT( "File contains no streamlines." ), LOGLEVEL_ERROR );
+        return false;
+    }
     
     m_linePointers.resize( m_countLines + 1 );
     m_linePointers[countLines] = countPoints;
@@ -1448,6 +1487,13 @@ bool Fibers::loadDmri( const wxString &filename )
     pS2 = NULL;
     pS3 = NULL;
     pS4 = NULL;
+
+    // If there are no streamlines to display, gently refuse to load the file.
+    if (m_countPoints == 0)
+    {
+        Logger::getInstance()->print( wxT( "File contains no streamlines." ), LOGLEVEL_ERROR );
+        return false;
+    }
     
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
