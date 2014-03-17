@@ -112,7 +112,20 @@ public:
      wxMenu         *m_menuHelp;
         wxMenuItem  *m_itemAbout;
         wxMenuItem  *m_itemKeyboardShortcuts;
-        wxMenuItem  *m_itemScreenShot;
+        wxMenu      *m_menuScreenShot;
+            wxMenuItem  *m_itemScreenShot;
+            wxMenu      *m_menuResolution;
+            wxMenuItem  *m_itemResolution2048;
+            wxMenuItem  *m_itemResolution4096;
+            wxMenuItem  *m_itemResolution8192; 
+            wxMenuItem  *m_itemResolution16384;            
+            wxMenu      *m_menuLineWidth;
+            wxMenuItem  *m_itemLineWidth1;
+            wxMenuItem  *m_itemLineWidth2;
+            wxMenuItem  *m_itemLineWidth4;
+            wxMenuItem  *m_itemLineWidth8;
+            wxMenuItem  *m_itemSaveTransparency;
+            wxMenuItem  *m_itemInvertTransparency;
         wxMenuItem  *m_itemWarningsInfo;
 };
 

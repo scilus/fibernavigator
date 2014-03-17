@@ -167,6 +167,18 @@ private:
     void onAbout                            ( wxCommandEvent& evt );
     void onShortcuts                        ( wxCommandEvent& evt );
     void onScreenshot                       ( wxCommandEvent& evt );
+    void onSaveTransparency                 ( wxCommandEvent& evt );
+    void onInvertTransparency               ( wxCommandEvent& evt );
+    void onResolution2048                   ( wxCommandEvent& evt );
+    void onResolution4096                   ( wxCommandEvent& evt );
+    void onResolution8192                   ( wxCommandEvent& evt );
+    void onResolution16384                  ( wxCommandEvent& evt );
+    void onLineWidth1                       ( wxCommandEvent& evt );
+    void onLineWidth2                       ( wxCommandEvent& evt );
+    void onLineWidth4                       ( wxCommandEvent& evt );
+    void onLineWidth8                       ( wxCommandEvent& evt );
+
+
     void onWarningsInformations             ( wxCommandEvent& evt );
 
     // List widget event functions     

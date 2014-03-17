@@ -70,7 +70,6 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     Matrix4fSetRotationFromMatrix3f(&transform, &m_lastRot);
 
     SceneManager::getInstance()->setTransform( transform );
-
     m_delta   = 0;
     m_pArcBall = new ArcBallT(640.0f, 480.0f);
 
@@ -704,9 +703,12 @@ void MainCanvas::render()
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
                 // FIXME: Screenshot crashes the GUI
-                int size = 2048;
 
-                FgeOffscreen fbo( size, size, true );
+                int size = SceneManager::getInstance()->getResolution();
+                glLineWidth(SceneManager::getInstance()->getLineWidth()); 
+
+                FgeOffscreen fbo( size, size, false );
+
                 if( SceneManager::getInstance()->getClearToBlack() )
                 {
                     fbo.setClearColor( 0.0f, 0.0f, 0.0f);
@@ -729,7 +731,14 @@ void MainCanvas::render()
 				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
-                fbo.getTexObject( 1 )->saveImageToPPM( SceneManager::getInstance()->getScreenshotName().mb_str() );
+                /* Save to PPM
+                if (m_dh->m_isImgPPM)
+                {
+                    fbo.getTexObject( 1 )->saveImageToPPM( ( m_dh->m_screenshotName ).mb_str() );
+                }*/
+
+                fbo.getTexObject( 1 )->saveImageToPNG( SceneManager::getInstance()->getScreenshotName().mb_str(), SceneManager::getInstance()->isSaveTransparency(), SceneManager::getInstance()->isInvertTransparency() );
+                  
                 fbo.deactivate();
                 SceneManager::getInstance()->setScreenshotScheduled( false );
             }

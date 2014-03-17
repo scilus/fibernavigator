@@ -1753,7 +1753,7 @@ void MainFrame::onWarningsInformations( wxCommandEvent& WXUNUSED(event) )
 void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
 {
     wxString l_caption         = wxT( "Choose a file" );
-    wxString l_wildcard        = wxT( "PPM files (*.ppm)|*.ppm|*.*|*.*" );
+    wxString l_wildcard        = wxT( "PNG files (*.png)|*.png|*.*|*.*" );
     wxString l_defaultDir      = wxEmptyString;
     wxString l_defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxSAVE );
@@ -1765,14 +1765,64 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void MainFrame::onSaveTransparency( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleSaveTransparency();
+}
+
+void MainFrame::onInvertTransparency( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleInvertTransparency();
+}
+
+void MainFrame::onResolution2048( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setResolution(2048);
+}
+
+void MainFrame::onResolution4096( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setResolution(4096);
+}
+
+void MainFrame::onResolution8192( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setResolution(8192);
+}
+
+void MainFrame::onResolution16384( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setResolution(16384);
+}
+
+void MainFrame::onLineWidth1( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setLineWidth(1);
+}
+
+void MainFrame::onLineWidth2( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setLineWidth(2);
+}
+
+void MainFrame::onLineWidth4( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setLineWidth(4);
+}
+
+void MainFrame::onLineWidth8( wxCommandEvent& evt )
+{
+    SceneManager::getInstance()->setLineWidth(8);
+}
+
 void MainFrame::screenshot( const wxString &path, const wxString &filename )
 {
     SceneManager::getInstance()->setScreenshotName( filename );
     SceneManager::getInstance()->setScreenshotPath( path );
 
-    if ( filename.AfterLast( '.' ) != _T( "ppm" ) )
+    if ( filename.AfterLast( '.' ) != _T( "png" ) )
     {
-        SceneManager::getInstance()->setScreenshotName( filename + wxT( ".ppm" ) );
+        SceneManager::getInstance()->setScreenshotName( filename + wxT( ".png" ) );
     }
 
     SceneManager::getInstance()->setScreenshotScheduled( true );

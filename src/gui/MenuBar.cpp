@@ -141,7 +141,26 @@ MenuBar::MenuBar()
 
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
-    m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot"));
+
+    m_menuScreenShot = new wxMenu();
+        m_itemScreenShot = m_menuScreenShot->Append(wxID_ANY, wxT("ScreenShot"));
+        m_menuResolution = new wxMenu();
+            m_itemResolution2048 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("2048x2048"));
+            m_itemResolution4096 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("4096x4096"));
+            m_itemResolution8192 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("8192x8192"));
+            m_itemResolution16384= m_menuResolution->AppendRadioItem(wxID_ANY, wxT("16384x16384"));
+            m_menuScreenShot->AppendSubMenu(m_menuResolution, wxT("Resolution"));
+        m_menuLineWidth = new wxMenu();
+            m_itemLineWidth1 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("1"));
+            m_itemLineWidth2 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("2"));
+            m_itemLineWidth4 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("4"));
+            m_itemLineWidth8 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("8"));            
+            m_menuScreenShot->AppendSubMenu(m_menuLineWidth, wxT("Line width"));
+        m_itemSaveTransparency = m_menuScreenShot->AppendCheckItem(wxID_ANY, wxT("Save Transparency"));
+        m_itemInvertTransparency = m_menuScreenShot->AppendCheckItem(wxID_ANY, wxT("Invert Transparency"));
+
+        m_menuHelp->AppendSubMenu(m_menuScreenShot, wxT("Screen Shot"));
+        
     m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
     m_menuHelp->AppendSeparator();
     m_itemAbout = m_menuHelp->Append(wxID_ABOUT, wxT("About"));
@@ -251,7 +270,20 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemBlueLightblue->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetCMap4));
     mf->Connect(m_itemAbout->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onAbout));
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
+    
     mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
+    mf->Connect(m_itemSaveTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveTransparency));
+    mf->Connect(m_itemInvertTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertTransparency));
+    mf->Connect(m_itemResolution2048->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResolution2048));
+    mf->Connect(m_itemResolution4096->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResolution4096));
+    mf->Connect(m_itemResolution8192->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResolution8192));
+    mf->Connect(m_itemResolution16384->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResolution16384));
+    mf->Connect(m_itemLineWidth1->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth1));
+    mf->Connect(m_itemLineWidth2->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth2));
+    mf->Connect(m_itemLineWidth4->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth4));
+    mf->Connect(m_itemLineWidth8->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth8));
+    
+
     mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
     mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateZ));
     mf->Connect(m_itemRotateY->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateY));
@@ -360,4 +392,6 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemDrawColorPicker->Enable( mf->isDrawerToolActive() &&
                                    mf->canUseColorPicker() &&
                                    DRAWMODE_PEN == mf->getDrawMode() );
+    m_itemSaveTransparency->Check(SceneManager::getInstance()->isSaveTransparency());
+    m_itemInvertTransparency->Check(SceneManager::getInstance()->isInvertTransparency());
 }

@@ -60,6 +60,7 @@ ENDIF ( NOT CMAKE_BUILD_TYPE )
 
 # Package dependencies:
 FIND_PACKAGE( GLEW REQUIRED )
+FIND_PACKAGE( LIBPNG REQUIRED )
 
 IF (APPLE)
     FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS base core gl net xml adv )
@@ -78,6 +79,16 @@ ENDIF(APPLE)
 INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( . ${wxWidgets_INCLUDE_DIRS} )
+
+#INCLUDE( ${PNG_LIBRARY} )
+INCLUDE_DIRECTORIES( . ${PNG_INCLUDE_DIR} )
+
+
+#INCLUDE('/usr/lib/x86_64-linux-gnu/libpng12.a')
+#INCLUDE('/usr/lib/x86_64-linux-gnu/libz.a')
+#INCLUDE_DIRECTORIES('/usr/lib/x86_64-linux-gnu/')
+#INCLUDE_DIRECTORIES('/lib/x86_64-linux-gnu/')
+
 
 IF (UNIX AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
 ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} --cppflags` )
@@ -222,7 +233,7 @@ ELSE(APPLE)
       execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/${BUILD_TYPE}/icons)
     ENDFOREACH(BUILD_TYPE ${CMAKE_BUILD_TYPE})
   ELSE(WIN32)
-    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8 libGL.so libz.so libGLU.so ) 
+    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} ${PNG_LIBRARY} wx_gtk2u_gl-2.8 libGL.so libz.so libGLU.so )
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/icons)
   ENDIF(WIN32)

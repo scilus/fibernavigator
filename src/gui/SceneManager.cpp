@@ -89,7 +89,11 @@ SceneManager::SceneManager(void)
     m_selBoxChanged( true ),
     m_isRulerActive( false ),
     m_rulerFullLength( 0.0 ),
-    m_rulerPartialLength( 0.0 )
+    m_rulerPartialLength( 0.0 ),
+    m_saveTransparency( true ),
+    m_invertTransparency( false ),
+    m_resolution( 2096 ),
+    m_lineWidth(1)
 {
     m_pAnatomyHelper = new AnatomyHelper();
     m_pTheScene = new TheScene();
