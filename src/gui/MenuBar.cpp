@@ -142,8 +142,9 @@ MenuBar::MenuBar()
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
 
+#if !_USE_LIGHT_GUI
     m_menuScreenShot = new wxMenu();
-        m_itemScreenShot = m_menuScreenShot->Append(wxID_ANY, wxT("ScreenShot"));
+        m_itemScreenShot = m_menuScreenShot->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
         m_menuResolution = new wxMenu();
             m_itemResolution2048 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("2048x2048"));
             m_itemResolution4096 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("4096x4096"));
@@ -160,7 +161,10 @@ MenuBar::MenuBar()
         m_itemInvertTransparency = m_menuScreenShot->AppendCheckItem(wxID_ANY, wxT("Invert Transparency"));
 
         m_menuHelp->AppendSubMenu(m_menuScreenShot, wxT("Screen Shot"));
-        
+#else
+    m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
+#endif
+
     m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
     m_menuHelp->AppendSeparator();
     m_itemAbout = m_menuHelp->Append(wxID_ABOUT, wxT("About"));
@@ -272,6 +276,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
     
     mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
+#if !_USE_LIGHT_GUI     
     mf->Connect(m_itemSaveTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSaveTransparency));
     mf->Connect(m_itemInvertTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onInvertTransparency));
     mf->Connect(m_itemResolution2048->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onResolution2048));
@@ -282,7 +287,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemLineWidth2->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth2));
     mf->Connect(m_itemLineWidth4->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth4));
     mf->Connect(m_itemLineWidth8->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLineWidth8));
-    
+#endif    
 
     mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
     mf->Connect(m_itemRotateZ->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onRotateZ));
@@ -392,6 +397,8 @@ void MenuBar::updateMenuBar( MainFrame *mf )
     m_itemDrawColorPicker->Enable( mf->isDrawerToolActive() &&
                                    mf->canUseColorPicker() &&
                                    DRAWMODE_PEN == mf->getDrawMode() );
+#if !_USE_LIGHT_GUI
     m_itemSaveTransparency->Check(SceneManager::getInstance()->isSaveTransparency());
     m_itemInvertTransparency->Check(SceneManager::getInstance()->isInvertTransparency());
+#endif
 }
