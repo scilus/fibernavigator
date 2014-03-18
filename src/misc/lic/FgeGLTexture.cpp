@@ -15,10 +15,7 @@
 
 #include <cassert>
 
-#include "libpng/png.h"
-//#include <png.h>
-//#include <zlib.h>
-
+#include <png.h>
 using namespace std;
 
 

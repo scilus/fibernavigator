@@ -79,16 +79,7 @@ ENDIF(APPLE)
 INCLUDE_DIRECTORIES( ${GLEW_INCLUDE_PATH} )
 INCLUDE( ${wxWidgets_USE_FILE} )
 INCLUDE_DIRECTORIES( . ${wxWidgets_INCLUDE_DIRS} )
-
-#INCLUDE( ${PNG_LIBRARY} )
 INCLUDE_DIRECTORIES( . ${PNG_INCLUDE_DIR} )
-
-
-#INCLUDE('/usr/lib/x86_64-linux-gnu/libpng12.a')
-#INCLUDE('/usr/lib/x86_64-linux-gnu/libz.a')
-#INCLUDE_DIRECTORIES('/usr/lib/x86_64-linux-gnu/')
-#INCLUDE_DIRECTORIES('/lib/x86_64-linux-gnu/')
-
 
 IF (UNIX AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
 ADD_DEFINITIONS( `${wxWidgets_CONFIG_EXECUTABLE} --cppflags` )

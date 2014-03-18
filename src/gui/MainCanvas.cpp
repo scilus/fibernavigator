@@ -20,7 +20,6 @@
 #include <limits>
 #include <list>
 #include <vector>
-#include <time.h>
 using std::vector;
 
 typedef std::vector<float> image1D;

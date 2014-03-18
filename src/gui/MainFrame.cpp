@@ -202,7 +202,7 @@ MainFrame::MainFrame( const wxString     &title,
     initLayout();
 
     m_pTimer = new wxTimer( this );
-    m_pTimer->Start( 5000 );
+    m_pTimer->Start( 100 );
 
     m_pMenuBar = new MenuBar();
     m_pToolBar = new ToolBar(this);
