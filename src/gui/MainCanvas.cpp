@@ -731,10 +731,8 @@ void MainCanvas::render()
 				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
-                /* Save to PPM
-                if (m_dh->m_isImgPPM)
-                {
-                    fbo.getTexObject( 1 )->saveImageToPPM( ( m_dh->m_screenshotName ).mb_str() );
+                /* Save to PPM  
+                fbo.getTexObject( 1 )->saveImageToPPM( ( m_dh->m_screenshotName ).mb_str() );
                 }*/
 
                 fbo.getTexObject( 1 )->saveImageToPNG( SceneManager::getInstance()->getScreenshotName().mb_str(), SceneManager::getInstance()->isSaveTransparency(), SceneManager::getInstance()->isInvertTransparency() );
