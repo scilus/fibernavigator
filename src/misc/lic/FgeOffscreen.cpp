@@ -211,12 +211,13 @@ unsigned int FgeOffscreen::addDepthTexture(bool permanent) {
  * Sets the color to use as background color in fbo textures.
  * \param cc the color
  */
-void FgeOffscreen::setClearColor(const float r, const float g, const float b)
+void FgeOffscreen::setClearColor(const float r, const float g, const float b, const float a)
 {
-  clearColor = new float[3];
+  clearColor = new float[4];
   clearColor[0] = r;
   clearColor[1] = g;
   clearColor[2] = b;
+  clearColor[3] = a;
 }
 
 

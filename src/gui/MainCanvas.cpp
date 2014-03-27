@@ -711,11 +711,11 @@ void MainCanvas::render()
 
                 if( SceneManager::getInstance()->getClearToBlack() )
                 {
-                    fbo.setClearColor( 0.0f, 0.0f, 0.0f);
+                    fbo.setClearColor( 0.0f, 0.0f, 0.0f, 0.0f);
                 } 
                 else 
                 {
-                    fbo.setClearColor( 1.0f, 1.0f, 1.0f);
+                    fbo.setClearColor( 1.0f, 1.0f, 1.0f, 1.0f);
                 }
                 fbo.activate();
 

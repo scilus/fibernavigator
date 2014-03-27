@@ -56,7 +56,7 @@ class FgeOffscreen
 
 
     //! set default background color
-    void setClearColor(const float r, const float g, const float b);
+    void setClearColor(const float r, const float g, const float b, const float a);
 
     //! get current clear color
     float* getClearColor();
