@@ -53,12 +53,16 @@ void FgeGLTexture::saveImageToPNG(const char* filename, bool isEnableAlpha, bool
 
     if (isEnableAlpha)
     {
-        png_set_IHDR(png_ptr, info_ptr, width, height,8,PNG_COLOR_TYPE_RGBA,PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
+        png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGBA, 
+            PNG_INTERLACE_NONE, 
+            PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
         nbrChannels = 4;
     }
     else
     {
-        png_set_IHDR(png_ptr, info_ptr, width, height,8,PNG_COLOR_TYPE_RGB,PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
+        png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB,
+            PNG_INTERLACE_NONE, 
+            PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
     }
 
     png_write_info(png_ptr, info_ptr);
@@ -109,87 +113,6 @@ void FgeGLTexture::saveImageToPNG(const char* filename, bool isEnableAlpha, bool
     delete[] imageData;
     delete[] tmpImageData;
 } 
-
-void FgeGLTexture::saveImageToPPM(const char* filename)
-{
-    // FIXME:
-    // defined by opengl manual, we should do something like
-    // glGetTexLevelParameter and GL_PACK ALIGNMENT check here
-    if ( type == GL_UNSIGNED_BYTE )
-    {
-        // allocate mem
-        GLubyte *tmpImageData= new GLubyte[width * height * 4];
-        GLubyte *imageData= new GLubyte[width * height * 4];
-
-        // get image
-        bind();
-        glGetTexImage( target, 0, GL_RGBA, type, tmpImageData);
-        
-        for ( unsigned int i = 1 ; i <= height ; ++i )
-        {
-            for ( unsigned int j = 0 ; j < width * 4 ; j += 4 )
-            {
-                imageData[(i-1) * width * 4 + j     ] = tmpImageData[(height - i) * width * 4 + j   ];
-                imageData[(i-1) * width * 4 + j + 1 ] = tmpImageData[(height - i) * width * 4 + j + 1 ];
-                imageData[(i-1) * width * 4 + j + 2 ] = tmpImageData[(height - i) * width * 4 + j + 2 ];                
-            }
-        }
-
-        ofstream o( filename );
-        o << "P3\n# Texture\n"<< width << " " << height << "\n255\n";
-
-        for(unsigned int i=0; i< width*height; ++i)
-        {
-            o << (unsigned int)imageData[i*4+0] << " " << (unsigned int)imageData[i*4+1] << " " << (unsigned int)imageData[i*4+2]<< "\n";
-        }
-
-        o.close();
-        delete[] imageData;
-        delete[] tmpImageData;
-    }
-    else if ( type == GL_BYTE )
-    {
-        // allocate mem
-        GLbyte *imageData= new GLbyte[width * height * 4];
-
-        // get image
-        bind();
-        glGetTexImage( target, 0, GL_RGBA, type, imageData);
-
-        // finally write
-        ofstream o( filename );
-        o << "P3\n# Texture\n"<< width << " " << height << "\n255\n";
-
-        for(unsigned int i=0; i< width*height; ++i)
-        {
-            o << (unsigned int)imageData[i*4+0] << " " << (unsigned int)imageData[i*4+1] << " " << (unsigned int)imageData[i*4+2]<< "\n";
-        }
-
-        o.close();
-        delete[] imageData;
-    }
-    else if ( type == GL_FLOAT )
-    {
-        // allocate mem
-        GLfloat *imageData= new GLfloat[width * height * 4];
-
-        // get image
-        bind();
-        glGetTexImage( target, 0, GL_RGBA, type, imageData);
-
-        // finally write
-        ofstream o( filename );
-        o << "P3\n# Texture\n"<< width << " " << height << "\n10000\n";
-
-        for(unsigned int i=0; i< width*height; ++i)
-        {
-            o << (int )( 10000.*imageData[i*4+0] ) << " " << (int)( 10000.*imageData[i*4+1] ) << " " << (int)( 10000.*imageData[i*4+2] )<< "\n";
-        }
-
-        o.close();
-        delete[] imageData;
-    }
-}
 
 namespace{
 /** extract RGB data out of an RGBA thingy and save it to the (binary)stream */

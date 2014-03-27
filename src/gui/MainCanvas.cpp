@@ -70,6 +70,7 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     Matrix4fSetRotationFromMatrix3f(&transform, &m_lastRot);
 
     SceneManager::getInstance()->setTransform( transform );
+
     m_delta   = 0;
     m_pArcBall = new ArcBallT(640.0f, 480.0f);
 
@@ -702,7 +703,6 @@ void MainCanvas::render()
             if( SceneManager::getInstance()->isScreenshotScheduled() )
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
-                // FIXME: Screenshot crashes the GUI
 
                 int size = SceneManager::getInstance()->getResolution();
                 glLineWidth(SceneManager::getInstance()->getLineWidth()); 
@@ -730,10 +730,6 @@ void MainCanvas::render()
                 SceneManager::getInstance()->getScene()->renderScene();
 				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
-
-                /* Save to PPM  
-                fbo.getTexObject( 1 )->saveImageToPPM( ( m_dh->m_screenshotName ).mb_str() );
-                }*/
 
                 fbo.getTexObject( 1 )->saveImageToPNG( SceneManager::getInstance()->getScreenshotName().mb_str(), SceneManager::getInstance()->isSaveTransparency(), SceneManager::getInstance()->isInvertTransparency() );
                   
