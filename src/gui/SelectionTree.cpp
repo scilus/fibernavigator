@@ -374,7 +374,7 @@ int SelectionTree::SelectionTreeNode::getId() const
     return m_nodeId;
 }
 
-bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
+bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode, const wxString &rootPath )
 {
     wxXmlNode *pSelObjNode( NULL );
     
@@ -383,7 +383,7 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
         // Create node
         pSelObjNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "selection_object" ) );
         
-        if( m_pSelObject->populateXMLNode( pSelObjNode ) )
+        if( m_pSelObject->populateXMLNode( pSelObjNode, rootPath ) )
         {
             pParentNode->AddChild( pSelObjNode );
             pParentNode = pSelObjNode;
@@ -403,7 +403,7 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
         // Call this method for each child
         for( unsigned int childIdx( 0 ); childIdx < m_children.size(); ++childIdx )
         {
-            if( !m_children[ childIdx ]->populateXMLNode( pChildNode ) )
+            if( !m_children[ childIdx ]->populateXMLNode( pChildNode, rootPath ) )
             {
                 return false;
             }
@@ -413,7 +413,9 @@ bool SelectionTree::SelectionTreeNode::populateXMLNode( wxXmlNode *pParentNode )
     return true;
 }
 
-bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode, SelectionTree *pSelTree )
+bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode,
+                                                                SelectionTree *pSelTree,
+                                                                const wxString &rootPath )
 {
     if( pChildContainingNode->GetName() != wxT( "children_objects" ) )
     {
@@ -446,7 +448,7 @@ bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChil
         {
             try
             {
-                pLoadedObj = new SelectionVOI( wxXmlNode( *pSelObjNode ) );
+                pLoadedObj = new SelectionVOI( wxXmlNode( *pSelObjNode ), rootPath );
             }
             catch( wxString &err )
             {
@@ -473,7 +475,7 @@ bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChil
                 if( childName == wxT("children_objects") )
                 {
                     SelectionTreeNode *childTreeNode = findNode( newNodeId );
-                    childTreeNode->loadChildrenFromXMLNode( pSelObjNodeChildNode, pSelTree );
+                    childTreeNode->loadChildrenFromXMLNode( pSelObjNodeChildNode, pSelTree, rootPath );
                 }
                 pSelObjNodeChildNode = pSelObjNodeChildNode->GetNext();
             }
@@ -833,17 +835,17 @@ void SelectionTree::notifyStatsNeedUpdating( SelectionObject *pSelObject )
     }
 }
 
-bool SelectionTree::populateXMLNode( wxXmlNode *pRootSelObjNode )
+bool SelectionTree::populateXMLNode( wxXmlNode *pRootSelObjNode, const wxString &rootPath )
 {
     if( !m_pRootNode->hasChildren() )
     {
         return true;
     }
     
-    return m_pRootNode->populateXMLNode( pRootSelObjNode );
+    return m_pRootNode->populateXMLNode( pRootSelObjNode, rootPath );
 }
 
-bool SelectionTree::loadFromXMLNode( wxXmlNode *pRootSelObjNode )
+bool SelectionTree::loadFromXMLNode( wxXmlNode *pRootSelObjNode, const wxString &rootPath )
 {
     if( m_pRootNode->hasChildren() )
     {
@@ -856,7 +858,7 @@ bool SelectionTree::loadFromXMLNode( wxXmlNode *pRootSelObjNode )
         return true;
     }
     
-    m_pRootNode->loadChildrenFromXMLNode( pRootChildNode, this );
+    m_pRootNode->loadChildrenFromXMLNode( pRootChildNode, this, rootPath );
     
     return true;
 }

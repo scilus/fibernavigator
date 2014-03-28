@@ -34,8 +34,8 @@ public:
     
     // Methods related to loading and saving.
     virtual wxString getTypeTag() const;
-    bool populateXMLNode( wxXmlNode *pCurNode );
-    SelectionVOI( const wxXmlNode selObjNode );
+    bool populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath );
+    SelectionVOI( const wxXmlNode selObjNode, const wxString &rootPath );
     
     virtual void createPropertiesSizer( PropertiesWindow *pParent );
     virtual void updatePropertiesSizer();

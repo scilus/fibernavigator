@@ -340,7 +340,7 @@ bool SceneManager::save( const wxString &filename )
 
     //////////////////////////////////////////////////////////////////////////
     // SELECTION OBJECTS
-    bool success = m_pSelTree->populateXMLNode( pSelSetup );
+    bool success = m_pSelTree->populateXMLNode( pSelSetup, sceneRootPath );
     if( !success )
     {
         // If an error occured, reset the node to a basic content.
@@ -601,7 +601,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  
         }
         else if( wxT( "selection_setup" ) == nodeName )
         {
-            m_pSelTree->loadFromXMLNode( pChild );
+            m_pSelTree->loadFromXMLNode( pChild, rootPath );
 
             // Build the selection tree widget content.
             if( !m_pSelTree->isEmpty() )

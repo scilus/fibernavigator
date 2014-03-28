@@ -1902,7 +1902,7 @@ SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &f
     return m_selectionStates[ fiberId ];
 }
 
-bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode )
+bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath )
 {
     wxString floatPrecision = wxT( ".8" );
     

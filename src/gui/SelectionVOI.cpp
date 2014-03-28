@@ -10,6 +10,8 @@
 #include "../misc/IsoSurface/CBoolIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
+#include <wx/filename.h>
+
 #include <algorithm>
 #include <functional>
 #include <limits>
@@ -31,7 +33,7 @@ SelectionVOI::SelectionVOI( Anatomy *pSourceAnatomy, const float threshold, cons
     setColor( wxColour( 240, 30, 30 ) );
 }
 
-SelectionVOI::SelectionVOI( const wxXmlNode selObjNode )
+SelectionVOI::SelectionVOI( const wxXmlNode selObjNode, const wxString &rootPath )
 : SelectionObject( selObjNode ),
   m_voiSize( 0 ),
   m_generationThreshold( 0.0f ),
@@ -62,12 +64,15 @@ SelectionVOI::SelectionVOI( const wxXmlNode selObjNode )
             if( pAnatNode->GetName() == wxT("generation_anatomy") )
             {
                 wxString anatPath = pAnatNode->GetNodeContent();
-                
+
+                // Get full path, since this is how it is stored in the dataset.
+                wxFileName fullAnatPath( rootPath + wxFileName::GetPathSeparator() + anatPath );
+                               
                 // Find the anatomy related to this file.
                 vector< Anatomy* > anats = DatasetManager::getInstance()->getAnatomies();
                 for( vector< Anatomy* >::iterator anatIt( anats.begin() ); anatIt != anats.end(); ++anatIt )
                 {
-                    if( (*anatIt)->getPath() == anatPath )
+                    if( (*anatIt)->getPath() == fullAnatPath.GetFullPath() )
                     {
                         m_sourceAnatIndex = (*anatIt)->getDatasetIndex();
                         break;
@@ -260,9 +265,9 @@ wxString SelectionVOI::getTypeTag() const
     return wxT( "voi" );
 }
 
-bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode )
+bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath )
 {
-    bool result( SelectionObject::populateXMLNode( pCurNode ) );
+    bool result( SelectionObject::populateXMLNode( pCurNode, rootPath ) );
     
     if( result )
     {
@@ -281,7 +286,9 @@ bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode )
         DatasetInfo *pDS = DatasetManager::getInstance()->getDataset( m_sourceAnatIndex );
         if( pDS )
         {
-            pVoiGenAnatPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), pDS->getPath() ) );
+            wxFileName tempName( pDS->getPath() );
+            tempName.MakeRelativeTo( rootPath );
+            pVoiGenAnatPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), tempName.GetFullPath() ) );
         }
         else
         {

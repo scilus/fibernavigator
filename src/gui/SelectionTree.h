@@ -71,8 +71,8 @@ public:
     void notifyStatsNeedUpdating( SelectionObject *pSelObject );
     
     // Methods related to saving and loading.
-    bool populateXMLNode( wxXmlNode *pRootSelObjNode );
-    bool loadFromXMLNode( wxXmlNode *pRootSelObjNode );
+    bool populateXMLNode( wxXmlNode *pRootSelObjNode, const wxString &rootPath );
+    bool loadFromXMLNode( wxXmlNode *pRootSelObjNode, const wxString &rootPath );
     
 private:
     class SelectionTreeNode
@@ -111,8 +111,10 @@ private:
         
         int getId() const;
         
-        bool populateXMLNode( wxXmlNode *pParentNode );
-        bool loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode, SelectionTree *pSelTree );
+        bool populateXMLNode( wxXmlNode *pParentNode, const wxString &rootPath );
+        bool loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode, 
+                                      SelectionTree *pSelTree, 
+                                      const wxString &rootPath );
         
     private:
         SelectionTreeNode();    // Disable default constructor.

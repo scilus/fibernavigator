@@ -175,7 +175,7 @@ public :
     SelectionState& getState(           const FiberIdType &fiberId );
     
     // Methods related to saving and loading.
-    virtual bool populateXMLNode( wxXmlNode *pCurNode );
+    virtual bool populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath );
     
     virtual wxString getTypeTag() const;
 
