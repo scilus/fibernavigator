@@ -167,16 +167,16 @@ private:
     void onAbout                            ( wxCommandEvent& evt );
     void onShortcuts                        ( wxCommandEvent& evt );
     void onScreenshot                       ( wxCommandEvent& evt );
-    void onSaveTransparency                 ( wxCommandEvent& evt );
-    void onInvertTransparency               ( wxCommandEvent& evt );
-    void onResolution2048                   ( wxCommandEvent& evt );
-    void onResolution4096                   ( wxCommandEvent& evt );
-    void onResolution8192                   ( wxCommandEvent& evt );
-    void onResolution16384                  ( wxCommandEvent& evt );
-    void onLineWidth1                       ( wxCommandEvent& evt );
-    void onLineWidth2                       ( wxCommandEvent& evt );
-    void onLineWidth4                       ( wxCommandEvent& evt );
-    void onLineWidth8                       ( wxCommandEvent& evt );
+    void onScreenshotTransparencySaved      ( wxCommandEvent& evt );
+    void onScreenshotTransparencyInverted   ( wxCommandEvent& evt );
+    void onSetScreenshotResolution2048      ( wxCommandEvent& evt );
+    void onSetScreenshotResolution4096      ( wxCommandEvent& evt );
+    void onSetScreenshotResolution8192      ( wxCommandEvent& evt );
+    void onSetScreenshotResolution16384     ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth1          ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth2          ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth4          ( wxCommandEvent& evt );
+    void onSetScreenshotLineWidth8          ( wxCommandEvent& evt );
 
 
     void onWarningsInformations             ( wxCommandEvent& evt );

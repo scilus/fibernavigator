@@ -704,8 +704,8 @@ void MainCanvas::render()
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
 
-                int size = SceneManager::getInstance()->getResolution();
-                glLineWidth(SceneManager::getInstance()->getLineWidth()); 
+                int size = SceneManager::getInstance()->getScreenshotResolution();
+                glLineWidth(SceneManager::getInstance()->getScreenshotLineWidth()); 
 
                 FgeOffscreen fbo( size, size, false );
 
@@ -731,7 +731,10 @@ void MainCanvas::render()
 				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
-                fbo.getTexObject( 1 )->saveImageToPNG( SceneManager::getInstance()->getScreenshotName().mb_str(), SceneManager::getInstance()->isSaveTransparency(), SceneManager::getInstance()->isInvertTransparency() );
+                fbo.getTexObject( 1 )->saveImageToPNG( 
+                    SceneManager::getInstance()->getScreenshotName().mb_str(), 
+                    SceneManager::getInstance()->isScreenshotTransparencySaved(), 
+                    SceneManager::getInstance()->isScreenshotTransparencyInverted() );
                   
                 fbo.deactivate();
                 SceneManager::getInstance()->setScreenshotScheduled( false );

@@ -1765,54 +1765,54 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-void MainFrame::onSaveTransparency( wxCommandEvent& WXUNUSED(event) )
+void MainFrame::onScreenshotTransparencySaved( wxCommandEvent& WXUNUSED(event) )
 {
-    SceneManager::getInstance()->toggleSaveTransparency();
+    SceneManager::getInstance()->toggleScreenshotTransparencySaved();
 }
 
-void MainFrame::onInvertTransparency( wxCommandEvent& WXUNUSED(event) )
+void MainFrame::onScreenshotTransparencyInverted( wxCommandEvent& WXUNUSED(event) )
 {
-    SceneManager::getInstance()->toggleInvertTransparency();
+    SceneManager::getInstance()->toggleScreenshotTransparencyInverted();
 }
 
-void MainFrame::onResolution2048( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotResolution2048( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setResolution(2048);
+    SceneManager::getInstance()->setScreenshotResolution(2048);
 }
 
-void MainFrame::onResolution4096( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotResolution4096( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setResolution(4096);
+    SceneManager::getInstance()->setScreenshotResolution(4096);
 }
 
-void MainFrame::onResolution8192( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotResolution8192( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setResolution(8192);
+    SceneManager::getInstance()->setScreenshotResolution(8192);
 }
 
-void MainFrame::onResolution16384( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotResolution16384( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setResolution(16384);
+    SceneManager::getInstance()->setScreenshotResolution(16384);
 }
 
-void MainFrame::onLineWidth1( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotLineWidth1( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setLineWidth(1);
+    SceneManager::getInstance()->setScreenshotLineWidth(1);
 }
 
-void MainFrame::onLineWidth2( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotLineWidth2( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setLineWidth(2);
+    SceneManager::getInstance()->setScreenshotLineWidth(2);
 }
 
-void MainFrame::onLineWidth4( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotLineWidth4( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setLineWidth(4);
+    SceneManager::getInstance()->setScreenshotLineWidth(4);
 }
 
-void MainFrame::onLineWidth8( wxCommandEvent& evt )
+void MainFrame::onSetScreenshotLineWidth8( wxCommandEvent& evt )
 {
-    SceneManager::getInstance()->setLineWidth(8);
+    SceneManager::getInstance()->setScreenshotLineWidth(8);
 }
 
 void MainFrame::screenshot( const wxString &path, const wxString &filename )
