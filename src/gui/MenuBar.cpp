@@ -29,6 +29,31 @@ MenuBar::MenuBar()
     m_itemNewAnatomyByte = m_menuNewAnatomy->Append(wxID_ANY, wxT("New White"));
     m_itemNewAnatomyRGB = m_menuNewAnatomy->Append(wxID_ANY, wxT("New RGB"));
     m_menuFile->AppendSubMenu(m_menuNewAnatomy, wxT("New Empty Anatomy"));
+    m_menuFile->AppendSeparator();
+#if !_USE_LIGHT_GUI
+    m_menuScreenshot = new wxMenu();
+        m_itemScreenshot = m_menuScreenshot->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
+        m_menuScreenshotResolution = new wxMenu();
+            m_itemScreenshotResolution2048 = m_menuScreenshotResolution->AppendRadioItem(wxID_ANY, wxT("2048x2048"));
+            m_itemScreenshotResolution4096 = m_menuScreenshotResolution->AppendRadioItem(wxID_ANY, wxT("4096x4096"));
+            m_itemScreenshotResolution8192 = m_menuScreenshotResolution->AppendRadioItem(wxID_ANY, wxT("8192x8192"));
+            m_itemScreenshotResolution16384= m_menuScreenshotResolution->AppendRadioItem(wxID_ANY, wxT("16384x16384"));
+            m_menuScreenshot->AppendSubMenu(m_menuScreenshotResolution, wxT("Resolution"));
+        m_menuScreenshotLineWidth = new wxMenu();
+            m_itemScreenshotLineWidth1 = m_menuScreenshotLineWidth->AppendRadioItem(wxID_ANY, wxT("1"));
+            m_itemScreenshotLineWidth2 = m_menuScreenshotLineWidth->AppendRadioItem(wxID_ANY, wxT("2"));
+            m_itemScreenshotLineWidth4 = m_menuScreenshotLineWidth->AppendRadioItem(wxID_ANY, wxT("4"));
+            m_itemScreenshotLineWidth8 = m_menuScreenshotLineWidth->AppendRadioItem(wxID_ANY, wxT("8"));            
+            m_menuScreenshot->AppendSubMenu(m_menuScreenshotLineWidth, wxT("Line width"));
+        m_itemScreenshotTransparencySaved = m_menuScreenshot->AppendCheckItem(wxID_ANY, wxT("Save Transparency"));
+        m_itemScreenshotTransparencyInverted = m_menuScreenshot->AppendCheckItem(wxID_ANY, wxT("Invert Transparency"));
+
+        m_menuFile->AppendSubMenu(m_menuScreenshot, wxT("Screen Shot"));
+#else
+    m_itemScreenShot = m_menuFile->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
+#endif
+
+
     m_itemSaveSCN = m_menuFile->Append(wxID_ANY, wxT("Save Current Scene\tCtrl-S"));
     m_itemSaveSelectedFibers = m_menuFile->Append(wxID_ANY, wxT("Save Selected Fibers"));
     m_itemSaveSelectedSurface = m_menuFile->Append(wxID_ANY, wxT("Save Selected Surface"));
@@ -142,29 +167,6 @@ MenuBar::MenuBar()
     m_menuHelp = new wxMenu();
     m_itemKeyboardShortcuts = m_menuHelp->Append(wxID_ANY, wxT("Keyboard Shortcut"));
 
-#if !_USE_LIGHT_GUI
-    m_menuScreenShot = new wxMenu();
-        m_itemScreenShot = m_menuScreenShot->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
-        m_menuResolution = new wxMenu();
-            m_itemResolution2048 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("2048x2048"));
-            m_itemResolution4096 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("4096x4096"));
-            m_itemResolution8192 = m_menuResolution->AppendRadioItem(wxID_ANY, wxT("8192x8192"));
-            m_itemResolution16384= m_menuResolution->AppendRadioItem(wxID_ANY, wxT("16384x16384"));
-            m_menuScreenShot->AppendSubMenu(m_menuResolution, wxT("Resolution"));
-        m_menuLineWidth = new wxMenu();
-            m_itemLineWidth1 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("1"));
-            m_itemLineWidth2 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("2"));
-            m_itemLineWidth4 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("4"));
-            m_itemLineWidth8 = m_menuLineWidth->AppendRadioItem(wxID_ANY, wxT("8"));            
-            m_menuScreenShot->AppendSubMenu(m_menuLineWidth, wxT("Line width"));
-        m_itemSaveTransparency = m_menuScreenShot->AppendCheckItem(wxID_ANY, wxT("Save Transparency"));
-        m_itemInvertTransparency = m_menuScreenShot->AppendCheckItem(wxID_ANY, wxT("Invert Transparency"));
-
-        m_menuHelp->AppendSubMenu(m_menuScreenShot, wxT("Screen Shot"));
-#else
-    m_itemScreenShot = m_menuHelp->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
-#endif
-
     m_itemWarningsInfo = m_menuHelp->Append(wxID_ANY, wxT("Warnings Informations"));
     m_menuHelp->AppendSeparator();
     m_itemAbout = m_menuHelp->Append(wxID_ABOUT, wxT("About"));
@@ -275,18 +277,18 @@ void MenuBar::initMenuBar( MainFrame *mf )
     mf->Connect(m_itemAbout->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onAbout));
     mf->Connect(m_itemKeyboardShortcuts->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onShortcuts));
     
-    mf->Connect(m_itemScreenShot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
+    mf->Connect(m_itemScreenshot->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshot));
 #if !_USE_LIGHT_GUI     
-    mf->Connect(m_itemSaveTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshotTransparencySaved));
-    mf->Connect(m_itemInvertTransparency->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshotTransparencyInverted));
-    mf->Connect(m_itemResolution2048->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution2048));
-    mf->Connect(m_itemResolution4096->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution4096));
-    mf->Connect(m_itemResolution8192->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution8192));
-    mf->Connect(m_itemResolution16384->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution16384));
-    mf->Connect(m_itemLineWidth1->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth1));
-    mf->Connect(m_itemLineWidth2->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth2));
-    mf->Connect(m_itemLineWidth4->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth4));
-    mf->Connect(m_itemLineWidth8->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth8));
+    mf->Connect(m_itemScreenshotTransparencySaved->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshotTransparencySaved));
+    mf->Connect(m_itemScreenshotTransparencyInverted->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onScreenshotTransparencyInverted));
+    mf->Connect(m_itemScreenshotResolution2048->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution2048));
+    mf->Connect(m_itemScreenshotResolution4096->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution4096));
+    mf->Connect(m_itemScreenshotResolution8192->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution8192));
+    mf->Connect(m_itemScreenshotResolution16384->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotResolution16384));
+    mf->Connect(m_itemScreenshotLineWidth1->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth1));
+    mf->Connect(m_itemScreenshotLineWidth2->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth2));
+    mf->Connect(m_itemScreenshotLineWidth4->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth4));
+    mf->Connect(m_itemScreenshotLineWidth8->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSetScreenshotLineWidth8));
 #endif    
 
     mf->Connect(m_itemWarningsInfo->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onWarningsInformations));
@@ -398,7 +400,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
                                    mf->canUseColorPicker() &&
                                    DRAWMODE_PEN == mf->getDrawMode() );
 #if !_USE_LIGHT_GUI
-    m_itemSaveTransparency->Check(SceneManager::getInstance()->isScreenshotTransparencySaved());
-    m_itemInvertTransparency->Check(SceneManager::getInstance()->isScreenshotTransparencyInverted());
+    m_itemScreenshotTransparencySaved->Check(SceneManager::getInstance()->isScreenshotTransparencySaved());
+    m_itemScreenshotTransparencyInverted->Check(SceneManager::getInstance()->isScreenshotTransparencyInverted());
 #endif
 }
