@@ -50,7 +50,7 @@ MenuBar::MenuBar()
 
         m_menuFile->AppendSubMenu(m_menuScreenshot, wxT("Screen Shot"));
 #else
-    m_itemScreenShot = m_menuFile->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
+    m_itemScreenshot = m_menuFile->Append(wxID_ANY, wxT("ScreenShot\tCtrl-P"));
 #endif
 
 
