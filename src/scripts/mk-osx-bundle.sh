@@ -8,17 +8,19 @@
 #
 # $1 Path to the application executable.
 # $2 Path to the custom wxWidgets compilation, should point to the build directory
+# $3 Path to the Glew lib (if installed with MacPorts, in /opt/local/lib/libGLEW.*)
+# $4 Be verbose. 1 to set to true. Defaults to false.
 
 echo
 
-if [[ $# < 2 ]]
+if [[ $# < 3 ]]
 then
     echo "Missing some arguments."
     return 1
 fi
 
 verbose=false
-if [[ $# == 3 && $3 == "1" ]]
+if [[ $# == 4 && $4 == "1" ]]
 then
     verbose=true
     echo "Verbose"
@@ -43,13 +45,17 @@ echo "Copying $1 to the app directory..."
 cp $1 $EXEC_DIR/$EXE
 
 WXWIDGETSROOT=$2
+GLEWPATH=$3
+GLEWLIB=$(basename $GLEWPATH)
 
 # copy additional libraries
-EXTLIBS=("${WXWIDGETSROOT}/lib/libwx_base_carbon-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_base_carbon_net-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_base_carbon_xml-2.8.0.dylib" 
-         "${WXWIDGETSROOT}/lib/libwx_mac_adv-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_mac_core-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_mac_gl-2.8.0.dylib" "/opt/local/lib/libGLEW.1.6.0.dylib")
+EXTLIBS=("${WXWIDGETSROOT}/lib/libwx_base_carbon-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_base_carbon_net-2.8.0.dylib" 
+         "${WXWIDGETSROOT}/lib/libwx_base_carbon_xml-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_mac_adv-2.8.0.dylib" 
+         "${WXWIDGETSROOT}/lib/libwx_mac_core-2.8.0.dylib" "${WXWIDGETSROOT}/lib/libwx_mac_gl-2.8.0.dylib"
+         "${GLEWPATH}")
 
-EXTLIBN=("libwx_base_carbon-2.8.0.dylib" "libwx_base_carbon_net-2.8.0.dylib" "libwx_base_carbon_xml-2.8.0.dylib" "libwx_mac_adv-2.8.0.dylib" "libwx_mac_core-2.8.0.dylib" 
-        "libwx_mac_gl-2.8.0.dylib" "libGLEW.1.6.0.dylib")
+EXTLIBN=("libwx_base_carbon-2.8.0.dylib" "libwx_base_carbon_net-2.8.0.dylib" "libwx_base_carbon_xml-2.8.0.dylib" 
+         "libwx_mac_adv-2.8.0.dylib" "libwx_mac_core-2.8.0.dylib" "libwx_mac_gl-2.8.0.dylib" "${GLEWLIB}")
 
 echo "Copying external libraries to the Frameworks folder..."
     
