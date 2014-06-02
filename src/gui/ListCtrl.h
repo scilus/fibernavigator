@@ -59,7 +59,7 @@ private:
 
     long FindFiberGroupPosition();
     void Swap( long i, long j );
-    void Update( long index );
+    void update_internal( long index );
 
 private:
     int m_column;

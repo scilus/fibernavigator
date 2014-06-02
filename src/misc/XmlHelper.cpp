@@ -16,7 +16,7 @@ wxXmlNode * getXmlNodeByName( const wxString name, wxXmlNode * pNode )
 
 //////////////////////////////////////////////////////////////////////////
 
-wxXmlProperty * getXmlPropertyByName( const wxString name, wxXmlNode * pNode )
+/*wxXmlProperty * getXmlPropertyByName( const wxString name, wxXmlNode * pNode )
 {
     assert( NULL != pNode );
 
@@ -26,4 +26,4 @@ wxXmlProperty * getXmlPropertyByName( const wxString name, wxXmlNode * pNode )
         pProp = pProp->GetNext();
     }
     return pProp;
-}
+}*/

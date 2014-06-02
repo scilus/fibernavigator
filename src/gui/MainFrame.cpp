@@ -384,7 +384,7 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
     wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxFD_OPEN | wxFD_MULTIPLE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
     if( dialog.ShowModal() == wxID_OK )
@@ -417,7 +417,7 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*" );
     wxString defaultDir       = wxEmptyString;
     wxString defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxOPEN | wxFD_MULTIPLE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxFD_OPEN | wxFD_MULTIPLE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
     if( dialog.ShowModal() == wxID_OK )
@@ -507,7 +507,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard        = wxT( "Scene files (*.scn)|*.scn|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
@@ -545,7 +545,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
@@ -607,7 +607,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
 
@@ -625,7 +625,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
 
@@ -676,7 +676,7 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
@@ -1756,7 +1756,7 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     wxString l_wildcard        = wxT( "PPM files (*.ppm)|*.ppm|*.*|*.*" );
     wxString l_defaultDir      = wxEmptyString;
     wxString l_defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxSAVE );
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( SceneManager::getInstance()->getScreenshotPath() );
     if( dialog.ShowModal() == wxID_OK )
