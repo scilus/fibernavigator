@@ -5,9 +5,6 @@
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "../main.h"
-#include "../Logger.h"
-
-#include <sstream>
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/ODFs.h"
@@ -21,7 +18,6 @@
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 #include <wx/treectrl.h>
-#include <wx/wxchar.h>
 
 
 IMPLEMENT_DYNAMIC_CLASS( TrackingWindow, wxScrolledWindow )
