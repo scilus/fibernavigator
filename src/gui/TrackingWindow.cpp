@@ -70,7 +70,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pTxtAngleBox = new wxTextCtrl( this, wxID_ANY, wxT("60.0 "), wxPoint(190,90), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     m_pTextStep = new wxStaticText( this, wxID_ANY, wxT("Step"), wxPoint(0,120), wxSize(60, -1), wxALIGN_CENTER );
-    m_pSliderStep = new MySlider( this, wxID_ANY, 0, 5, 20, wxPoint(60,120), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderStep = new MySlider( this, wxID_ANY, 0, 1, 20, wxPoint(60,120), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderStep->SetValue( 10 );
     Connect( m_pSliderStep->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderStepMoved) );
     m_pTxtStepBox = new wxTextCtrl( this, wxID_ANY, wxT("1.0 mm"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -192,7 +192,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	m_pTrackingSizer->Add( pBoxRow6, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     m_pTextStep = new wxStaticText( this, wxID_ANY, wxT("Step"), wxPoint(0,180), wxSize(70, -1), wxALIGN_CENTER );
-    m_pSliderStep = new MySlider( this, wxID_ANY, 0, 5, 20, wxPoint(60,180), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderStep = new MySlider( this, wxID_ANY, 0, 1, 20, wxPoint(60,180), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderStep->SetValue( 10 );
     Connect( m_pSliderStep->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderStepMoved) );
     m_pTxtStepBox = new wxTextCtrl( this, wxID_ANY, wxT("1.0 mm"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -407,7 +407,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
 
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-          SetSelectionBoxSize(2, 2, 2);
+          CreateSelectionBox(2, 2, 2);
         }
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
@@ -435,7 +435,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
 
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-          SetSelectionBoxSize(2, 2, 2);
+          CreateSelectionBox(2, 2, 2);
         }
         if(m_pTextFA->IsEnabled())
         {
@@ -445,7 +445,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-const void TrackingWindow::SetSelectionBoxSize(
+const void TrackingWindow::CreateSelectionBox(
   const float x, const float y, const float z)
 {
   m_pMainFrame->createNewSelectionObject( BOX_TYPE );

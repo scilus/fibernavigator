@@ -62,7 +62,7 @@ public:
     wxTextCtrl          *m_pTxtTotalSeedNbBox;
 
 protected:
-  const void SetSelectionBoxSize(
+  const void CreateSelectionBox(
     const float x, const float y, const float z);
 
 private:
