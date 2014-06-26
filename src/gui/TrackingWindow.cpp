@@ -5,6 +5,9 @@
 #include "SelectionBox.h"
 #include "SelectionEllipsoid.h"
 #include "../main.h"
+#include "../Logger.h"
+
+#include <sstream>
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/ODFs.h"
@@ -18,6 +21,7 @@
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 #include <wx/treectrl.h>
+#include <wx/wxchar.h>
 
 
 IMPLEMENT_DYNAMIC_CLASS( TrackingWindow, wxScrolledWindow )
@@ -58,7 +62,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pSliderFA->SetValue( 10 );
     Connect( m_pSliderFA->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderFAMoved) );
     m_pTxtFABox = new wxTextCtrl( this, wxID_ANY, wxT("0.10"), wxPoint(190,60), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-    
+
     m_pTextAngle = new wxStaticText( this, wxID_ANY, wxT("Max angle"), wxPoint(0,90), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderAngle = new MySlider( this, wxID_ANY, 0, 1, 90, wxPoint(60,90), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderAngle->SetValue( 60 );
@@ -274,7 +278,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxRowAnim1->Add( m_pLineSeparator, 0, wxALIGN_RIGHT | wxALL, 1 );
 	pBoxRowAnim1->Add( animationZone,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxRowAnim1, 0, wxFIXED_MINSIZE | wxALL, 2 );
-    
+
     m_bmpPlay = wxImage(MyApp::iconsPath+ wxT("play.png"), wxBITMAP_TYPE_PNG);
     m_bmpPause = wxImage(MyApp::iconsPath+ wxT("pause.png"), wxBITMAP_TYPE_PNG);
 
@@ -389,7 +393,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
     //Tensor data
     long item = m_pMainFrame->getCurrentListIndex();
     Tensors* pTensorInfo = (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
-	
+
 	if( pTensorInfo != NULL && TENSORS == pTensorInfo->getType() && 6 == pTensorInfo->getBands()  )
     {
 		//Hide tensor data
@@ -399,19 +403,11 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectFile->SetLabel( pTensorInfo->getName() );
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
-        //Set Step
-        float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
-            
-            SelectionObject* pNewSelObj(m_pMainFrame->getCurrentSelectionObject());
-            
-            Vector boxSize(2/step,2/step,2/step);
-            
-            pNewSelObj->setSize(boxSize);
+          SetSelectionBoxSize(2, 2, 2);
         }
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
         m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( true );
@@ -423,7 +419,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
     //HARDI data
     long item = m_pMainFrame->getCurrentListIndex();
     Maximas* pMaximasInfo = (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) );
-	
+
 	if( pMaximasInfo != NULL && pMaximasInfo->getType() == MAXIMAS )
     {
 		//Hide hardi data
@@ -434,33 +430,37 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
         m_pBtnSelectFile->SetLabel( pMaximasInfo->getName() );
         m_pBtnSelectFile->SetBackgroundColour(wxNullColour);
 
-        //Set Step
-        float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setIsHardi( true );
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
-        
+
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
-            
-            SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();
-            
-            Vector boxSize(2/step,2/step,2/step);
-            pNewSelObj->setSize(boxSize);
+          SetSelectionBoxSize(2, 2, 2);
         }
         if(m_pTextFA->IsEnabled())
         {
             m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
-            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );   
+            m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
         }
     }
+}
+
+const void TrackingWindow::SetSelectionBoxSize(
+  const float x, const float y, const float z)
+{
+  m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+
+  SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();
+
+  Vector boxSize(x, y, z);
+  pNewSelObj->setSize(boxSize);
 }
 
 void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
 {
 	//Select surface for seeding
     long item = m_pMainFrame->getCurrentListIndex();
-	DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+	DatasetInfo* pMesh = DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item ));
 
 	if( pMesh != NULL && pMesh->getType() == ISO_SURFACE )
     {
@@ -482,9 +482,9 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
         else
         {
             float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
-            m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
+            m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
             m_pToggleShell->SetLabel(wxT( "Shell seed ON"));
-        } 
+        }
 	}
 }
 
@@ -492,7 +492,7 @@ void TrackingWindow::OnSelectSeedMap( wxCommandEvent& WXUNUSED(event) )
 {
 	//Select map for threshold seeding
     long item = m_pMainFrame->getCurrentListIndex();
-	Anatomy* pSeedMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+	Anatomy* pSeedMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item ));
 
 	if( pSeedMap != NULL && pSeedMap->getBands() == 1 )
     {
@@ -519,9 +519,9 @@ void TrackingWindow::OnSelectSeedMap( wxCommandEvent& WXUNUSED(event) )
 			m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), 1.0f) );
 			m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 1 );
             float seedMapNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getSeedMapNb();
-            m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), seedMapNb) ); 
+            m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), seedMapNb) );
             m_pToggleSeedMap->SetLabel(wxT( "Seed map ON"));
-        } 
+        }
 	}
 }
 
@@ -531,7 +531,7 @@ void TrackingWindow::OnMapSeeding( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setRTTDirty( true );
     float sliderValue = m_pSliderAxisSeedNb->GetValue();
 	m_pBtnStart->Enable( true );
-    
+
 	//Set nb of seeds depending on the seeding mode
 	if( !RTTrackingHelper::getInstance()->isSeedMap() )
     {
@@ -547,7 +547,7 @@ void TrackingWindow::OnMapSeeding( wxCommandEvent& WXUNUSED(event) )
 		m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), 1.0f) );
 		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 1 );
         float seedMapNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getSeedMapNb();
-        m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), seedMapNb) ); 
+        m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), seedMapNb) );
         m_pToggleSeedMap->SetLabel(wxT( "Seed map ON"));
     }
 }
@@ -556,7 +556,7 @@ void TrackingWindow::OnSelectMask( wxCommandEvent& WXUNUSED(event) )
 {
 	//Select map for threshold seeding
     long item = m_pMainFrame->getCurrentListIndex();
-	Anatomy* pMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+	Anatomy* pMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item ));
 
 	if( pMap != NULL && pMap->getBands() == 1 )
     {
@@ -580,7 +580,7 @@ void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setRTTDirty( true );
     float sliderValue = m_pSliderAxisSeedNb->GetValue();
 	m_pBtnStart->Enable( true );
-    
+
 	//Set nb of seeds depending on the seeding mode
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() )
     {
@@ -590,7 +590,7 @@ void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
     else
     {
         float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
-        m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
+        m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
         m_pToggleShell->SetLabel(wxT( "Shell seed ON"));
     }
 }

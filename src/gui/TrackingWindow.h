@@ -61,6 +61,9 @@ public:
     wxToggleButton      *m_pBtnStart;
     wxTextCtrl          *m_pTxtTotalSeedNbBox;
 
+protected:
+  const void SetSelectionBoxSize(
+    const float x, const float y, const float z);
 
 private:
     MainFrame           *m_pMainFrame;
@@ -98,7 +101,7 @@ private:
     wxBitmapButton      *m_pBtnStop;
     wxImage             m_bmpPause;
     wxImage             m_bmpPlay;
-    
+
 
 
 private:
