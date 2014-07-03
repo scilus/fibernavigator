@@ -111,7 +111,7 @@ Fibers::Fibers()
 Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
-    
+
     SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getName() );
 
     if( SceneManager::getInstance()->isUsingVBO() )
@@ -168,7 +168,7 @@ bool Fibers::load( const wxString &filename )
 
     /* OcTree points classification */
     m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
-    
+
     return res;
 }
 
@@ -200,7 +200,7 @@ bool Fibers::loadTRK( const wxString &filename )
     //Read file header. [1000 bytes]
     wxUint8 *pBuffer = new wxUint8[1000];
     dataFile.Read( pBuffer, ( size_t )1000 );
-    
+
     //ID String for track file. The first 5 characters must match "TRACK". [6 bytes]
     char idString[6];
     memcpy( idString, &pBuffer[0], 6 );
@@ -208,7 +208,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ss << "Type: " << idString;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
 
-    if( strncmp( idString, "TRACK", 5 ) != 0 ) 
+    if( strncmp( idString, "TRACK", 5 ) != 0 )
     {
         return false;
     }
@@ -225,7 +225,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ss.str( "" );
     ss << "Dim: " << dim[0] << "x" << dim[1] << "x" << dim[2];
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Voxel size of the image volume. [12 bytes]
     float voxelSize[3];
 
@@ -251,7 +251,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ss.str( "" );
     ss << "Origin: (" << origin[0] << "," << origin[1] << "," << origin[2] << ")";
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Number of scalars saved at each track point. [2 bytes]
     wxUint16 nbScalars;
     memcpy( cbi.b, &pBuffer[36], 2 );
@@ -259,7 +259,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ss.str( "" );
     ss << "Nb. scalars: " << nbScalars;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Name of each scalar. (20 characters max each, max 10 names) [200 bytes]
     char scalarNames[10][20];
     memcpy( scalarNames, &pBuffer[38], 200 );
@@ -278,7 +278,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ss.str( "" );
     ss << "Nb. properties: " << nbProperties;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Name of each property. (20 characters max each, max 10 names) [200 bytes]
     char propertyNames[10][20];
     memcpy( propertyNames, &pBuffer[240], 200 );
@@ -317,14 +317,14 @@ bool Fibers::loadTRK( const wxString &filename )
     ss.str( "" );
     ss << "Voxel order: " << voxelOrder;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Paddings [4 bytes]
     char pad2[4];
     memcpy( pad2, &pBuffer[952], 4 );
     ss.str( "" );
     ss << "Pad #2: " << pad2;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Image orientation of the original image. As defined in the DICOM header. [24 bytes]
     float imageOrientationPatient[6];
     ss.str( "" );
@@ -338,14 +338,14 @@ bool Fibers::loadTRK( const wxString &filename )
     }
 
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Paddings. [2 bytes]
     char pad1[2];
     memcpy( pad1, &pBuffer[980], 2 );
     ss.str( "" );
     ss << "Pad #1: " << pad1;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Inversion/rotation flags used to generate this track file. [1 byte]
     bool invertX = pBuffer[982] > 0;
     ss.str( "" );
@@ -397,7 +397,7 @@ bool Fibers::loadTRK( const wxString &filename )
     ss.str( "" );
     ss << "Version: " << version;
     Logger::getInstance()->print( wxString( ss.str().c_str(), wxConvUTF8 ), LOGLEVEL_MESSAGE );
-    
+
     //Size of the header. Used to determine byte swap. Should be 1000. [4 bytes]
     wxUint32 hdrSize;
     memcpy( cbi32.b, &pBuffer[996], 4 );
@@ -432,7 +432,7 @@ bool Fibers::loadTRK( const wxString &filename )
         wxUint32 nbPoints;
         dataFile.Read( cbi32.b, ( size_t )4 );
         nbPoints = cbi32.i;
-        
+
         //Read data of one track.
         size_t ptsSize = 3 + nbScalars;
         size_t tractSize = 4 * ( nbPoints * ( ptsSize ) + nbProperties );
@@ -463,7 +463,7 @@ bool Fibers::loadTRK( const wxString &filename )
         }
 
         //TODO: incorporate properties in the navigator.
-//         for( unsigned int j = 0; j != nbProperties; ++j ) 
+//         for( unsigned int j = 0; j != nbProperties; ++j )
 //         {}
 
         m_countPoints += curLine.size() / 3;
@@ -480,7 +480,7 @@ bool Fibers::loadTRK( const wxString &filename )
     }
 
     dataFile.Close();
-    
+
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
@@ -528,7 +528,7 @@ bool Fibers::loadTRK( const wxString &filename )
         vector< float >::iterator it2;
 
         for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
-        {   
+        {
             if (colors.size() > 0)
             {
                 m_colorArray[pos] = colors[pos] / 255.;
@@ -735,7 +735,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
 
         if( readLine.find( "count" ) != std::string::npos && !countFieldFound )
         {
-            sscanf( lineBuffer, "count: %i", &m_countLines );
+            sscanf( lineBuffer, "count: %d", &m_countLines );
             countFieldFound = true;
         }
     }
@@ -757,7 +757,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
     wxUint8 *pBuffer = new wxUint8[nSize];
     dataFile.Read( pBuffer, nSize );
     dataFile.Close();
-    
+
     Logger::getInstance()->print( wxT( "Reading fibers" ), LOGLEVEL_DEBUG );
     pc = 0;
     m_countPoints = 0; // number of points
@@ -835,7 +835,7 @@ bool Fibers::loadMRtrix( const wxString &filename )
 
     delete[] pBuffer;
     pBuffer = NULL;
-    
+
     ////
     //POST PROCESS: set all the data in the right format for the navigator
     ////
@@ -877,15 +877,15 @@ bool Fibers::loadMRtrix( const wxString &filename )
             m_pointArray[pos++] = *it2;
         }
     }
-    
+
     // The MrTrix fibers are defined in the same geometric reference
-    // as the anatomical file. That is, the fibers coordinates are related to 
+    // as the anatomical file. That is, the fibers coordinates are related to
     // the anatomy in world space. The transformation from local to world space
     // for the anatomy is encoded in the m_dh->m_niftiTransform member.
-    // Since we do not consider this tranform when loading the anatomy, we must 
-    // bring back the fibers in the same reference, using the inverse of the 
+    // Since we do not consider this tranform when loading the anatomy, we must
+    // bring back the fibers in the same reference, using the inverse of the
     // local to world transformation. A further problem arises when loading an
-    // anatomy that has voxels with dimensions differing from 1x1x1. The 
+    // anatomy that has voxels with dimensions differing from 1x1x1. The
     // scaling factor is encoded in the transformation matrix, but we do not,
     // for the moment, use this scaling. Therefore, we must remove it from the
     // the transformation matrix before computing its inverse.
@@ -899,17 +899,17 @@ bool Fibers::loadMRtrix( const wxString &filename )
     {
         FMatrix rotMat( 3, 3 );
         localToWorld.getSubMatrix( rotMat, 0, 0 );
-        
+
         FMatrix scaleInversion( 3, 3 );
         scaleInversion( 0, 0 ) = 1.0 / voxelX;
         scaleInversion( 1, 1 ) = 1.0 / voxelY;
         scaleInversion( 2, 2 ) = 1.0 / voxelZ;
-        
+
         rotMat = scaleInversion * rotMat;
-        
+
         localToWorld.setSubMatrix( 0, 0, rotMat );
     }
-       
+
     FMatrix invertedTransform( 4, 4 );
     invertedTransform = invert( localToWorld );
 
@@ -920,13 +920,13 @@ bool Fibers::loadMRtrix( const wxString &filename )
         curPoint( 1, 0 ) = m_pointArray[i + 1];
         curPoint( 2, 0 ) = m_pointArray[i + 2];
         curPoint( 3, 0 ) = 1;
-        
+
         FMatrix invertedPoint = invertedTransform * curPoint;
-        
+
         m_pointArray[i] = invertedPoint( 0, 0 );
         m_pointArray[i + 1] = invertedPoint( 1, 0 );
         m_pointArray[i + 2] = invertedPoint( 2, 0 );
-        
+
         i += 2;
     }
 
@@ -1035,7 +1035,7 @@ bool Fibers::loadPTK( const wxString &filename )
     float voxelX  = DatasetManager::getInstance()->getVoxelX();
     float voxelY  = DatasetManager::getInstance()->getVoxelY();
     float voxelZ  = DatasetManager::getInstance()->getVoxelZ();
-    
+
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
         m_pointArray[i] = columns * voxelX - m_pointArray[i];
@@ -1048,10 +1048,10 @@ bool Fibers::loadPTK( const wxString &filename )
     calculateLinePointers();
     createColorArray( false );
     Logger::getInstance()->print( wxT( "Read all" ), LOGLEVEL_MESSAGE );
-    
+
     delete[] pBuffer;
     pBuffer = NULL;
-    
+
     m_type = FIBERS;
     m_fullPath = filename;
 #ifdef __WXMSW__
@@ -1079,7 +1079,7 @@ bool Fibers::loadVTK( const wxString &filename )
 
     wxUint8 *pBuffer = new wxUint8[255];
     dataFile.Read( pBuffer, ( size_t )255 );
-    
+
     int pointOffset         = 0;
     int lineOffset          = 0;
     int pointColorOffset    = 0;
@@ -1279,7 +1279,7 @@ bool Fibers::loadVTK( const wxString &filename )
     Logger::getInstance()->print( wxString::Format( wxT( "Loading %d points and %d lines" ), countPoints, countLines ), LOGLEVEL_MESSAGE );
     m_countLines        = countLines;
     m_countPoints       = countPoints;
-    
+
     m_linePointers.resize( m_countLines + 1 );
     m_linePointers[countLines] = countPoints;
     m_reverse.resize( countPoints );
@@ -1288,7 +1288,7 @@ bool Fibers::loadVTK( const wxString &filename )
     m_pointArray.resize( countPoints * 3 );
     m_lineArray.resize( lengthLines * 4 );
     m_colorArray.resize( countPoints * 3 );
-    
+
     dataFile.Seek( pointOffset );
     dataFile.Read( &m_pointArray[0], ( size_t )countPoints * 12 );
     dataFile.Seek( lineOffset );
@@ -1332,8 +1332,8 @@ bool Fibers::loadDmri( const wxString &filename )
     FILE *pFile;
     pFile = fopen( filename.mb_str(), "r" );
 
-    if( pFile == NULL ) 
-    {   
+    if( pFile == NULL )
+    {
         return false;
     }
 
@@ -1343,7 +1343,7 @@ bool Fibers::loadDmri( const wxString &filename )
     char *pS4 = new char[10];
     float f1, f2, f3, f4, f5;
     int res;
-    
+
     // the header
     res = fscanf( pFile, "%f %s", &f1, pS1 );
     res = fscanf( pFile, "%f %s %s %s %s", &f1, pS1, pS2, pS3, pS4 );
@@ -1353,7 +1353,7 @@ bool Fibers::loadDmri( const wxString &filename )
     res = fscanf( pFile, "%f %f %f %f %f", &f1, &f2, &f3, &f4, &f5 );
     res = fscanf( pFile, "%s %s", pS1, pS2 );
     m_countLines = std::atof(pS1);
-    
+
     vector< vector< float > > lines;
     m_countPoints = 0;
     float back, front;
@@ -1369,7 +1369,7 @@ bool Fibers::loadDmri( const wxString &filename )
         ss << pS2;
         ss >> front;
         ss.clear();
-        
+
         int nbpoints = back + front;
 
         if( back != 0 && front != 0 )
@@ -1386,8 +1386,8 @@ bool Fibers::loadDmri( const wxString &filename )
             for( int j = back - 1; j >= 0; j-- )
             {
                 res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
-                
-              
+
+
                 ss << pS1;
                 ss >> f1;
                 ss.clear();
@@ -1395,11 +1395,11 @@ bool Fibers::loadDmri( const wxString &filename )
                 ss << pS2;
                 ss >> f2;
                 ss.clear();
-                
+
                 ss << pS3;
                 ss >> f3;
                 ss.clear();
-                
+
                 curLine[j * 3]  = f1;
                 curLine[j * 3 + 1] = f2;
                 curLine[j * 3 + 2] = f3;
@@ -1415,7 +1415,7 @@ bool Fibers::loadDmri( const wxString &filename )
             for( int j = back; j < nbpoints; j++ )
             {
                 res = fscanf( pFile, "%s %s %s %s", pS1, pS2, pS3, pS4 );
-                
+
                 ss << pS1;
                 ss >> f1;
                 ss.clear();
@@ -1423,11 +1423,11 @@ bool Fibers::loadDmri( const wxString &filename )
                 ss << pS2;
                 ss >> f2;
                 ss.clear();
-                
+
                 ss << pS3;
                 ss >> f3;
                 ss.clear();
-                
+
                 curLine[j * 3]  = f1;
                 curLine[j * 3 + 1] = f2;
                 curLine[j * 3 + 2] = f3;
@@ -1439,7 +1439,7 @@ bool Fibers::loadDmri( const wxString &filename )
     }
 
     fclose( pFile );
-    
+
     delete[] pS1;
     delete[] pS2;
     delete[] pS3;
@@ -1448,7 +1448,7 @@ bool Fibers::loadDmri( const wxString &filename )
     pS2 = NULL;
     pS3 = NULL;
     pS4 = NULL;
-    
+
     //set all the data in the right format for the navigator
     m_countLines = lines.size();
     m_pointArray.max_size();
@@ -1557,14 +1557,14 @@ void Fibers::loadTestFibers()
     int lengthLines   = 10; // The number of points each fiber will have.
     int pos = 0;
     m_countPoints       = m_countLines * lengthLines;
-    
+
     m_linePointers.resize( m_countLines + 1 );
     m_pointArray.resize( m_countPoints * 3 );
     m_linePointers[m_countLines] = m_countPoints;
     m_reverse.resize( m_countPoints );
     m_selected.resize( m_countLines, false );
     m_filtered.resize( m_countLines, false );
-    
+
     // Because you need to load an anatomy file first in order to load this fake set of fibers,
     // the points composing your fibers have to be between [0,159] in x, [0,199] in y and [0,159] in z.
     // This is for a straight line.
@@ -1598,7 +1598,7 @@ void Fibers::loadTestFibers()
     m_pointArray[pos++] = 60.0f;
     m_pointArray[pos++] = 190.0f;
     m_pointArray[pos++] = 60.0f;
-    
+
     // This is for a circle in 2D (Z never changes).
     float circleRadius = 10.0f;
     float offset       = 100.0f;
@@ -1638,7 +1638,7 @@ void Fibers::loadTestFibers()
     {
         m_linePointers[i] = i * lengthLines;
     }
-    
+
 
     int lineCounter = 0;
 
@@ -1767,14 +1767,14 @@ void Fibers::colorWithTorsion( float *pColorData )
                 progression = 0.5f;     // For every other points.
             }
 
-            Helper::getProgressionTorsion( 
+            Helper::getProgressionTorsion(
                     Vector( m_pointArray[index - 6], m_pointArray[index - 5], m_pointArray[index - 4] ),
                     Vector( m_pointArray[index - 3], m_pointArray[index - 2], m_pointArray[index - 1] ),
                     Vector( m_pointArray[index],     m_pointArray[index + 1], m_pointArray[index + 2] ),
                     Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
                     Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
                     progression, color );
-            
+
             // Lets apply a specific hard coded coloration for the torsion.
             float realColor;
 
@@ -1871,7 +1871,7 @@ void Fibers::colorWithCurvature( float *pColorData )
                     Vector( m_pointArray[index + 3], m_pointArray[index + 4], m_pointArray[index + 5] ),
                     Vector( m_pointArray[index + 6], m_pointArray[index + 7], m_pointArray[index + 8] ),
                     progression, color );
-            
+
             // Lets apply a specific hard coded coloration for the curvature.
             float realColor;
 
@@ -1914,11 +1914,11 @@ void Fibers::colorWithDistance( float *pColorData )
     {
         return;
     }
-    
+
     SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-    
+
     vector< SelectionObject* > simplifiedList;
-    
+
     for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
         if( selectionObjects[objIdx]->IsUsedForDistanceColoring() )
@@ -1986,11 +1986,11 @@ void Fibers::colorWithMinDistance( float *pColorData )
     {
         return;
     }
-    
+
     SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-    
+
     vector< SelectionObject* > simplifiedList;
-    
+
     for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx )
     {
         if( selectionObjects[objIdx]->IsUsedForDistanceColoring() )
@@ -2088,11 +2088,11 @@ void Fibers::colorWithConstantColor( float *pColorData )
     {
         return;
     }
-    
+
     float r = m_constantColor.Red() / 255.f;
     float g = m_constantColor.Green() / 255.f;
     float b = m_constantColor.Blue() / 255.f;
-    
+
     for( int ptColorIdx = 0; ptColorIdx < m_countPoints * 3; ptColorIdx += 3 )
     {
         pColorData[ptColorIdx] = r;
@@ -2127,7 +2127,7 @@ Anatomy* Fibers::generateFiberVolume()
     DatasetIndex index = DatasetManager::getInstance()->createAnatomy( RGB );
     Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
     pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
-    
+
     MyApp::frame->m_pListCtrl->InsertItem( index );
 
     MyApp::frame->refreshAllGLWidgets();
@@ -2145,7 +2145,7 @@ Anatomy* Fibers::generateFiberVolume()
         int y     = std::min( rows    - 1, std::max( 0, (int)( m_pointArray[i * 3 + 1] / voxelY ) ) ) ;
         int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) ) ;
         int index = x + y * columns + z * rows * columns;
-        
+
         ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3]     * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
         ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
@@ -2165,7 +2165,7 @@ void Fibers::getFibersInfoToSave( vector<float>& pointsToSave,  vector<int>& lin
     countLines = 0;
 
     float *pColorData( NULL );
-    
+
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
@@ -2461,7 +2461,7 @@ void Fibers::createColorArray( const bool colorsLoadedFromFile )
     m_normalArray.clear();
     m_normalArray.resize( m_countPoints * 3 );
     int   pc = 0;
-    
+
     float x1, x2, y1, y2, z1, z2 = 0.0f;
     float r, g, b, rr, gg, bb    = 0.0f;
     float lastX, lastY, lastZ          = 0.0f;
@@ -2497,7 +2497,7 @@ void Fibers::createColorArray( const bool colorsLoadedFromFile )
         r *= 1.0 / norm;
         g *= 1.0 / norm;
         b *= 1.0 / norm;
-        
+
         lastX = m_pointArray[pc]     + ( m_pointArray[pc]     - m_pointArray[pc + 3] );
         lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
         lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
@@ -2596,7 +2596,7 @@ void Fibers::resetColorArray()
         r *= 1.0 / norm;
         g *= 1.0 / norm;
         b *= 1.0 / norm;
-        
+
         lastX = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
         lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
         lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
@@ -2636,16 +2636,16 @@ void Fibers::setFiberColor( const int fiberIdx, const wxColour &col )
     {
         pColorData  = &m_colorArray[0];
     }
-    
+
     int curPointStart( getStartIndexForLine( fiberIdx ) * 3);
-    
+
     for( int i = 0; i < getPointsPerLine( fiberIdx ); ++i, curPointStart += 3 )
     {
         pColorData[curPointStart] = col.Red() / 255.0f;
         pColorData[curPointStart + 1] = col.Green() / 255.0f;
         pColorData[curPointStart + 2] = col.Blue() / 255.0f;
     }
-    
+
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
@@ -2655,9 +2655,9 @@ void Fibers::setFiberColor( const int fiberIdx, const wxColour &col )
 wxColour Fibers::getFiberPointColor( const int fiberIdx, const int ptIdx )
 {
     assert(fiberIdx < m_countLines );
-    
+
     float *pColorData( NULL );
-    
+
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
@@ -2667,19 +2667,19 @@ wxColour Fibers::getFiberPointColor( const int fiberIdx, const int ptIdx )
     {
         pColorData  = &m_colorArray[0];
     }
-    
+
     int curPointStart( getStartIndexForLine( fiberIdx ) * 3 + ptIdx * 3);
-    
+
     wxColour ptCol;
     ptCol.Set( static_cast<unsigned char>(pColorData[curPointStart] * 255.0f),
-               static_cast<unsigned char>(pColorData[curPointStart + 1] * 255.0f), 
+               static_cast<unsigned char>(pColorData[curPointStart + 1] * 255.0f),
                static_cast<unsigned char>(pColorData[curPointStart + 2] * 255.0f));
-    
+
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glUnmapBuffer( GL_ARRAY_BUFFER );
     }
-    
+
     return ptCol;
 }
 
@@ -2691,11 +2691,11 @@ void Fibers::resetLinesShown()
 void Fibers::updateLinesShown()
 {
     SelectionTree::SelectionObjectVector selectionObjects = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-    
+
     m_selected.assign( m_countLines, true );
 
     int activeCount( 0 );
-    
+
     for( unsigned int objIdx( 0 ); objIdx < selectionObjects.size(); ++objIdx)
     {
         if( selectionObjects[objIdx]->getIsActive() )
@@ -2703,14 +2703,14 @@ void Fibers::updateLinesShown()
             ++activeCount;
         }
     }
-    
+
     if( activeCount == 0 )
     {
         return;
     }
 
     m_selected = SceneManager::getInstance()->getSelectionTree().getSelectedFibers( this );
-    
+
     if( m_fibersInverted )
     {
         for( int k = 0; k < m_countLines; ++k )
@@ -2718,7 +2718,7 @@ void Fibers::updateLinesShown()
             m_selected[k] = !m_selected[k];
         }
     }
-    
+
     // TODO selection convex hull
     // This is to update the information display in the fiber grid info and the mean fiber
     /*if( boxWasUpdated && m_dh->m_lastSelectedObject != NULL )
@@ -2736,13 +2736,13 @@ void Fibers::initializeBuffer()
 
     m_isInitialized = true;
     bool isOK = true;
-    
+
     glGenBuffers( 3, m_bufferObjects );
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
     glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
 
     isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo points" ) );
-    
+
     if( isOK )
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
@@ -2967,7 +2967,7 @@ void Fibers::drawSortedLines()
     // Only sort those lines we see.
     unsigned int *pSnippletSort = NULL;
     unsigned int *pLineIds      = NULL;
-    
+
     int nbSnipplets = 0;
 
     // Estimate memory required for arrays.
@@ -3005,7 +3005,7 @@ void Fibers::drawSortedLines()
 
     GLfloat projMatrix[16];
     glGetFloatv( GL_PROJECTION_MATRIX, projMatrix );
-    
+
     // Compute z values of lines (in our case: starting points only).
     vector< float > zVals( nbSnipplets );
 
@@ -3018,7 +3018,7 @@ void Fibers::drawSortedLines()
     }
 
     sort( &pSnippletSort[0], &pSnippletSort[nbSnipplets], IndirectComp< vector< float > > ( zVals ) );
-    
+
     float *pColors  = NULL;
     float *pNormals = NULL;
 
@@ -3091,7 +3091,7 @@ void Fibers::drawSortedLines()
 
     glEnd();
     glDisable( GL_BLEND );
-    
+
     // FIXME: store these later on!
     delete[] pSnippletSort;
     delete[] pLineIds;
@@ -3282,7 +3282,7 @@ float Fibers::getLocalizedAlpha( int index )
 void Fibers::setFibersLength()
 {
     m_length.resize( m_countLines, false );
-    
+
     vector< Vector >           currentFiberPoints;
     vector< vector< Vector > > fibersPoints;
 
@@ -3359,7 +3359,7 @@ void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsamplin
     {
         m_filtered[i] = !( ( i % maxSubsampling ) >= minSubsampling && m_length[i] >= minLength && m_length[i] <= maxLength );
     }
-    
+
     SceneManager::getInstance()->getSelectionTree().notifyAllObjectsNeedUpdating();
 
     //Update stats, mean fiber and convexhull only if an object is selected.
@@ -3398,19 +3398,19 @@ void Fibers::flipAxis( AxisType i_axe )
             Logger::getInstance()->print( wxT( "Cannot flip fibers. The specified axis is undefined" ), LOGLEVEL_ERROR );
             return; //No axis specified - Cannot flip
     }
-    
+
     // Compute the dimension of the bounding box.
     DatasetManager *pDatMan = DatasetManager::getInstance();
 
     float axisShift(0.0f);
-    
+
     if( i_axe == X_AXIS )
         axisShift = (pDatMan->getColumns() * pDatMan->getVoxelX()) / 2.0f;
     else if( i_axe == Y_AXIS )
         axisShift = (pDatMan->getRows() * pDatMan->getVoxelY()) / 2.0f;
     else if( i_axe == Z_AXIS )
         axisShift = (pDatMan->getFrames() * pDatMan->getVoxelZ()) / 2.0f;
-        
+
 
     // Translate fibers at origin, flip them and move them back.
     for ( ; i < m_pointArray.size(); i += 3 )
@@ -3441,30 +3441,30 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 
-                                            FIBERS_SUBSAMPLING_RANGE_START, 
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,
+                                            FIBERS_SUBSAMPLING_RANGE_START,
                                             FIBERS_SUBSAMPLING_RANGE_MIN,
-                                            FIBERS_SUBSAMPLING_RANGE_MAX , 
+                                            FIBERS_SUBSAMPLING_RANGE_MAX ,
                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
 #endif
-    
+
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
     m_pSelectConstantFibersColor = new wxButton(    pParent, wxID_ANY, wxT( "Select Constant Color..." ) );
     m_pToggleCrossingFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
     m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
 
-#if !_USE_LIGHT_GUI 
+#if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
     m_pRadMinDistanceAnchoring = new wxRadioButton( pParent, wxID_ANY, wxT( "Min Dist. Anchoring" ) );
     m_pRadCurvature            = new wxRadioButton( pParent, wxID_ANY, wxT( "Curvature" ) );
     m_pRadTorsion              = new wxRadioButton( pParent, wxID_ANY, wxT( "Torsion" ) );
 #endif
-    
+
     m_pRadConstant             = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant" ) );
 
     //////////////////////////////////////////////////////////////////////////
@@ -3492,7 +3492,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #if !_USE_LIGHT_GUI
     pBoxMain->Add( pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 #endif
-    
+
     pBoxMain->Add( m_pToggleLocalColoring,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pToggleNormalColoring,    0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
     pBoxMain->Add( m_pSelectConstantFibersColor, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
@@ -3504,14 +3504,14 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     wxBoxSizer *pBoxColoringRadios = new wxBoxSizer( wxVERTICAL );
     pBoxColoringRadios->Add( m_pRadNormalColoring,       0, wxALIGN_LEFT | wxALL, 1 );
-    
+
 #if !_USE_LIGHT_GUI
     pBoxColoringRadios->Add( m_pRadDistanceAnchoring,    0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadMinDistanceAnchoring, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadCurvature,            0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoringRadios->Add( m_pRadTorsion,              0, wxALIGN_LEFT | wxALL, 1 );
 #endif
-    
+
     pBoxColoringRadios->Add( m_pRadConstant,             0, wxALIGN_LEFT | wxALL, 1 );
     pBoxColoring->Add( pBoxColoringRadios, 0, wxALIGN_LEFT | wxLEFT, 32 );
 
@@ -3532,16 +3532,16 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSelectConstantFibersColor->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnSelectConstantColor ) );
     pParent->Connect( m_pToggleCrossingFibers->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibers ) );
     pParent->Connect( m_pRadNormalColoring->GetId(),             wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnNormalColoring ) );
-    
+
 #if !_USE_LIGHT_GUI
     pParent->Connect( m_pRadDistanceAnchoring->GetId(),          wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuDistance ) );
     pParent->Connect( m_pRadMinDistanceAnchoring->GetId(),       wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnListMenuMinDistance ) );
     pParent->Connect( m_pRadTorsion->GetId(),                    wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithTorsion ) );
     pParent->Connect( m_pRadCurvature->GetId(),                  wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithCurvature ) );
 #endif
-    
+
     pParent->Connect( m_pRadConstant->GetId(),                   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithConstantColor ) );
-    
+
 #if !_USE_LIGHT_GUI
     pParent->Connect( pBtnGeneratesDensityVolume->GetId(),
                       wxEVT_COMMAND_BUTTON_CLICKED,
@@ -3549,7 +3549,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     m_pRadNormalColoring->SetValue( true );
-    
+
     updateFibersFilters();
 }
 
@@ -3562,14 +3562,14 @@ void Fibers::updatePropertiesSizer()
     m_pToggleFiltering->Enable( false );
     m_pToggleCrossingFibers->Enable( true );
     m_pRadNormalColoring->Enable(       getShowFS() );
-    
+
 #if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring->Enable(    getShowFS() );
     m_pRadMinDistanceAnchoring->Enable( getShowFS() );
     m_pRadCurvature->Enable(            getShowFS() );
     m_pRadTorsion->Enable(              getShowFS() );
 #endif
-    
+
     m_pRadConstant->Enable(             getShowFS() );
 
     m_pToggleFiltering->SetValue( false );
@@ -3588,14 +3588,14 @@ void Fibers::updatePropertiesSizer()
     if( m_isColorationUpdated )
     {
         m_pRadNormalColoring->SetValue( m_fiberColorationMode == NORMAL_COLOR );
-        
+
 #if !_USE_LIGHT_GUI
         m_pRadDistanceAnchoring->SetValue( m_fiberColorationMode == DISTANCE_COLOR );
         m_pRadMinDistanceAnchoring->SetValue( m_fiberColorationMode == MINDISTANCE_COLOR );
         m_pRadTorsion->SetValue( m_fiberColorationMode == TORSION_COLOR );
         m_pRadCurvature->SetValue( m_fiberColorationMode == CURVATURE_COLOR );
 #endif
-        
+
         m_pRadConstant->SetValue( m_fiberColorationMode == CONSTANT_COLOR );
         m_isColorationUpdated = false;
     }
@@ -3664,18 +3664,18 @@ bool Fibers::toggleShow()
 
 //////////////////////////////////////////////////////////////////////////
 
-void Fibers::updateCrossingFibersThickness() 
+void Fibers::updateCrossingFibersThickness()
 {
     if ( NULL != m_pSliderInterFibersThickness )
     {
-        m_thickness = m_pSliderInterFibersThickness->GetValue() * 0.25f; 
+        m_thickness = m_pSliderInterFibersThickness->GetValue() * 0.25f;
         m_cfDrawDirty = true;
     }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void Fibers::findCrossingFibers() 
+void Fibers::findCrossingFibers()
 {
     if (   m_cfDrawDirty
         || m_xDrawn != SceneManager::getInstance()->getSliceX()
@@ -3691,7 +3691,7 @@ void Fibers::findCrossingFibers()
         m_axialShown    = SceneManager::getInstance()->isAxialDisplayed();
         m_coronalShown  = SceneManager::getInstance()->isCoronalDisplayed();
         m_sagittalShown = SceneManager::getInstance()->isSagittalDisplayed();
-        
+
         float xVoxSize = DatasetManager::getInstance()->getVoxelX();
         float yVoxSize = DatasetManager::getInstance()->getVoxelY();
         float zVoxSize = DatasetManager::getInstance()->getVoxelZ();
@@ -3787,7 +3787,7 @@ void Fibers::setShader()
         float xVoxSize = DatasetManager::getInstance()->getVoxelX();
         float yVoxSize = DatasetManager::getInstance()->getVoxelY();
         float zVoxSize = DatasetManager::getInstance()->getVoxelZ();
-        
+
         const float xMin( ( curSliceX + 0.5f ) * xVoxSize - m_thickness );
         const float xMax( ( curSliceX + 0.5f ) * xVoxSize + m_thickness );
         const float yMin( ( curSliceY + 0.5f ) * yVoxSize - m_thickness );
@@ -3865,7 +3865,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 				{
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
-					curLine[j * 3 + 2] = RTT->at(i+1)[k].z;	
+					curLine[j * 3 + 2] = RTT->at(i+1)[k].z;
 				}
 
 				m_countPoints += curLine.size() / 3;
@@ -3918,7 +3918,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     createColorArray( false );
     m_type = FIBERS;
     m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
-	
+
 	wxString id = wxString::Format(_T("%d"), RTTrackingHelper::getInstance()->generateId());
     m_name = wxT( "RTTFibers" + id );
 
