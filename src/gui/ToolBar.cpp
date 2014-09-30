@@ -22,7 +22,7 @@ ToolBar::ToolBar(wxWindow *parent)
 {
     wxImage bmpOpen(MyApp::iconsPath+ wxT("fileopen.png" ), wxBITMAP_TYPE_PNG);
 
-    m_btnOpen = this->AddTool(wxID_ANY, bmpOpen, wxT("Open"));    
+    m_btnOpen = this->AddTool(wxID_ANY, wxT("Open"), bmpOpen );
     this->AddSeparator();
 
     wxImage bmpAxial(MyApp::iconsPath+ wxT("axial.png"), wxBITMAP_TYPE_PNG);
@@ -43,8 +43,9 @@ ToolBar::ToolBar(wxWindow *parent)
     
     wxImage bmpEllipsoid(MyApp::iconsPath + wxT("ellipsoid.png"), wxBITMAP_TYPE_PNG);
 
-    m_btnNewSelectionBox = this->AddTool( wxID_ANY, bmpBox, wxT("New Selection Box"));
-    m_btnNewSelectionEllipsoid = this->AddTool( wxID_ANY, bmpEllipsoid, wxT("New Selection Ellipsoid") );
+    // TODO all the addtools can have some captions.
+    m_btnNewSelectionBox = this->AddTool( wxID_ANY, wxT("New Selection Box"), bmpBox);
+    m_btnNewSelectionEllipsoid = this->AddTool( wxID_ANY, wxT("New Selection Ellipsoid"), bmpEllipsoid );
     
 #if !_USE_LIGHT_GUI
     m_toggleShowAllSelectionObjects = this->AddCheckTool( wxID_ANY, wxT( "Toggle Show All Selection Object" ), bmpBoxEyeAll, wxNullBitmap, wxT("Toggle Show All Selection Objects"));

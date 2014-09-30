@@ -36,15 +36,15 @@ MainFrame * MyApp::frame = NULL;
 const wxString MyApp::APP_NAME   = _T( "main" );
 const wxString MyApp::APP_VENDOR = _T( "Ralph S. & Mario H." );
 
-IMPLEMENT_APP( MyApp )
+wxIMPLEMENT_APP( MyApp );
 
 static const wxCmdLineEntryDesc desc[] =
 {
-    { wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("help yourself") },
-    { wxCMD_LINE_SWITCH, _T("p"), _T("screenshot"), _T("screenshot") },
-    { wxCMD_LINE_SWITCH, _T("d"), _T("dmap"), _T("create a distance map on the first loaded dataset") },
-    { wxCMD_LINE_SWITCH, _T("e"), _T("exit"), _T("exit after executing the command line") },
-    { wxCMD_LINE_PARAM, NULL, NULL, _T("scene file"), wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
+    { wxCMD_LINE_SWITCH, "h", "help", "help yourself" },
+    { wxCMD_LINE_SWITCH, "p", "screenshot", "screenshot" },
+    { wxCMD_LINE_SWITCH, "d", "dmap", "create a distance map on the first loaded dataset" },
+    { wxCMD_LINE_SWITCH, "e", "exit", "exit after executing the command line" },
+    { wxCMD_LINE_PARAM, NULL, NULL, "scene file", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
     { wxCMD_LINE_NONE } 
 };
 
@@ -76,9 +76,10 @@ bool MyApp::OnInit( void )
         fd = _open_osfhandle( (long)GetStdHandle( STD_OUTPUT_HANDLE ), 0);
         fp = _fdopen( fd, "w" );
         *stdout = *fp;
-        setvbuf( stdout, NULL, _IONBF, 0 );        
+        setvbuf( stdout, NULL, _IONBF, 0 );  */
 
-#elif __WXMAC__
+// TODO fix may not work.
+/*#elif __WXMAC__
 
         // If we use the above code to get the same on OSX, I get a segfault somewhere
         // therefore I use the OSX native code here:
@@ -98,7 +99,7 @@ bool MyApp::OnInit( void )
 
         respath += _T( "/Contents/Resources/" );
         shaderPath = respath + _T( "GLSL/" );
-        iconsPath = respath + _T( "icons/" );
+        iconsPath = respath + _T( "icons/" );*/
 
 #else
         if ( respath.Last() != '/' )
@@ -173,6 +174,10 @@ bool MyApp::OnInit( void )
         return false;
     }
     Logger::getInstance()->print( wxT( "End on init main" ), LOGLEVEL_DEBUG );
+    wxFrame *the_frame = new wxFrame(NULL, 1, argv[0]);
+
+    the_frame->Show(true);
+    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -269,3 +274,4 @@ int MyApp::OnExit()
     delete Logger::getInstance();
     return 0;
 }
+

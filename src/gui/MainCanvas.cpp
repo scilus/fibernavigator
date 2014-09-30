@@ -43,7 +43,7 @@ MainCanvas::MainCanvas( int i_view, wxWindow *i_pParent, wxWindowID i_id,
         wxDefaultPosition, wxDefaultSize, 0, i_name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name ),
 #else
 const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLCanvas* shared )
-: wxGLCanvas( i_pParent, shared, i_id, i_pos, i_size, i_style | wxFULL_REPAINT_ON_RESIZE, i_name, i_gl_attrib ),
+: wxGLCanvas( i_pParent, i_id, i_gl_attrib, i_pos, i_size, i_style | wxFULL_REPAINT_ON_RESIZE, i_name ),
 #endif
     m_isDragging( false ),
     m_isrDragging( false ),
@@ -655,11 +655,7 @@ void MainCanvas::render()
     glGetError();
     wxPaintDC dc( this );
 
-#ifndef __WXMAC__
     SetCurrent(*SceneManager::getInstance()->getScene()->getMainGLContext());
-#else
-    SetCurrent();
-#endif
 
     int w, h;
     GetClientSize( &w, &h );

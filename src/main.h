@@ -1,8 +1,3 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:        main.h
-// Author:      Ralph Schurade
-/////////////////////////////////////////////////////////////////////////////
-
 #ifndef MAIN_H_
 #define MAIN_H_
 
@@ -14,7 +9,7 @@ class MyApp : public wxApp
 {
 public:
     MyApp();
-    bool OnInit(void);
+    virtual bool OnInit();
     int  OnExit();
 
 private:
@@ -29,5 +24,6 @@ public:
     static wxString iconsPath;
     static MainFrame * frame;
 };
+
 
 #endif // MAIN_H_

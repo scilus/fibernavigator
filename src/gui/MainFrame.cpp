@@ -269,12 +269,12 @@ void MainFrame::initLayout()
     m_pGL1->SetMaxSize( wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ) );
     m_pGL2->SetMaxSize( wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ) );
 
-#ifndef __WXMAC__
+//#ifndef __WXMAC__
     SceneManager::getInstance()->getScene()->setMainGLContext( new wxGLContext( m_pMainGL ) );
     glGetError(); // Removes the error code so we don't have an error message the first time we check it
-#else
-    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
-#endif
+//#else
+//    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
+//#endif
 
     //////////////////////////////////////////////////////////////////////////
     // 3 Nav Panels initialization
