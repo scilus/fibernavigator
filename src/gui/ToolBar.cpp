@@ -1,14 +1,3 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:            toolBar.cpp
-// Author:          GGirard
-// Creation Date:   30/11/2010
-//
-// Description: MainFrame ToolBar
-//
-// Last modifications:
-//      
-/////////////////////////////////////////////////////////////////////////////
-
 #include "ToolBar.h"
 
 #include "MainFrame.h"
@@ -16,44 +5,45 @@
 #include "../main.h"
 #include "../dataset/Fibers.h"
 
-ToolBar::ToolBar(wxWindow *parent)
-    :wxToolBar( parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL | wxNO_BORDER )
-    , m_txtRuler( NULL )
+ToolBar::ToolBar(wxToolBar *pToolBar)
+: m_txtRuler( NULL ),
+  m_drawColorIcon(16, 16, true),
+  m_pToolBar(pToolBar)
 {
     wxImage bmpOpen(MyApp::iconsPath+ wxT("fileopen.png" ), wxBITMAP_TYPE_PNG);
-
-    m_btnOpen = this->AddTool(wxID_ANY, wxT("Open"), bmpOpen );
-    this->AddSeparator();
-
+    
+    m_btnOpen = m_pToolBar->AddTool(wxID_ANY, wxT("Open"), bmpOpen );
+    m_pToolBar->AddSeparator();
+     
     wxImage bmpAxial(MyApp::iconsPath+ wxT("axial.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpCor(MyApp::iconsPath+ wxT("cor.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpSag(MyApp::iconsPath+ wxT("sag.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpAlphaBlend(MyApp::iconsPath+ wxT("alphablend.png"), wxBITMAP_TYPE_PNG);
 
-    m_toggleShowAxial = this->AddCheckTool( wxID_ANY, wxT("Show Axial"), bmpAxial, wxNullBitmap, wxT("Show Axial"));
-    m_toggleShowCoronal = this->AddCheckTool( wxID_ANY, wxT( "Show Coronal" ), bmpCor, wxNullBitmap, wxT("Show Coronal"));
-    m_toggleShowSagittal = this->AddCheckTool( wxID_ANY, wxT("Show Sagittal"), bmpSag, wxNullBitmap, wxT("Show Sagittal"));
-    m_toggleAlphaBlending = this->AddCheckTool( wxID_ANY, wxT("Toggle Alpha Blending"), bmpAlphaBlend, wxNullBitmap, wxT("Toggle Alpha Blending"));
-    this->AddSeparator();
+    m_toggleShowAxial = m_pToolBar->AddCheckTool( wxID_ANY, wxT("Show Axial"), bmpAxial, wxNullBitmap, wxT("Show Axial"));
+    m_toggleShowCoronal = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Show Coronal" ), bmpCor, wxNullBitmap, wxT("Show Coronal"));
+    m_toggleShowSagittal = m_pToolBar->AddCheckTool( wxID_ANY, wxT("Show Sagittal"), bmpSag, wxNullBitmap, wxT("Show Sagittal"));
+    m_toggleAlphaBlending = m_pToolBar->AddCheckTool( wxID_ANY, wxT("Toggle Alpha Blending"), bmpAlphaBlend, wxNullBitmap, wxT("Toggle Alpha Blending"));
+    m_pToolBar->AddSeparator();
 
     wxImage bmpBox(MyApp::iconsPath+ wxT("box.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpBoxEyeAll(MyApp::iconsPath+ wxT("box_eye_all.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpBoxOffAll(MyApp::iconsPath+ wxT("box_off_all.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpBoxNotAll(MyApp::iconsPath+ wxT("box_not_all.png"), wxBITMAP_TYPE_PNG);
-    
+
     wxImage bmpEllipsoid(MyApp::iconsPath + wxT("ellipsoid.png"), wxBITMAP_TYPE_PNG);
 
     // TODO all the addtools can have some captions.
-    m_btnNewSelectionBox = this->AddTool( wxID_ANY, wxT("New Selection Box"), bmpBox);
-    m_btnNewSelectionEllipsoid = this->AddTool( wxID_ANY, wxT("New Selection Ellipsoid"), bmpEllipsoid );
-    
+    m_btnNewSelectionBox = m_pToolBar->AddTool( wxID_ANY, wxT("New Selection Box"), bmpBox);
+    m_btnNewSelectionEllipsoid = m_pToolBar->AddTool( wxID_ANY, wxT("New Selection Ellipsoid"), bmpEllipsoid );
+
 #if !_USE_LIGHT_GUI
-    m_toggleShowAllSelectionObjects = this->AddCheckTool( wxID_ANY, wxT( "Toggle Show All Selection Object" ), bmpBoxEyeAll, wxNullBitmap, wxT("Toggle Show All Selection Objects"));
-    m_toggleActivateAllSelectionObjects = this->AddCheckTool( wxID_ANY, wxT( "Toggle Activate All Selection Objects" ), bmpBoxOffAll, wxNullBitmap, wxT("Toggle Activate All Selection Objects"));
-    m_toggleInverseSelection = this->AddCheckTool( wxID_ANY, wxT( "Toggle Inverse Fibers Selection" ), bmpBoxNotAll, wxNullBitmap, wxT("Toggle Inverse Fibers Selection"));
+    m_toggleShowAllSelectionObjects = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Toggle Show All Selection Object" ), bmpBoxEyeAll, wxNullBitmap, wxT("Toggle Show All Selection Objects"));
+    m_toggleActivateAllSelectionObjects = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Toggle Activate All Selection Objects" ), bmpBoxOffAll, wxNullBitmap, wxT("Toggle Activate All Selection Objects"));
+    m_toggleInverseSelection = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Toggle Inverse Fibers Selection" ), bmpBoxNotAll, wxNullBitmap, wxT("Toggle Inverse Fibers Selection"));
 #endif
-    
-    this->AddSeparator();
+
+    m_pToolBar->AddSeparator();
 
     wxImage bmpGridSpline(MyApp::iconsPath+ wxT("grid_spline.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpGrid(MyApp::iconsPath+ wxT("grid.png"), wxBITMAP_TYPE_PNG);
@@ -63,69 +53,69 @@ ToolBar::ToolBar(wxWindow *parent)
     wxImage bmpLighting(MyApp::iconsPath+ wxT("lightbulb.png"), wxBITMAP_TYPE_PNG);
 
 #if !_USE_LIGHT_GUI
-    m_toggleLighting = this->AddCheckTool( wxID_ANY, wxT( "Toggle Lighting" ), bmpLighting, wxNullBitmap, wxT("Toggle Lighting"));
-    
-    this->AddSeparator();
-    
+    m_toggleLighting = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Toggle Lighting" ), bmpLighting, wxNullBitmap, wxT("Toggle Lighting"));
+
+    m_pToolBar->AddSeparator();
+
     wxImage bmpTubes (MyApp::iconsPath+ wxT("tubes.png"), wxBITMAP_TYPE_PNG);
 
-    m_toggleFakeTubes = this->AddCheckTool( wxID_ANY, wxT("Toggle Tubes"), bmpTubes, wxNullBitmap, wxT("Toggle Tubes"));
-    this->AddSeparator();
+    m_toggleFakeTubes = m_pToolBar->AddCheckTool( wxID_ANY, wxT("Toggle Tubes"), bmpTubes, wxNullBitmap, wxT("Toggle Tubes"));
+    m_pToolBar->AddSeparator();
 #endif
 
     wxImage bmpClearColor (MyApp::iconsPath+ wxT("background_color.png"), wxBITMAP_TYPE_PNG);
 
-    m_toggleClearToBlack = this->AddCheckTool( wxID_ANY, wxT("Clear To Black"), bmpClearColor, wxNullBitmap, wxT("Clear To Black"));
-    this->AddSeparator();
+    m_toggleClearToBlack = m_pToolBar->AddCheckTool( wxID_ANY, wxT("Clear To Black"), bmpClearColor, wxNullBitmap, wxT("Clear To Black"));
+    m_pToolBar->AddSeparator();
 
     wxImage bmpPointer (MyApp::iconsPath+ wxT("pointer.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpRuler (MyApp::iconsPath+ wxT("rulertool.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpDrawer (MyApp::iconsPath+ wxT("drawertool.png"), wxBITMAP_TYPE_PNG);
 
-    m_selectNormalPointer = this->AddRadioTool( wxID_ANY, wxT("Pointer" ), bmpPointer, wxNullBitmap, wxT("Pointer"));
-    
-#if !_USE_LIGHT_GUI
-    m_selectRuler = this->AddRadioTool( wxID_ANY, wxT("Ruler" ), bmpRuler, wxNullBitmap, wxT("Ruler"));
-#endif
-    
-    m_selectDrawer = this->AddRadioTool( wxID_ANY, wxT("Drawer" ), bmpDrawer, wxNullBitmap, wxT("Drawer"));
-    this->AddSeparator();
+    m_selectNormalPointer = m_pToolBar->AddRadioTool( wxID_ANY, wxT("Pointer" ), bmpPointer, wxNullBitmap, wxT("Pointer"));
 
 #if !_USE_LIGHT_GUI
-    m_txtRuler = new wxTextCtrl(this, wxID_ANY,wxT("0.00mm (0.00mm)"), wxDefaultPosition, wxSize( 160, 24 ), wxTE_LEFT | wxTE_READONLY);
+    m_selectRuler = m_pToolBar->AddRadioTool( wxID_ANY, wxT("Ruler" ), bmpRuler, wxNullBitmap, wxT("Ruler"));
+#endif
+
+    m_selectDrawer = m_pToolBar->AddRadioTool( wxID_ANY, wxT("Drawer" ), bmpDrawer, wxNullBitmap, wxT("Drawer"));
+    m_pToolBar->AddSeparator();
+
+#if !_USE_LIGHT_GUI
+    m_txtRuler = new wxTextCtrl(m_pToolBar, wxID_ANY,wxT("0.00mm (0.00mm)"), wxDefaultPosition, wxSize( 160, 24 ), wxTE_LEFT | wxTE_READONLY);
     m_txtRuler->SetForegroundColour(wxColour(wxT("#222222")));
     m_txtRuler->SetBackgroundColour(*wxWHITE);
     wxFont font = m_txtRuler->GetFont();
     font.SetPointSize(10);
     font.SetWeight(wxBOLD);
     m_txtRuler->SetFont(font);
-    this->AddControl(m_txtRuler);
+    m_pToolBar->AddControl(m_txtRuler);
 #endif
 
     //no wxImage, it will show the selected color
 
-    m_selectColorPicker = this->AddTool(wxID_ANY, wxT("Color Picker" ), bmpClearColor, wxNullBitmap, wxITEM_NORMAL, wxT("Color Picker"));
-    EnableTool(m_selectColorPicker->GetId(), false);
+    m_selectColorPicker = m_pToolBar->AddTool(wxID_ANY, wxT("Color Picker" ), bmpClearColor, wxNullBitmap, wxITEM_NORMAL, wxT("Color Picker"));
+    m_pToolBar->EnableTool(m_selectColorPicker->GetId(), false);
 
     wxImage bmpRound (MyApp::iconsPath+ wxT("draw_round.png"), wxBITMAP_TYPE_PNG);
     wxImage bmp3d (MyApp::iconsPath+ wxT("draw3D.png"), wxBITMAP_TYPE_PNG);
 
-    m_toggleDrawRound = this->AddCheckTool( wxID_ANY, wxT( "Round Shape" ), bmpRound, wxNullBitmap, wxT("Round Shape"));
-    EnableTool(m_toggleDrawRound->GetId(), false);
-    m_toggleDraw3d = this->AddCheckTool( wxID_ANY, wxT( "Draw in 3d" ), bmp3d, wxNullBitmap, wxT("Draw in 3d"));
-    EnableTool(m_toggleDraw3d->GetId(), false);
-    this->AddSeparator();
+    m_toggleDrawRound = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Round Shape" ), bmpRound, wxNullBitmap, wxT("Round Shape"));
+    m_pToolBar->EnableTool(m_toggleDrawRound->GetId(), false);
+    m_toggleDraw3d = m_pToolBar->AddCheckTool( wxID_ANY, wxT( "Draw in 3d" ), bmp3d, wxNullBitmap, wxT("Draw in 3d"));
+    m_pToolBar->EnableTool(m_toggleDraw3d->GetId(), false);
+    m_pToolBar->AddSeparator();
 
     wxImage bmpPen (MyApp::iconsPath+ wxT("draw_pen.png"), wxBITMAP_TYPE_PNG);
     wxImage bmpEraser (MyApp::iconsPath+ wxT("draw_eraser.png"), wxBITMAP_TYPE_PNG);
 
-    m_selectPen = this->AddRadioTool( wxID_ANY, wxT("Use Pen" ), bmpPen, wxNullBitmap, wxT("Use Pen"));
-    EnableTool(m_selectPen->GetId(), false);
-    m_selectEraser = this->AddRadioTool( wxID_ANY, wxT("Use Eraser" ), bmpEraser, wxNullBitmap, wxT("Use Eraser"));
-    EnableTool(m_selectEraser->GetId(), false);
+    m_selectPen = m_pToolBar->AddRadioTool( wxID_ANY, wxT("Use Pen" ), bmpPen, wxNullBitmap, wxT("Use Pen"));
+    m_pToolBar->EnableTool(m_selectPen->GetId(), false);
+    m_selectEraser = m_pToolBar->AddRadioTool( wxID_ANY, wxT("Use Eraser" ), bmpEraser, wxNullBitmap, wxT("Use Eraser"));
+    m_pToolBar->EnableTool(m_selectEraser->GetId(), false);
 }
 
-void ToolBar::initToolBar( MainFrame *mf )
+void ToolBar::connectToolsEvents( MainFrame *mf )
 {
     mf->Connect(m_btnOpen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onLoad));
     mf->Connect(m_toggleShowAxial->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onToggleShowAxial));
@@ -159,24 +149,20 @@ void ToolBar::initToolBar( MainFrame *mf )
     mf->Connect(m_selectPen->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectPen)); 
     mf->Connect(m_selectEraser->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onSelectEraser)); 
 
-    //set ColorPicker's initial color to white
-    mf->setDrawColor( wxColour( 255, 255, 255 ) );
-    wxRect fullImage( 0, 0, 16, 16 ); //this is valid as long as toolbar items use 16x16 icons
-    mf->getDrawIcon().SetRGB( fullImage, 255, 255, 255 );
-    SetToolNormalBitmap( m_selectColorPicker->GetId(), wxBitmap( mf->getDrawIcon() ) );
+    setColorPickerColor( mf->getDrawColor() );
 }
 
 void ToolBar::updateToolBar( MainFrame *mf )
 {
-    ToggleTool( m_toggleShowAxial->GetId(),     SceneManager::getInstance()->isAxialDisplayed() );
-    ToggleTool( m_toggleShowCoronal->GetId(),   SceneManager::getInstance()->isCoronalDisplayed() );
-    ToggleTool( m_toggleShowSagittal->GetId(),  SceneManager::getInstance()->isSagittalDisplayed() );
-    ToggleTool( m_toggleAlphaBlending->GetId(), SceneManager::getInstance()->isAlphaBlend() );
+    m_pToolBar->ToggleTool( m_toggleShowAxial->GetId(),     SceneManager::getInstance()->isAxialDisplayed() );
+    m_pToolBar->ToggleTool( m_toggleShowCoronal->GetId(),   SceneManager::getInstance()->isCoronalDisplayed() );
+    m_pToolBar->ToggleTool( m_toggleShowSagittal->GetId(),  SceneManager::getInstance()->isSagittalDisplayed() );
+    m_pToolBar->ToggleTool( m_toggleAlphaBlending->GetId(), SceneManager::getInstance()->isAlphaBlend() );
 
 #if !_USE_LIGHT_GUI
-    ToggleTool( m_toggleLighting->GetId(),      SceneManager::getInstance()->isLightingActive() );
-    ToggleTool( m_toggleShowAllSelectionObjects->GetId(), SceneManager::getInstance()->getShowAllSelObj() );
-    ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !SceneManager::getInstance()->getActivateAllSelObj() );
+    m_pToolBar->ToggleTool( m_toggleLighting->GetId(),      SceneManager::getInstance()->isLightingActive() );
+    m_pToolBar->ToggleTool( m_toggleShowAllSelectionObjects->GetId(), SceneManager::getInstance()->getShowAllSelObj() );
+    m_pToolBar->ToggleTool( m_toggleActivateAllSelectionObjects->GetId(), !SceneManager::getInstance()->getActivateAllSelObj() );
 #endif
 
     bool isFiberSelected = false;
@@ -199,26 +185,51 @@ void ToolBar::updateToolBar( MainFrame *mf )
     }
     
 #if !_USE_LIGHT_GUI
-    ToggleTool( m_toggleFakeTubes->GetId(), isFiberSelected && isFiberUsingFakeTubes);
+    m_pToolBar->ToggleTool( m_toggleFakeTubes->GetId(), isFiberSelected && isFiberUsingFakeTubes);
     
-    ToggleTool( m_toggleInverseSelection->GetId(), isFiberSelected && isFiberInverted);
+    m_pToolBar->ToggleTool( m_toggleInverseSelection->GetId(), isFiberSelected && isFiberInverted);
 #endif
     
-    ToggleTool( m_toggleClearToBlack->GetId(), SceneManager::getInstance()->getClearToBlack() );
-    ToggleTool( m_selectNormalPointer->GetId(), SceneManager::getInstance()->isRulerActive() && mf->isDrawerToolActive() );
+    m_pToolBar->ToggleTool( m_toggleClearToBlack->GetId(), SceneManager::getInstance()->getClearToBlack() );
+    m_pToolBar->ToggleTool( m_selectNormalPointer->GetId(), SceneManager::getInstance()->isRulerActive() && mf->isDrawerToolActive() );
 
 #if !_USE_LIGHT_GUI
-    ToggleTool( m_selectRuler->GetId(), SceneManager::getInstance()->isRulerActive() );
+    m_pToolBar->ToggleTool( m_selectRuler->GetId(), SceneManager::getInstance()->isRulerActive() );
 #endif
     
-    ToggleTool( m_selectDrawer->GetId(), mf->isDrawerToolActive() );
-    //SetToolNormalBitmap(m_selectColorPicker->GetId(), wxBitmap(mf->m_pDatasetHelper->m_drawColorIcon));
-
-    ToggleTool( m_toggleDrawRound->GetId(), mf->canDrawRound() );
-    ToggleTool( m_toggleDraw3d->GetId(), mf->canDraw3D() );
-    ToggleTool( m_selectPen->GetId(), DRAWMODE_PEN == mf->getDrawMode() );
-    ToggleTool( m_selectEraser->GetId(), DRAWMODE_ERASER == mf->getDrawMode() );
+    m_pToolBar->ToggleTool( m_selectDrawer->GetId(), mf->isDrawerToolActive() );
+    m_pToolBar->ToggleTool( m_toggleDrawRound->GetId(), mf->canDrawRound() );
+    m_pToolBar->ToggleTool( m_toggleDraw3d->GetId(), mf->canDraw3D() );
+    m_pToolBar->ToggleTool( m_selectPen->GetId(), DRAWMODE_PEN == mf->getDrawMode() );
+    m_pToolBar->ToggleTool( m_selectEraser->GetId(), DRAWMODE_ERASER == mf->getDrawMode() );
     
     // Check if the currently selected anatomy can use the Color Picker.
-    EnableTool( m_selectColorPicker->GetId(), DRAWMODE_PEN == mf->getDrawMode() && mf->canUseColorPicker() );
+    m_pToolBar->EnableTool( m_selectColorPicker->GetId(),
+                            mf->isDrawerToolActive() && DRAWMODE_PEN == mf->getDrawMode()
+                            && mf->canUseColorPicker() );
+}
+
+void ToolBar::updateDrawerToolBar( const bool drawingActive )
+{
+    // Need to check to avoid crash when using the light weight version.
+    if( m_txtRuler != NULL )
+    {
+        m_txtRuler->Disable();
+    }
+     
+     m_pToolBar->EnableTool( m_toggleDrawRound->GetId(), drawingActive );
+     m_pToolBar->EnableTool( m_toggleDraw3d->GetId(), drawingActive );
+     m_pToolBar->EnableTool( m_selectPen->GetId(), drawingActive );
+     m_pToolBar->EnableTool( m_selectEraser->GetId(), drawingActive );
+     m_pToolBar->EnableTool( m_selectColorPicker->GetId(), drawingActive );
+}
+
+void ToolBar::setColorPickerColor( const wxColour &color )
+{
+    wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
+    m_drawColorIcon.SetRGB( fullImage,
+                            color.Red(),
+                            color.Green(),
+                            color.Blue() );
+    m_pToolBar->SetToolNormalBitmap( m_selectColorPicker->GetId(), wxBitmap( m_drawColorIcon ) );
 }

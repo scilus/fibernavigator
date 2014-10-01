@@ -194,8 +194,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_drawRound( true ),
     m_draw3d( false ),
     m_canUseColorPicker( false ),
-    m_drawColor(255, 255, 255),
-    m_drawColorIcon(16, 16, true)
+    m_drawColor(255, 255, 255)
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -205,13 +204,17 @@ MainFrame::MainFrame( const wxString     &title,
     m_pTimer->Start( 100 );
 
     m_pMenuBar = new MenuBar();
-    m_pToolBar = new ToolBar(this);
-    m_pToolBar->Realize();
     m_pMenuBar->initMenuBar(this);
-    m_pToolBar->initToolBar(this);
-
     this->SetMenuBar(m_pMenuBar);
-    this->SetToolBar(m_pToolBar);
+    
+    // Need to use this structure because of a bad Toolbar behavior using the old
+    // derived Toolbar class on OSX. The toolbar wouldn't show.
+    wxToolBar *pInternalToolbar = CreateToolBar();
+    m_pToolBar = new ToolBar(pInternalToolbar);
+    m_pToolBar->connectToolsEvents(this);
+    pInternalToolbar->Realize();
+    this->SetToolBar(pInternalToolbar);
+    
     updateMenus();
     int widths[] = { 250, 250, -1 };
     CreateStatusBar( 2 );
@@ -844,18 +847,8 @@ void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 void MainFrame::updateDrawerToolbar()
 {
     SceneManager::getInstance()->setRulerActive( false );
-
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
-
-    m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectColorPicker->GetId(), m_isDrawerToolActive );
+    
+    m_pToolBar->updateDrawerToolBar( m_isDrawerToolActive );
     
     // Check if the current anatomy supports RGB
     Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
@@ -923,6 +916,8 @@ void MainFrame::onToggleDraw3d( wxCommandEvent& event )
 void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 {
     wxColourData l_colorData;
+    
+    // TODO Set initial color
 
     for( int i = 0; i < 10; ++i )
     {
@@ -949,12 +944,7 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     {
         wxColourData l_retData = dialog.GetColourData();
         m_drawColor = l_retData.GetColour();
-        wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
-        m_drawColorIcon.SetRGB( fullImage, 
-                                m_drawColor.Red(), 
-                                m_drawColor.Green(), 
-                                m_drawColor.Blue() );
-        m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap( m_drawColorIcon ) );
+        m_pToolBar->setColorPickerColor( m_drawColor );
     }
     else
     {
@@ -1522,17 +1512,7 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( false );
     m_isDrawerToolActive = false;
 
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
-    
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->updateDrawerToolBar( false );
     refreshAllGLWidgets();
 }
 
@@ -1541,17 +1521,7 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( true );
     m_isDrawerToolActive = false;
 
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Enable();
-    }
-    
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->updateDrawerToolBar( false );
     refreshAllGLWidgets();
 }
 
