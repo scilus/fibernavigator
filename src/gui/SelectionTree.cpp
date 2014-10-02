@@ -694,6 +694,23 @@ bool SelectionTree::containsId( const int itemId ) const
     return pFoundNode != NULL;
 }
 
+bool SelectionTree::isFirstLevel( SelectionObject *pSelObj ) const
+{
+    SelectionTreeNode * const pTreeNode = m_pRootNode->findNode( pSelObj );
+    
+    if( pTreeNode != NULL )
+    {
+        SelectionTreeNode * const pParentNode = m_pRootNode->findParentNode( pTreeNode->getId() );
+        
+        if( pParentNode == m_pRootNode )
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 void SelectionTree::unselectAll()
 {
     SelectionObjectVector allObjs = getAllObjects();

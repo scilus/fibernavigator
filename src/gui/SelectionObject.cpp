@@ -2257,9 +2257,9 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadNormalColoring->SetValue( true );
 
 #if !_USE_LIGHT_GUI
-    // TODO select
-    pBtnNewColorVolume->Enable( getIsFirstLevel() );
-    pBtnNewDensityVolume->Enable( getIsFirstLevel() );
+    bool isFirstLevel = SceneManager::getInstance()->getSelectionTree().isFirstLevel( this );
+    pBtnNewColorVolume->Enable( isFirstLevel );
+    pBtnNewDensityVolume->Enable( isFirstLevel );
     // TODO selection remove object type
     pBtnSetAsDistanceAnchor->Enable( m_objectType == VOI_TYPE );
 #endif

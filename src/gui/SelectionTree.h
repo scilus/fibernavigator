@@ -53,6 +53,7 @@ public:
     }
     
     bool containsId( const int itemId ) const;
+    bool isFirstLevel( SelectionObject *pSelObj ) const;
     
     void unselectAll();
     void clear();
