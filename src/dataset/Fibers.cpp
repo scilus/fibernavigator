@@ -3812,7 +3812,7 @@ void Fibers::setShader()
         ShaderHelper::getInstance()->getFibersShader()->bind();
         ShaderHelper::getInstance()->setFiberShaderVars();
         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
-//         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }
