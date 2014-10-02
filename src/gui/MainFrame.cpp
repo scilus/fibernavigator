@@ -194,8 +194,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_drawRound( true ),
     m_draw3d( false ),
     m_canUseColorPicker( false ),
-    m_drawColor(255, 255, 255),
-    m_drawColorIcon(16, 16, true)
+    m_drawColor(255, 255, 255)
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -205,13 +204,17 @@ MainFrame::MainFrame( const wxString     &title,
     m_pTimer->Start( 100 );
 
     m_pMenuBar = new MenuBar();
-    m_pToolBar = new ToolBar(this);
-    m_pToolBar->Realize();
     m_pMenuBar->initMenuBar(this);
-    m_pToolBar->initToolBar(this);
-
     this->SetMenuBar(m_pMenuBar);
-    this->SetToolBar(m_pToolBar);
+    
+    // Need to use this structure because of a bad Toolbar behavior using the old
+    // derived Toolbar class on OSX. The toolbar wouldn't show.
+    wxToolBar *pInternalToolbar = CreateToolBar();
+    m_pToolBar = new ToolBar(pInternalToolbar);
+    m_pToolBar->connectToolsEvents(this);
+    pInternalToolbar->Realize();
+    this->SetToolBar(pInternalToolbar);
+    
     updateMenus();
     int widths[] = { 250, 250, -1 };
     CreateStatusBar( 2 );
@@ -269,12 +272,12 @@ void MainFrame::initLayout()
     m_pGL1->SetMaxSize( wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ) );
     m_pGL2->SetMaxSize( wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ) );
 
-#ifndef __WXMAC__
+//#ifndef __WXMAC__
     SceneManager::getInstance()->getScene()->setMainGLContext( new wxGLContext( m_pMainGL ) );
     glGetError(); // Removes the error code so we don't have an error message the first time we check it
-#else
-    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
-#endif
+//#else
+//    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
+//#endif
 
     //////////////////////////////////////////////////////////////////////////
     // 3 Nav Panels initialization
@@ -384,7 +387,7 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
     wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxFD_OPEN | wxFD_MULTIPLE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
     if( dialog.ShowModal() == wxID_OK )
@@ -417,7 +420,7 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*" );
     wxString defaultDir       = wxEmptyString;
     wxString defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxOPEN | wxFD_MULTIPLE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxFD_OPEN | wxFD_MULTIPLE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
     if( dialog.ShowModal() == wxID_OK )
@@ -514,7 +517,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard        = wxT( "Scene files (*.scn)|*.scn|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
@@ -552,7 +555,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
@@ -614,7 +617,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
 
@@ -632,7 +635,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
 
@@ -683,7 +686,7 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
@@ -851,18 +854,8 @@ void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 void MainFrame::updateDrawerToolbar()
 {
     SceneManager::getInstance()->setRulerActive( false );
-
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
-
-    m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectColorPicker->GetId(), m_isDrawerToolActive );
+    
+    m_pToolBar->updateDrawerToolBar( m_isDrawerToolActive );
     
     // Check if the current anatomy supports RGB
     Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
@@ -930,6 +923,8 @@ void MainFrame::onToggleDraw3d( wxCommandEvent& event )
 void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 {
     wxColourData l_colorData;
+    
+    // TODO Set initial color
 
     for( int i = 0; i < 10; ++i )
     {
@@ -956,12 +951,7 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     {
         wxColourData l_retData = dialog.GetColourData();
         m_drawColor = l_retData.GetColour();
-        wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
-        m_drawColorIcon.SetRGB( fullImage, 
-                                m_drawColor.Red(), 
-                                m_drawColor.Green(), 
-                                m_drawColor.Blue() );
-        m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap( m_drawColorIcon ) );
+        m_pToolBar->setColorPickerColor( m_drawColor );
     }
     else
     {
@@ -1600,17 +1590,7 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( false );
     m_isDrawerToolActive = false;
 
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
-    
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->updateDrawerToolBar( false );
     refreshAllGLWidgets();
 }
 
@@ -1619,17 +1599,7 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( true );
     m_isDrawerToolActive = false;
 
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Enable();
-    }
-    
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->updateDrawerToolBar( false );
     refreshAllGLWidgets();
 }
 
@@ -1834,7 +1804,7 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     wxString l_wildcard        = wxT( "PPM files (*.ppm)|*.ppm|*.*|*.*" );
     wxString l_defaultDir      = wxEmptyString;
     wxString l_defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxSAVE );
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( SceneManager::getInstance()->getScreenshotPath() );
     if( dialog.ShowModal() == wxID_OK )

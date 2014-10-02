@@ -238,12 +238,15 @@ bool FibersGroup::save( wxXmlNode *pNode, const wxString &rootPath ) const
 
     if( NULL != pStatus )
     {
-        wxXmlProperty *pProp = getXmlPropertyByName( wxT( "isFiberGroup" ), pStatus );
+        //wxXmlProperty *pProp = pStatus->GetAttribute
+        pStatus->DeleteAttribute( "isFiberGroup" );
+        pStatus->AddAttribute( "isFiberGroup", "yes" );
+        /*pProp = getXmlPropertyByName( "isFiberGroup", pStatus );
 
         if( NULL != pProp )
         {
             pProp->SetValue( wxT( "yes" ) );
-        }
+        }*/
     }
 
     return true;

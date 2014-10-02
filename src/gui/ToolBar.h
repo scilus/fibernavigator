@@ -1,14 +1,3 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:            ToolBar.h
-// Author:          GGirard
-// Creation Date:   30/11/2010
-//
-// Description: MainFrame ToolBar
-//
-// Last modifications:
-//      
-/////////////////////////////////////////////////////////////////////////////
-
 #ifndef TOOLBAR_H_
 #define TOOLBAR_H_
 
@@ -16,14 +5,23 @@
 #include <wx/toolbar.h>
 
 class MainFrame;
-class ToolBar : public wxToolBar
+
+// Please note that this class is now a container for a wxToolbar, instead
+// of deriving from it, to overcome a problem with showing the Toolbar on OSX.
+class ToolBar
 {
 public:
-    ToolBar(wxWindow *parent);
-    void initToolBar(MainFrame *mf);
+    ToolBar(wxToolBar *pToolBar);
+    void connectToolsEvents(MainFrame *mf);
     void updateToolBar(MainFrame *mf);
+    
+    void updateDrawerToolBar( const bool drawingActive );
+    void setColorPickerColor( const wxColour &color );
 
 public:
+    wxTextCtrl        *m_txtRuler;
+    
+private:    // Private UI controls
     wxToolBarToolBase *m_btnOpen;
     wxToolBarToolBase *m_toggleShowAxial;
     wxToolBarToolBase *m_toggleShowCoronal;
@@ -40,12 +38,16 @@ public:
     wxToolBarToolBase *m_selectNormalPointer;
     wxToolBarToolBase *m_selectRuler;
     wxToolBarToolBase *m_selectDrawer;
-    wxTextCtrl        *m_txtRuler;
     wxToolBarToolBase *m_selectColorPicker;
     wxToolBarToolBase *m_toggleDrawRound;
     wxToolBarToolBase *m_toggleDraw3d;
     wxToolBarToolBase *m_selectPen;
     wxToolBarToolBase *m_selectEraser;
+    
+    wxImage  m_drawColorIcon;
+
+private:
+    wxToolBar *m_pToolBar;
 };
 
 

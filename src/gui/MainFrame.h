@@ -70,7 +70,6 @@ public:
     bool isDrawerToolActive() const { return m_isDrawerToolActive; }
 
     wxColour  getDrawColor() const  { return m_drawColor; }
-    wxImage & getDrawIcon()         { return m_drawColorIcon; }
     DrawMode  getDrawMode() const   { return m_drawMode; }
     int       getDrawSize() const   { return m_drawSize; }
 
@@ -238,7 +237,6 @@ private:
     bool     m_draw3d;
     bool     m_canUseColorPicker;
     wxColor  m_drawColor;
-    wxImage  m_drawColorIcon;
 
 DECLARE_EVENT_TABLE()
 };

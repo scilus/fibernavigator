@@ -171,13 +171,13 @@ bool DatasetInfo::save( wxXmlNode *pNode, const wxString &rootPath ) const
     pNode->AddChild( pStatus );
     pNode->AddChild( pPath );
 
-    pStatus->AddProperty( new wxXmlProperty( wxT( "name" ), m_name ) );
-    pStatus->AddProperty( new wxXmlProperty( wxT( "active" ), m_show ? wxT( "yes" ) : wxT( "no" ) ) );
-    pStatus->AddProperty( new wxXmlProperty( wxT( "showFS" ), m_showFS ? wxT( "yes" ) : wxT( "no" ) ) );
-    pStatus->AddProperty( new wxXmlProperty( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), m_alpha ) ) );
-    pStatus->AddProperty( new wxXmlProperty( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), m_threshold ) ) );
-    pStatus->AddProperty( new wxXmlProperty( wxT( "useTex" ), m_useTex ? wxT( "yes" ) : wxT( "no" ) ) );
-    pStatus->AddProperty( new wxXmlProperty( wxT( "isFiberGroup" ), wxT( "no" ) ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "name" ), m_name ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "active" ), m_show ? wxT( "yes" ) : wxT( "no" ) ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "showFS" ), m_showFS ? wxT( "yes" ) : wxT( "no" ) ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "alpha" ), wxString::Format( wxT( "%.2f" ), m_alpha ) ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "threshold" ), wxString::Format( wxT( "%.2f" ), m_threshold ) ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "useTex" ), m_useTex ? wxT( "yes" ) : wxT( "no" ) ) );
+    pStatus->AddAttribute( new wxXmlAttribute( wxT( "isFiberGroup" ), wxT( "no" ) ) );
 
     wxFileName tempName( m_fullPath );
     tempName.MakeRelativeTo( rootPath );

@@ -1062,7 +1062,7 @@ bool CIsoSurface::save( wxString filename ) const
     }
     else
     {
-        std::cout << "open file failed: " << filename.c_str() << std::endl;
+        std::cout << "open file failed: " << filename.wx_str() << std::endl;
         return false;
     }
 

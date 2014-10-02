@@ -213,22 +213,22 @@ bool SceneManager::save( const wxString &filename )
 
     //////////////////////////////////////////////////////////////////////////
     // POSITION
-    pSlidersPosition->AddProperty( new wxXmlProperty( wxT( "x" ), wxStrFormat( m_pMainFrame->m_pXSlider->GetValue() ) ) );
-    pSlidersPosition->AddProperty( new wxXmlProperty( wxT( "y" ), wxStrFormat( m_pMainFrame->m_pYSlider->GetValue() ) ) );
-    pSlidersPosition->AddProperty( new wxXmlProperty( wxT( "z" ), wxStrFormat( m_pMainFrame->m_pZSlider->GetValue() ) ) );
+    pSlidersPosition->AddAttribute( new wxXmlAttribute( wxT( "x" ), wxStrFormat( m_pMainFrame->m_pXSlider->GetValue() ) ) );
+    pSlidersPosition->AddAttribute( new wxXmlAttribute( wxT( "y" ), wxStrFormat( m_pMainFrame->m_pYSlider->GetValue() ) ) );
+    pSlidersPosition->AddAttribute( new wxXmlAttribute( wxT( "z" ), wxStrFormat( m_pMainFrame->m_pZSlider->GetValue() ) ) );
 
     //////////////////////////////////////////////////////////////////////////
     // ROTATION
     wxString rotPrecision = wxT( ".8" );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot00" ), wxStrFormat( m_transform.s.M00, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot01" ), wxStrFormat( m_transform.s.M01, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot02" ), wxStrFormat( m_transform.s.M02, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot10" ), wxStrFormat( m_transform.s.M10, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot11" ), wxStrFormat( m_transform.s.M11, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot12" ), wxStrFormat( m_transform.s.M12, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot20" ), wxStrFormat( m_transform.s.M20, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot21" ), wxStrFormat( m_transform.s.M21, rotPrecision ) ) );
-    pRotation->AddProperty( new wxXmlProperty( wxT( "rot22" ), wxStrFormat( m_transform.s.M22, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot00" ), wxStrFormat( m_transform.s.M00, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot01" ), wxStrFormat( m_transform.s.M01, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot02" ), wxStrFormat( m_transform.s.M02, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot10" ), wxStrFormat( m_transform.s.M10, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot11" ), wxStrFormat( m_transform.s.M11, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot12" ), wxStrFormat( m_transform.s.M12, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot20" ), wxStrFormat( m_transform.s.M20, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot21" ), wxStrFormat( m_transform.s.M21, rotPrecision ) ) );
+    pRotation->AddAttribute( new wxXmlAttribute( wxT( "rot22" ), wxStrFormat( m_transform.s.M22, rotPrecision ) ) );
 
     //////////////////////////////////////////////////////////////////////////
     // PREPARE DATASETS NODES
@@ -264,7 +264,7 @@ bool SceneManager::save( const wxString &filename )
         pDS->save( pNode, sceneRootPath );
 
         wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
-        pStatus->AddProperty( new wxXmlProperty( wxT( "position" ), wxStrFormat( i ) ) );
+        pStatus->AddAttribute( new wxXmlAttribute( wxT( "position" ), wxStrFormat( i ) ) );
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -352,6 +352,46 @@ bool SceneManager::save( const wxString &filename )
     }
     
     pRoot->AddChild( pSelSetup );
+
+        /*for( vector<SelectionObject *>::const_iterator childIt = it->begin(); childIt != it->end(); ++childIt )
+        {
+            wxXmlNode *pObjectNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "object" ) );
+
+            wxXmlNode *pStatus = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "status" ) );
+            wxXmlNode *pName   = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "name" ) );
+            wxXmlNode *pSize   = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "size" ) );
+            wxXmlNode *pCenter = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "center" ) );
+
+            pObjectNode->AddChild( pStatus );
+            pObjectNode->AddChild( pName );
+            pObjectNode->AddChild( pSize );
+            pObjectNode->AddChild( pCenter );
+
+            pStatus->AddAttribute( new wxXmlAttribute( wxT( "isBox" ), BOX_TYPE == (*childIt)->getSelectionType() ? wxT( "yes" ) : wxT( "no" ) ) );
+            pStatus->AddAttribute( new wxXmlAttribute( wxT( "visible" ), (*childIt)->getIsVisible() ? wxT( "yes" ) : wxT( "no" ) ) );
+            pStatus->AddAttribute( new wxXmlAttribute( wxT( "active" ), (*childIt)->getIsActive() ? wxT( "yes" ) : wxT( "no" ) ) );
+            if( childIt == it->begin() )
+            {
+                pStatus->AddAttribute( new wxXmlAttribute( wxT( "type" ), wxT( "MASTER" ) ) );
+            } 
+            else
+            {
+                pStatus->AddAttribute( new wxXmlAttribute( wxT( "type" ), (*childIt)->getIsNOT() ? wxT( "NOT" ) : wxT( "AND" ) ) );
+            }
+
+            pName->AddAttribute( new wxXmlAttribute( wxT( "string" ), (*childIt)->getName() ) );
+
+            pSize->AddAttribute( new wxXmlAttribute( wxT( "x" ), wxStrFormat( (*childIt)->getSize().x ) ) );
+            pSize->AddAttribute( new wxXmlAttribute( wxT( "y" ), wxStrFormat( (*childIt)->getSize().y ) ) );
+            pSize->AddAttribute( new wxXmlAttribute( wxT( "z" ), wxStrFormat( (*childIt)->getSize().z ) ) );
+
+            pCenter->AddAttribute( new wxXmlAttribute( wxT( "x" ), wxStrFormat( (*childIt)->getCenter().x ) ) );
+            pCenter->AddAttribute( new wxXmlAttribute( wxT( "y" ), wxStrFormat( (*childIt)->getCenter().y ) ) );
+            pCenter->AddAttribute( new wxXmlAttribute( wxT( "z" ), wxStrFormat( (*childIt)->getCenter().z ) ) );
+
+            pSelObjs->AddChild( pObjectNode );
+        }
+    }*/
 
     //////////////////////////////////////////////////////////////////////////
     // SAVE DOCUMENT
@@ -468,29 +508,29 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  
         wxString nodeName = pChild->GetName();
         if( wxT( "position" ) == nodeName )
         {
-            pChild->GetPropVal( wxT( "x" ), wxT( "1" ) ).ToLong( &sliceX );
-            pChild->GetPropVal( wxT( "y" ), wxT( "1" ) ).ToLong( &sliceY );
-            pChild->GetPropVal( wxT( "z" ), wxT( "1" ) ).ToLong( &sliceZ );
+            pChild->GetAttribute( wxT( "x" ), wxT( "1" ) ).ToLong( &sliceX );
+            pChild->GetAttribute( wxT( "y" ), wxT( "1" ) ).ToLong( &sliceY );
+            pChild->GetAttribute( wxT( "z" ), wxT( "1" ) ).ToLong( &sliceZ );
         }
         else if( wxT( "rotation" ) == nodeName )
         {
-            pChild->GetPropVal( wxT( "rot00" ), wxT( "1" ) ).ToDouble( &rotationMatrix[0] );
-            pChild->GetPropVal( wxT( "rot10" ), wxT( "1" ) ).ToDouble( &rotationMatrix[4] );
-            pChild->GetPropVal( wxT( "rot20" ), wxT( "1" ) ).ToDouble( &rotationMatrix[8] );
-            pChild->GetPropVal( wxT( "rot01" ), wxT( "1" ) ).ToDouble( &rotationMatrix[1] );
-            pChild->GetPropVal( wxT( "rot11" ), wxT( "1" ) ).ToDouble( &rotationMatrix[5] );
-            pChild->GetPropVal( wxT( "rot21" ), wxT( "1" ) ).ToDouble( &rotationMatrix[9] );
-            pChild->GetPropVal( wxT( "rot02" ), wxT( "1" ) ).ToDouble( &rotationMatrix[2] );
-            pChild->GetPropVal( wxT( "rot12" ), wxT( "1" ) ).ToDouble( &rotationMatrix[6] );
-            pChild->GetPropVal( wxT( "rot22" ), wxT( "1" ) ).ToDouble( &rotationMatrix[10] );
+            pChild->GetAttribute( wxT( "rot00" ), wxT( "1" ) ).ToDouble( &rotationMatrix[0] );
+            pChild->GetAttribute( wxT( "rot10" ), wxT( "1" ) ).ToDouble( &rotationMatrix[4] );
+            pChild->GetAttribute( wxT( "rot20" ), wxT( "1" ) ).ToDouble( &rotationMatrix[8] );
+            pChild->GetAttribute( wxT( "rot01" ), wxT( "1" ) ).ToDouble( &rotationMatrix[1] );
+            pChild->GetAttribute( wxT( "rot11" ), wxT( "1" ) ).ToDouble( &rotationMatrix[5] );
+            pChild->GetAttribute( wxT( "rot21" ), wxT( "1" ) ).ToDouble( &rotationMatrix[9] );
+            pChild->GetAttribute( wxT( "rot02" ), wxT( "1" ) ).ToDouble( &rotationMatrix[2] );
+            pChild->GetAttribute( wxT( "rot12" ), wxT( "1" ) ).ToDouble( &rotationMatrix[6] );
+            pChild->GetAttribute( wxT( "rot22" ), wxT( "1" ) ).ToDouble( &rotationMatrix[10] );
         }
         else if( wxT( "anatomy" ) == nodeName )
         {
             long columns, rows, frames;
 
-            pChild->GetPropVal( wxT( "columns" ), wxT( "1" ) ).ToLong( &columns );
-            pChild->GetPropVal( wxT( "rows" ), wxT( "1" ) ).ToLong( &rows );
-            pChild->GetPropVal( wxT( "frames" ), wxT( "1" ) ).ToLong( &frames );
+            pChild->GetAttribute( wxT( "columns" ), wxT( "1" ) ).ToLong( &columns );
+            pChild->GetAttribute( wxT( "rows" ), wxT( "1" ) ).ToLong( &rows );
+            pChild->GetAttribute( wxT( "frames" ), wxT( "1" ) ).ToLong( &frames );
 
             if( DatasetManager::getInstance()->isAnatomyLoaded() )
             {
@@ -527,15 +567,15 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  
                 {
                     if( wxT( "status" ) == pAttribute->GetName() )
                     {
-                        isFiberGroup = pAttribute->GetPropVal( wxT( "isFiberGroup" ), wxT( "no" ) ) == wxT( "yes" );
-                        name         = pAttribute->GetPropVal( wxT( "name" ), wxT( "" ) );
-                        useTex       = pAttribute->GetPropVal( wxT( "useTex" ), wxT( "yes" ) ) == wxT( "yes" );
-                        showFS       = pAttribute->GetPropVal( wxT( "showFS" ), wxT( "yes" ) ) == wxT( "yes" );
-                        active       = pAttribute->GetPropVal( wxT( "active" ), wxT( "yes" ) ) == wxT( "yes" );
+                        isFiberGroup = pAttribute->GetAttribute( wxT( "isFiberGroup" ), wxT( "no" ) ) == wxT( "yes" );
+                        name         = pAttribute->GetAttribute( wxT( "name" ), wxT( "" ) );
+                        useTex       = pAttribute->GetAttribute( wxT( "useTex" ), wxT( "yes" ) ) == wxT( "yes" );
+                        showFS       = pAttribute->GetAttribute( wxT( "showFS" ), wxT( "yes" ) ) == wxT( "yes" );
+                        active       = pAttribute->GetAttribute( wxT( "active" ), wxT( "yes" ) ) == wxT( "yes" );
                         
-                        pAttribute->GetPropVal( wxT( "alpha" ), wxT( "1.0" ) ).ToDouble( &alpha );
-                        pAttribute->GetPropVal( wxT( "threshold" ), wxT( "0.0" ) ).ToDouble( &threshold );
-                        pAttribute->GetPropVal( wxT( "position" ), wxT( "-1" ) ).ToLong( &position );
+                        pAttribute->GetAttribute( wxT( "alpha" ), wxT( "1.0" ) ).ToDouble( &alpha );
+                        pAttribute->GetAttribute( wxT( "threshold" ), wxT( "0.0" ) ).ToDouble( &threshold );
+                        pAttribute->GetAttribute( wxT( "position" ), wxT( "-1" ) ).ToLong( &position );
                     }
                     else if( wxT( "path" ) == pAttribute->GetName() )
                     {
@@ -607,6 +647,89 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  
             if( !m_pSelTree->isEmpty() )
             {
                 m_pMainFrame->buildSelectionViewFromSelectionTree( m_pSelTree );
+
+                /*bool active;
+                bool isBox;
+                bool visible;
+                Vector size;
+                Vector center;
+                wxString name;
+                wxString type;
+
+                wxXmlNode *pInfoNode = pBoxNode->GetChildren();
+                while( pInfoNode )
+                {
+                    if( wxT( "status" ) == pInfoNode->GetName() )
+                    {
+                        type    = pInfoNode->GetAttribute( wxT( "type" ), wxT( "MASTER" ) );
+                        active  = pInfoNode->GetAttribute( wxT( "active" ), wxT( "yes" ) ) == wxT( "yes" );
+                        visible = pInfoNode->GetAttribute( wxT( "visible" ), wxT( "yes" ) ) == wxT( "yes" );
+                        isBox   = pInfoNode->GetAttribute( wxT( "isBox" ), wxT( "yes" ) ) == wxT( "yes" );
+                    }
+                    else if( wxT( "name" ) == pInfoNode->GetName() )
+                    {
+                        name = pInfoNode->GetAttribute( wxT( "string" ), wxT( "object" ) );
+                    }
+                    else if( wxT( "size" ) == pInfoNode->GetName() )
+                    {
+                        pInfoNode->GetAttribute( wxT( "x" ), wxT( "0.0" ) ).ToDouble( &size.x );
+                        pInfoNode->GetAttribute( wxT( "y" ), wxT( "0.0" ) ).ToDouble( &size.y );
+                        pInfoNode->GetAttribute( wxT( "z" ), wxT( "0.0" ) ).ToDouble( &size.z );
+                    }
+                    else if( wxT( "center" ) == pInfoNode->GetName() )
+                    {
+                        pInfoNode->GetAttribute( wxT( "x" ), wxT( "0.0" ) ).ToDouble( &center.x );
+                        pInfoNode->GetAttribute( wxT( "y" ), wxT( "0.0" ) ).ToDouble( &center.y );
+                        pInfoNode->GetAttribute( wxT( "z" ), wxT( "0.0" ) ).ToDouble( &center.z );
+                    }
+
+                    pInfoNode = pInfoNode->GetNext();
+                }
+
+                SelectionObject *pSelObj;
+                if( isBox )
+                {
+                    pSelObj = new SelectionBox( center, size );
+                }
+                else
+                {
+                    pSelObj = new SelectionEllipsoid( center, size );
+                }
+
+                pSelObj->setName( name );
+                pSelObj->setIsActive( active );
+                pSelObj->setIsVisible( visible );
+
+                MyTreeCtrl *pTreeView = m_pMainFrame->m_pTreeWidget;
+                if( wxT( "MASTER" ) == type )
+                {
+                    pSelObj->setIsFirstLevel( true );
+                    currentMasterId = pTreeView->AppendItem( m_pMainFrame->m_tSelectionObjectsId, name, 0, -1, pSelObj );
+                    pTreeView->EnsureVisible( currentMasterId );
+                    pTreeView->SetItemImage( currentMasterId, pSelObj->getIcon() );
+                    pTreeView->SetItemBackgroundColour( currentMasterId, *wxCYAN );
+                    pSelObj->setTreeId( currentMasterId );
+                }
+                else
+                {
+                    pSelObj->setIsNOT( wxT( "NOT" ) == type );
+                    wxTreeItemId boxId = pTreeView->AppendItem( currentMasterId, name, 0, -1, pSelObj );
+                    pTreeView->EnsureVisible( boxId );
+                    pTreeView->SetItemImage( boxId, pSelObj->getIcon() );
+
+                    if( pSelObj->getIsNOT() )
+                    {
+                        pTreeView->SetItemBackgroundColour( boxId, *wxRED );
+                    }
+                    else
+                    {
+                        pTreeView->SetItemBackgroundColour( boxId, *wxGREEN );
+                    }
+
+                    pSelObj->setTreeId( boxId );
+                }
+
+                pBoxNode = pBoxNode->GetNext();*/
             }
             
         }
