@@ -53,11 +53,11 @@ SelectionVOI::SelectionVOI( const wxXmlNode selObjNode, const wxString &rootPath
         if( nodeName == wxT("voi_properties") )
         {
             double temp;
-            pChildNode->GetPropVal( wxT("gen_threshold"), &propVal );
+            pChildNode->GetAttribute( wxT("gen_threshold"), &propVal );
             propVal.ToDouble(&temp);
             m_generationThreshold = temp;
             
-            pChildNode->GetPropVal( wxT("thres_op_type"), &propVal );
+            pChildNode->GetAttribute( wxT("thres_op_type"), &propVal );
             m_thresType = Helper::getThresholdingTypeFromString( propVal );
             
             wxXmlNode *pAnatNode = pChildNode->GetChildren();
@@ -276,8 +276,8 @@ bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPat
         wxXmlNode *pVoiNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "voi_properties" ) );
         pCurNode->AddChild( pVoiNode );
         
-        pVoiNode->AddProperty( new wxXmlProperty( wxT( "gen_threshold" ), wxStrFormat( m_generationThreshold, floatPrecision ) ) );
-        pVoiNode->AddProperty( new wxXmlProperty( wxT( "thres_op_type" ), Helper::getThresholdingTypeString( m_thresType ) ) );
+        pVoiNode->AddAttribute( new wxXmlAttribute( wxT( "gen_threshold" ), wxStrFormat( m_generationThreshold, floatPrecision ) ) );
+        pVoiNode->AddAttribute( new wxXmlAttribute( wxT( "thres_op_type" ), Helper::getThresholdingTypeString( m_thresType ) ) );
         
         wxXmlNode *pVoiGenAnatPath = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "generation_anatomy" ) );
         pVoiNode->AddChild( pVoiGenAnatPath );

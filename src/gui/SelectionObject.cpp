@@ -108,22 +108,22 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
         
         if( nodeName == wxT("state") )
         {
-            pChildNode->GetPropVal( wxT("name"), &m_name );
-            pChildNode->GetPropVal( wxT("active"), &propVal );
+            pChildNode->GetAttribute( wxT("name"), &m_name );
+            pChildNode->GetAttribute( wxT("active"), &propVal );
             m_isActive = parseXmlBoolString( propVal );
-            pChildNode->GetPropVal( wxT("visible"), &propVal );
+            pChildNode->GetAttribute( wxT("visible"), &propVal );
             m_isVisible = parseXmlBoolString( propVal );
-            pChildNode->GetPropVal( wxT("isNOT"), &propVal );
+            pChildNode->GetAttribute( wxT("isNOT"), &propVal );
             m_isNOT = parseXmlBoolString( propVal );
         }
         else if( nodeName == wxT("center") )
         {
             double x, y, z;
-            pChildNode->GetPropVal( wxT("posX"), &propVal );
+            pChildNode->GetAttribute( wxT("posX"), &propVal );
             propVal.ToDouble( &x );
-            pChildNode->GetPropVal( wxT("posY"), &propVal );
+            pChildNode->GetAttribute( wxT("posY"), &propVal );
             propVal.ToDouble( &y );
-            pChildNode->GetPropVal( wxT("posZ"), &propVal );
+            pChildNode->GetAttribute( wxT("posZ"), &propVal );
             propVal.ToDouble( &z );
             m_center.x = x;
             m_center.y = y;
@@ -132,11 +132,11 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
         else if( nodeName == wxT("size") )
         {
             double x, y, z;
-            pChildNode->GetPropVal( wxT("sizeX"), &propVal );
+            pChildNode->GetAttribute( wxT("sizeX"), &propVal );
             propVal.ToDouble( &x );
-            pChildNode->GetPropVal( wxT("sizeY"), &propVal );
+            pChildNode->GetAttribute( wxT("sizeY"), &propVal );
             propVal.ToDouble( &y );
-            pChildNode->GetPropVal( wxT("sizeZ"), &propVal );
+            pChildNode->GetAttribute( wxT("sizeZ"), &propVal );
             propVal.ToDouble( &z );
             m_size.x = x;
             m_size.y = y;
@@ -144,11 +144,11 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
         }
         else if( nodeName == wxT("color") )
         {
-            pChildNode->GetPropVal( wxT("colorHTML"), &propVal );
+            pChildNode->GetAttribute( wxT("colorHTML"), &propVal );
             m_color.Set( propVal );
 
             long alpha;
-            pChildNode->GetPropVal( wxT("colorAlpha"), &propVal );
+            pChildNode->GetAttribute( wxT("colorAlpha"), &propVal );
             propVal.ToLong( &alpha );
 
             // Need to repeat it, there is no Alpha setter in wxWidgets.
@@ -156,20 +156,20 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
         }
         else if( nodeName == wxT("distance_coloring_state") )
         {
-            pChildNode->GetPropVal( wxT("used"), &propVal );
+            pChildNode->GetAttribute( wxT("used"), &propVal );
             m_DistColoring = parseXmlBoolString( propVal );
         }
         else if( nodeName == wxT("mean_fiber_options") )
         {
-            pChildNode->GetPropVal( wxT("colorHTML"), &propVal );
+            pChildNode->GetAttribute( wxT("colorHTML"), &propVal );
             m_meanFiberColor.Set( propVal );
             
             double opacity;
-            pChildNode->GetPropVal( wxT("opacity"), &propVal );
+            pChildNode->GetAttribute( wxT("opacity"), &propVal );
             propVal.ToDouble( &opacity );
             m_meanFiberOpacity = opacity;
             
-            pChildNode->GetPropVal( wxT("colorationMode"), &propVal );
+            pChildNode->GetAttribute( wxT("colorationMode"), &propVal );
             m_meanFiberColorationMode = Helper::getColorationModeFromString( propVal );
         }
         
@@ -1906,43 +1906,43 @@ bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode, const wxString &root
 {
     wxString floatPrecision = wxT( ".8" );
     
-    pCurNode->AddProperty( new wxXmlProperty( wxT( "type" ), getTypeTag() ) );
+    pCurNode->AddAttribute( new wxXmlAttribute( wxT( "type" ), getTypeTag() ) );
     
     wxXmlNode *pState = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "state" ) );
     pCurNode->AddChild( pState );
     
-    pState->AddProperty( new wxXmlProperty( wxT( "name" ), m_name) );
-    pState->AddProperty( new wxXmlProperty( wxT( "active" ), m_isActive? wxT( "yes" ) : wxT( "no" ) ) );
-    pState->AddProperty( new wxXmlProperty( wxT( "visible" ), m_isVisible? wxT( "yes" ) : wxT( "no" ) ) );
-    pState->AddProperty( new wxXmlProperty( wxT( "isNOT" ), m_isNOT? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "name" ), m_name) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "active" ), m_isActive? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "visible" ), m_isVisible? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "isNOT" ), m_isNOT? wxT( "yes" ) : wxT( "no" ) ) );
     
     
     wxXmlNode *pCenter = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "center" ) );
-    pCenter->AddProperty( new wxXmlProperty( wxT( "posX" ), wxStrFormat( m_center.x, floatPrecision ) ) );
-    pCenter->AddProperty( new wxXmlProperty( wxT( "posY" ), wxStrFormat( m_center.y, floatPrecision ) ) );
-    pCenter->AddProperty( new wxXmlProperty( wxT( "posZ" ), wxStrFormat( m_center.z, floatPrecision ) ) );
+    pCenter->AddAttribute( new wxXmlAttribute( wxT( "posX" ), wxStrFormat( m_center.x, floatPrecision ) ) );
+    pCenter->AddAttribute( new wxXmlAttribute( wxT( "posY" ), wxStrFormat( m_center.y, floatPrecision ) ) );
+    pCenter->AddAttribute( new wxXmlAttribute( wxT( "posZ" ), wxStrFormat( m_center.z, floatPrecision ) ) );
     pCurNode->AddChild( pCenter );
     
     wxXmlNode *pSize = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "size" ) );
-    pSize->AddProperty( new wxXmlProperty( wxT( "sizeX" ), wxStrFormat( m_size.x, floatPrecision ) ) );
-    pSize->AddProperty( new wxXmlProperty( wxT( "sizeY" ), wxStrFormat( m_size.y, floatPrecision ) ) );
-    pSize->AddProperty( new wxXmlProperty( wxT( "sizeZ" ), wxStrFormat( m_size.z, floatPrecision ) ) );
+    pSize->AddAttribute( new wxXmlAttribute( wxT( "sizeX" ), wxStrFormat( m_size.x, floatPrecision ) ) );
+    pSize->AddAttribute( new wxXmlAttribute( wxT( "sizeY" ), wxStrFormat( m_size.y, floatPrecision ) ) );
+    pSize->AddAttribute( new wxXmlAttribute( wxT( "sizeZ" ), wxStrFormat( m_size.z, floatPrecision ) ) );
     pCurNode->AddChild( pSize );
     
     // Color is currently only used by VOI, but let's save it anyway. We want to support it later on.
     wxXmlNode *pColor = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "color" ) );
-    pColor->AddProperty( new wxXmlProperty( wxT( "colorHTML" ), m_color.GetAsString(wxC2S_HTML_SYNTAX) ) );
-    pColor->AddProperty( new wxXmlProperty( wxT( "colorAlpha" ), wxStrFormat( m_color.Alpha() ) ) );
+    pColor->AddAttribute( new wxXmlAttribute( wxT( "colorHTML" ), m_color.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    pColor->AddAttribute( new wxXmlAttribute( wxT( "colorAlpha" ), wxStrFormat( m_color.Alpha() ) ) );
     pCurNode->AddChild( pColor );
     
     wxXmlNode *pDistanceColoring = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "distance_coloring_state" ) );
-    pDistanceColoring->AddProperty( new wxXmlProperty( wxT( "used" ), m_DistColoring ? wxT( "yes") : wxT( "no" ) ) );
+    pDistanceColoring->AddAttribute( new wxXmlAttribute( wxT( "used" ), m_DistColoring ? wxT( "yes") : wxT( "no" ) ) );
     pCurNode->AddChild( pDistanceColoring );
 
     wxXmlNode *pMeanFiberOptions = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "mean_fiber_options" ) );
-    pMeanFiberOptions->AddProperty( new wxXmlProperty( wxT( "colorHTML" ), m_meanFiberColor.GetAsString(wxC2S_HTML_SYNTAX) ) );
-    pMeanFiberOptions->AddProperty( new wxXmlProperty( wxT( "opacity" ), wxStrFormat( m_meanFiberOpacity, floatPrecision ) ) );
-    pMeanFiberOptions->AddProperty( new wxXmlProperty( wxT( "colorationMode" ), Helper::getColorationModeString( m_meanFiberColorationMode ) ) );
+    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorHTML" ), m_meanFiberColor.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "opacity" ), wxStrFormat( m_meanFiberOpacity, floatPrecision ) ) );
+    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorationMode" ), Helper::getColorationModeString( m_meanFiberColorationMode ) ) );
     pCurNode->AddChild( pMeanFiberOptions );
 
     return true;

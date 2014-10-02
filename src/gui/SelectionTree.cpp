@@ -430,7 +430,7 @@ bool SelectionTree::SelectionTreeNode::loadChildrenFromXMLNode( wxXmlNode *pChil
         
         // Check for node validity
         wxString objType;
-        if( !pSelObjNode->GetPropVal( wxT("type"), &objType ) )
+        if( !pSelObjNode->GetAttribute( wxT("type"), &objType ) )
         {
             return false;
         }
