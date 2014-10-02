@@ -77,7 +77,7 @@ bool MyApp::OnInit( void )
         fd = _open_osfhandle( (long)GetStdHandle( STD_OUTPUT_HANDLE ), 0);
         fp = _fdopen( fd, "w" );
         *stdout = *fp;
-        setvbuf( stdout, NULL, _IONBF, 0 );  */
+        setvbuf( stdout, NULL, _IONBF, 0 );
 
 // TODO fix may not work.
 /*#elif __WXMAC__
