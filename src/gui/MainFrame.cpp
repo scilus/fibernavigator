@@ -12,6 +12,7 @@
 #include "SelectionTree.h"
 #include "ToolBar.h"
 #include "TrackingWindow.h"
+#include "FMRIWindow.h"
 #include "../main.h"
 #include "../Logger.h"
 #include "../dataset/Anatomy.h"
@@ -22,6 +23,7 @@
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
@@ -342,9 +344,14 @@ void MainFrame::initLayout()
     m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindowHardi->EnableScrolling( true, true );
 
+	m_pFMRIWindow = new FMRIWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT )); // Contains realtime fmri properties
+    m_pFMRIWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pFMRIWindow->EnableScrolling( true, true );
+
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
     m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
+    m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 
@@ -440,6 +447,39 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
         return;
     }
     
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
+{
+    wxArrayString fileNames;
+    wxString caption          = wxT( "Choose a resting-state file" );
+    wxString wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*" );
+    wxString defaultDir       = wxEmptyString;
+    wxString defaultFileName  = wxEmptyString;
+    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxFD_OPEN | wxFD_MULTIPLE );
+    dialog.SetFilterIndex( 0 );
+    dialog.SetDirectory( m_lastPath );
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        m_lastPath = dialog.GetDirectory();
+        dialog.GetPaths( fileNames );
+    }
+
+    unsigned int nbErrors = for_each( fileNames.begin(), fileNames.end(), Loader( this, m_pListCtrl, false, true ) ).getNbErrors();
+
+    if ( nbErrors )
+    {
+        wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
+
+        wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
+        GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
+        GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
+        return;
+    }
+
+    m_pFMRIWindow->SetSelectButton();
+    m_pFMRIWindow->SetStartButton();
     refreshAllGLWidgets();
 }
 

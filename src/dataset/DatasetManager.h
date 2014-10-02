@@ -6,6 +6,7 @@
 #include "FibersGroup.h"
 #include "ODFs.h"
 #include "Maximas.h"
+#include "RestingStateNetwork.h"
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -43,6 +44,7 @@ public:
     std::vector<Maximas *>  getMaximas() const;
     Fibers *                getSelectedFibers( DatasetIndex index ) const;
     std::vector<Tensors *>  getTensors() const;
+    RestingStateNetwork     *m_pRestingStateNetwork;
 
     int                     getColumns() const;
     int                     getFrames() const;
@@ -64,6 +66,7 @@ public:
     bool                    isVectorsLoaded() const         { return false; }
     
     void                    forceLoadingAsMaximas(bool force) { m_forceLoadingAsMaximas = force; }
+    void                    forceLoadingAsRestingState(bool force) { m_forceLoadingAsRestingState = force; }
 
     void clear();
 
@@ -74,7 +77,9 @@ public:
     DatasetIndex createAnatomy()                                                 { return insert( new Anatomy() ); }
     DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( type ) ); }
     DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( pAnatomy ) ); }
-    DatasetIndex createAnatomy( std::vector<float> *pDataset, int sample )       { return insert( new Anatomy( pDataset, sample ) ); }
+    // TODO remove
+    //DatasetIndex createAnatomy( std::vector<float> *pDataset, int sample )       { return insert( new Anatomy( pDataset, sample ) ); }
+    DatasetIndex createAnatomy( std::vector<float> *pDataset, int type )         { return insert( new Anatomy( pDataset, type ) ); }
     DatasetIndex createCIsoSurface( Anatomy *pAnatomy )                          { return insert( new CIsoSurface( pAnatomy ) ); }
     DatasetIndex createFibersGroup()                                             { return insert( new FibersGroup() ); }
     DatasetIndex createODFs( const wxString &filename )                          { return insert( new ODFs( filename ) ); }
@@ -123,6 +128,9 @@ private:
     // Loads Maximas. Extension supported: .nii and .nii.gz
     DatasetIndex loadMaximas( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
     
+    // Loads Resting-state fMRI. Extension supported: .nii and .nii.gz
+    DatasetIndex loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+    
 private:
     static DatasetManager *m_pInstance;
 
@@ -141,6 +149,7 @@ private:
     FMatrix m_niftiTransform;
     
     bool m_forceLoadingAsMaximas;
+    bool m_forceLoadingAsRestingState;
 };
 
 #endif //DATASETMANAGER_H_

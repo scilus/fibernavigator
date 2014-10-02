@@ -21,12 +21,14 @@ private:
     // Set this to true to force the loader to load
     // anats looking as r4 ODFs as a file with 5 peaks per voxel instead.
     bool m_loadAsPeaks;
+    bool m_loadAsRestingState;
 public:
-    Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl, const bool loadAsPeaks = false ) 
+    Loader( MainFrame *pMainFrame, ListCtrl *pListCtrl, const bool loadAsPeaks = false, const bool loadAsRestingState = false )
     :   m_pMainFrame( pMainFrame ),
         m_pListCtrl( pListCtrl ),
         m_error( 0 ),
-        m_loadAsPeaks( loadAsPeaks )
+        m_loadAsPeaks( loadAsPeaks ),
+        m_loadAsRestingState( loadAsRestingState )
     {
     }
 
@@ -71,10 +73,12 @@ public:
             else
             {
                 DatasetManager::getInstance()->forceLoadingAsMaximas( m_loadAsPeaks );
+                DatasetManager::getInstance()->forceLoadingAsRestingState( m_loadAsRestingState );
                 
                 DatasetIndex result = DatasetManager::getInstance()->load( filename, extension );
                 
                 DatasetManager::getInstance()->forceLoadingAsMaximas( false );
+                DatasetManager::getInstance()->forceLoadingAsRestingState( false );
                 
                 if( result.isOk() )
                 {

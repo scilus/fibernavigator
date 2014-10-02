@@ -6,7 +6,8 @@
 #include "ODFs.h"
 #include "Tensors.h"
 #include "Maximas.h"
-
+#include "RestingStateNetwork.h"
+#include "RTFMRIHelper.h"
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
 #include "../gui/SelectionTree.h"
@@ -34,7 +35,8 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
-    m_forceLoadingAsMaximas( false )
+    m_forceLoadingAsMaximas( false ),
+	m_forceLoadingAsRestingState( false )
 {
 }
 
@@ -312,7 +314,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                  (0 == pHeader->dim[4] 
                   || ( 15 == pHeader->dim[4] && !m_forceLoadingAsMaximas )
                   || 28 == pHeader->dim[4] 
-                  || 45 == pHeader->dim[4] 
+				  || ( 45 == pHeader->dim[4] && !m_forceLoadingAsRestingState )
                   || 66 == pHeader->dim[4] 
                   || 91 == pHeader->dim[4] 
                   || 120 == pHeader->dim[4] 
@@ -339,6 +341,17 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
             else
             {
                 result = loadMaximas( filename, pHeader, pBody );
+            }
+        }
+		else if( m_forceLoadingAsRestingState )
+        {
+            if ( m_anatomies.empty() )
+            {
+                Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
+            }
+            else
+            {
+                result = loadRestingState( filename, pHeader, pBody );
             }
         }
         else
@@ -593,6 +606,43 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 
 //////////////////////////////////////////////////////////////////////////
 
+// Loads a resting-state profile. Extension supported: .nii and .nii.gz
+DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
+{
+    Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
+	Anatomy *pAnatomy = new Anatomy( filename, RGB ); //OVERLAY
+	m_pRestingStateNetwork = new RestingStateNetwork();
+	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
+    if( m_pRestingStateNetwork->load( pHeader, pBody ) )
+    {
+        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+        pAnatomy->setThreshold( THRESHOLD );
+        pAnatomy->setAlpha( ALPHA );
+        pAnatomy->setShow( SHOW );
+        pAnatomy->setShowFS( SHOW_FS );
+        pAnatomy->setUseTex( USE_TEX );
+		//wxString givenName = wxT("Network");
+		//pAnatomy->setName( givenName );
+		pAnatomy->setFloatDataset( m_pRestingStateNetwork->data );
+
+        DatasetIndex index = insert( pAnatomy );
+		m_pRestingStateNetwork->setNetworkInfo( index );
+
+        SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+        
+        for( SelectionTree::SelectionObjectVector::iterator objsIt = objs.begin(); objsIt != objs.end(); ++objsIt )
+        {
+            (*objsIt)->update();
+        }
+		
+        return index;
+    }
+	
+    delete pAnatomy;
+    return BAD_INDEX;
+}
+//////////////////////////////////////////////////////////////////////////
+
 // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
 DatasetIndex DatasetManager::loadFibers( const wxString &filename )
 {
@@ -659,6 +709,7 @@ DatasetIndex DatasetManager::addFibers( Fibers* fibers )
 
     return index;
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 

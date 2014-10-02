@@ -10,6 +10,7 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/ShaderHelper.h"
 #include "../misc/lic/FgeOffscreen.h"
@@ -422,6 +423,7 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
             ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
             SceneManager::getInstance()->setSelBoxChanged( true );
             RTTrackingHelper::getInstance()->setRTTDirty( true );
+			RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
         }
     }
     m_lastPos = evt.GetPosition();
@@ -700,7 +702,7 @@ void MainCanvas::render()
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
                 // FIXME: Screenshot crashes the GUI
-                int size = 2048;
+                int size = 4096;
 
                 FgeOffscreen fbo( size, size, true );
                 if( SceneManager::getInstance()->getClearToBlack() )
@@ -780,7 +782,7 @@ void MainCanvas::render()
                     //TODO, may be useful later
                     //renderDrawerDisplay();
                 }
-
+				//Real-time Fiber Tractography
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {	
 					m_pRealTimeFibers->seed();
@@ -792,6 +794,17 @@ void MainCanvas::render()
                     else
                         m_pRealTimeFibers->renderRTTFibers(true);
                 }
+				//Real-time fMRI correlation
+				if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )
+                {	
+					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
+                }
+				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
+				{
+					bool move = DatasetManager::getInstance()->m_pRestingStateNetwork->isBoxMoving();
+					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(move);
+					DatasetManager::getInstance()->m_pRestingStateNetwork->setBoxMoving(false);
+				}
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
@@ -1457,7 +1470,7 @@ void MainCanvas::segment()
     }
 
     //Create a new anatomy for the tumor
-    int indx = DatasetManager::getInstance()->createAnatomy( resultData, 0 );
+	int indx = DatasetManager::getInstance()->createAnatomy( resultData, HEAD_BYTE );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
     pNewAnatomy->setShowFS(false);
     // TODO: Change hard coded value and use enum instead

@@ -2793,7 +2793,7 @@ void Fibers::draw()
         return;
     }
 
-    if( m_useTransparency )
+    if( m_useTransparency && !m_useIntersectedFibers )
     {
         glPushAttrib( GL_ALL_ATTRIB_BITS );
         glEnable( GL_BLEND );
@@ -2808,7 +2808,19 @@ void Fibers::draw()
     // Otherwise, use the drawCrossingFibers
     if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
-        drawCrossingFibers();
+        if( m_useTransparency )
+        {
+            glPushAttrib( GL_ALL_ATTRIB_BITS );
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_ONE, GL_ONE );
+            glDepthMask( GL_FALSE );
+            drawCrossingFibers();
+            glPopAttrib();
+        }
+        else
+        {
+            drawCrossingFibers();
+        }
         return;
     }
 

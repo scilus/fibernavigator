@@ -23,6 +23,7 @@ class SceneObject;
 class SelectionObject;
 class SelectionTree;
 class TrackingWindow;
+class FMRIWindow;
 
 enum DrawMode
 {
@@ -37,6 +38,7 @@ class MainFrame : public wxFrame
     friend class MenuBar;
     friend class PropertiesWindow;
     friend class TrackingWindow;
+    friend class FMRIWindow;
 
 public:
     MainFrame( const wxString &title, const wxPoint &pos, const wxSize &size );
@@ -58,6 +60,7 @@ public:
     void onTreeChange();
     void onLoad                             ( wxCommandEvent& evt );
     void onLoadAsPeaks                      ( wxCommandEvent& evt );
+    void onLoadAsRestingState               ( wxCommandEvent& evt );
     long getCurrentListIndex() const         { return m_currentListIndex; }
     void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
@@ -83,6 +86,7 @@ public:
     PropertiesWindow    *m_pPropertiesWindow;
     TrackingWindow      *m_pTrackingWindow;
     TrackingWindow      *m_pTrackingWindowHardi;
+    FMRIWindow          *m_pFMRIWindow;
     MainCanvas          *m_pMainGL;
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
