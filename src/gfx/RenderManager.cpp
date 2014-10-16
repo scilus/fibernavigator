@@ -1,4 +1,5 @@
 #include "RenderManager.h"
+#include <iostream>
 
 #include "../Logger.h"
 
