@@ -531,7 +531,7 @@ void TrackingWindow::OnMapSeeding( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 	m_pBtnStart->Enable( true );
     
-	//Set nb of seeds depending on the seeding mode
+	//Set nb of seeds depending on the seeding mode 
 	if( !RTTrackingHelper::getInstance()->isSeedMap() )
     {
 		m_pSliderAxisSeedNb->SetValue( 10 );

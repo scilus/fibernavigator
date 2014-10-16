@@ -167,8 +167,6 @@ bool MyApp::OnInit( void )
             exit( 0 );
         }
         
-        RenderManager::getInstance()->queryGPUCapabilities();
-        
         return true;
 
     }

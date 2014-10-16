@@ -134,6 +134,8 @@ void TheScene::initGL( int whichView )
         {
             Logger::getInstance()->print( wxT( "Status: Using GLEW " ) + wxString::FromAscii( (char*)glewGetString( GLEW_VERSION ) ), LOGLEVEL_MESSAGE );
 
+            RenderManager::getInstance()->queryGPUCapabilities();
+
             wxString vendorId;
             wxString rendererId;
             vendorId   = wxString::FromAscii( (char*)glGetString( GL_VENDOR   ) );

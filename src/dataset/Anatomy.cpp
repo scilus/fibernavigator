@@ -102,7 +102,7 @@ Anatomy::Anatomy( const Anatomy * const pAnatomy )
 }
 
 Anatomy::Anatomy( std::vector< float >* pDataset, 
-                  const int sample ) 
+                  const int type )
 : DatasetInfo(),
   m_isSegmentOn( false ),
   m_dataType( 2 ),
@@ -118,13 +118,36 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
     m_rows    = DatasetManager::getInstance()->getRows();
     m_frames  = DatasetManager::getInstance()->getFrames();
     m_bands   = 1;
+    
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
 
-    m_type    = HEAD_BYTE;
+    m_type    = type;
 
     m_isLoaded = true;
 
-    m_floatDataset.resize( m_columns * m_frames * m_rows );
+    int datasetSize = m_columns * m_frames * m_rows;
+    m_floatDataset.resize( datasetSize );
+    
     std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
+    
+    float dataMax = 0.0f;
+    for( int i(0); i < datasetSize; ++i )
+    {
+        if (m_floatDataset[i] > dataMax)
+        {
+            dataMax = m_floatDataset[i];
+        }
+    }
+    
+    for( int i(0); i < datasetSize; ++i )
+    {
+        m_floatDataset[i] = m_floatDataset[i] / dataMax;
+    }
+    
+    m_oldMax    = dataMax;
+    m_newMax    = 1.0;
 }
 
 Anatomy::Anatomy( const int type )
@@ -168,6 +191,52 @@ Anatomy::Anatomy( const int type )
         // Only compiled and runned in debug
         assert(false);
     }
+}
+
+Anatomy::Anatomy( const wxString &filename, const int type )
+: DatasetInfo(),
+m_isSegmentOn( false ),
+m_dataType( 2 ),
+m_pTensorField( NULL ),
+m_useEqualizedDataset( false ),
+m_lowerEqThreshold( LOWER_EQ_THRES ),
+m_upperEqThreshold( UPPER_EQ_THRES ),
+m_currentLowerEqThreshold( -1 ),
+m_currentUpperEqThreshold( -1 ),
+m_originalAxialOrientation( ORIENTATION_UNDEFINED )
+{
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
+    
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
+    
+    if(type == OVERLAY)
+    {
+        m_bands         = 1;
+        m_isLoaded      = true;
+        m_type          = type;
+        
+        m_floatDataset.resize( m_columns * m_frames * m_rows, 0.0f );
+    }
+    if(type == RGB)
+    {
+        m_bands         = 3;
+        m_isLoaded      = true;
+        m_type          = type;
+        
+        m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
+    }
+    
+    m_fullPath = filename;
+    
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 }
 
 void Anatomy::add( Anatomy* pAnatomy )
@@ -939,6 +1008,20 @@ void Anatomy::saveNifti( wxString fileName )
         }
         
         // Do not move the call to nifti_image_write out of the 
+        // if, because it will crash, since the temp vector will
+        // not exist anymore, and pImage->data will point to garbage.
+        pImage->data = &tmp[0];
+        nifti_image_write( pImage );
+    }
+    else if( m_type == OVERLAY )
+    {
+        vector<float> tmp( pDataset->size() );
+        for(unsigned int i(0); i < pDataset->size(); ++i )
+        {
+            tmp[i] = (float)( (*pDataset)[i] * m_oldMax );
+        }
+
+        // Do not move the call to nifti_image_write out of the
         // if, because it will crash, since the temp vector will
         // not exist anymore, and pImage->data will point to garbage.
         pImage->data = &tmp[0];
