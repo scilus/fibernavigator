@@ -1400,6 +1400,8 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
         newSelectionObjectId = m_pTreeWidget->AppendItem( pCurObj->getTreeId(), pSelObj->getName(), 0, -1, pTreeItem );
     }
     
+    pSelObj->setTreeId( newSelectionObjectId );
+    
     m_pTreeWidget->EnsureVisible( newSelectionObjectId );
     m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelObj->getIcon() );
 
@@ -1407,7 +1409,6 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
     m_pTreeWidget->SelectItem(newSelectionObjectId, true);
     
-    pSelObj->setTreeId( newSelectionObjectId );    
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
