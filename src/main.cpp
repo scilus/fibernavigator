@@ -29,6 +29,10 @@
 
 #include <exception>
 
+#ifdef __WXMAC__
+    #import <CoreFoundation/CoreFoundation.h>
+#endif
+
 wxString    MyApp::respath;
 wxString    MyApp::shaderPath;
 wxString    MyApp::iconsPath;
@@ -80,7 +84,7 @@ bool MyApp::OnInit( void )
         setvbuf( stdout, NULL, _IONBF, 0 );
 
 // TODO fix may not work.
-/*#elif __WXMAC__
+#elif __WXMAC__
 
         // If we use the above code to get the same on OSX, I get a segfault somewhere
         // therefore I use the OSX native code here:
@@ -100,7 +104,8 @@ bool MyApp::OnInit( void )
 
         respath += _T( "/Contents/Resources/" );
         shaderPath = respath + _T( "GLSL/" );
-        iconsPath = respath + _T( "icons/" );*/
+        iconsPath = respath + _T( "icons/" );
+        std::cout << std::endl << iconsPath << std::endl;
 
 #else
         if ( respath.Last() != '/' )
