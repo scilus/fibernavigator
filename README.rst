@@ -8,7 +8,7 @@ The Fibernavigator is a tool designed for a fast and versatile visualization of 
 If you are new here and are coming after seeing the presentation in Rome, you can find 
 the version containing Real-time fMRI and all the latest tools in the Releases_ page.
 
-For other users, please note that the Fibernavigator now has a Real-time fMRI mode,
+For other users, please note that the Fibernavigator now has a Real-time fMRI mode and
 new anatomy coloring modes. The branch containing this code is rtfmri-coloring-feature,
 and is based on wxWidgets 3.0.
 
