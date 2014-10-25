@@ -3,7 +3,19 @@ Fibernavigator
 
 The Fibernavigator is a tool designed for a fast and versatile visualization of fibers datasets.
 
-**NEW!** New **video tutorials** of the Fibernavigator are available.
+**Welcome new users**
+
+If you are new here and are coming after seeing the presentation in Rome, you can find 
+the version containing Real-time fMRI and all the latest tools in the Releases_ page.
+
+For other users, please note that the Fibernavigator now has a Real-time fMRI mode,
+new anatomy coloring modes. The branch containing this code is rtfmri-coloring-feature,
+and is based on wxWidgets 3.0.
+
+Tutorials
+---------
+
+New **video tutorials** of the Fibernavigator are available.
 
 - `Scene navigation`_: how to interact with the 3D view, move planes, etc.
 - `Mesh display and interaction`_: how to create and modify the display of meshes.
