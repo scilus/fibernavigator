@@ -40,7 +40,7 @@ public:
 	void OnSliderRestMoved                     ( wxCommandEvent& event );
 	void OnStartRTFMRI					       ( wxCommandEvent& event );
 	void OnSliderCorrThreshMoved			   ( wxCommandEvent& event );
-	void OnSliderColorMoved					   ( wxCommandEvent& event );
+	void OnSliderClusterLevelMoved			   ( wxCommandEvent& event );
 	void OnSliderSizePMoved					   ( wxCommandEvent& event );
 	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
 	void onConvertRestingState				   ( wxCommandEvent& event );
@@ -61,9 +61,9 @@ private:
 	wxSlider            *m_pSliderCorrThreshold;
 	wxTextCtrl          *m_pTxtCorrThreshBox;
     wxStaticText        *m_pTextCorrThreshold;
-	wxSlider            *m_pSliderColorMap;
-	wxTextCtrl          *m_pTxtColorMapBox;
-    wxStaticText        *m_pTextColorMap;
+	wxSlider            *m_pSliderClusterLvl;
+	wxTextCtrl          *m_pTxtClusterLvlBox;
+    wxStaticText        *m_pTextClusterLvl;
 	wxSlider            *m_pSliderSizeP;
 	wxTextCtrl          *m_pTxtSizePBox;
     wxStaticText        *m_pTextSizeP;

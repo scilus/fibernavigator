@@ -42,7 +42,7 @@ m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
 m_corrThreshold( 1.65f ),
-m_colorSliderValue( 5.0f ),
+m_clusterLvlSliderValue( 9.0f ),
 m_boxMoving( false ),
 m_originL(0,0,0),
 m_origin(0,0,0)
@@ -789,7 +789,7 @@ void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> 
     + inMap[curIndex + m_columns * m_rows - m_columns]
     + inMap[curIndex + m_columns * m_rows + m_columns];
 
-    if( acc > 9.0 )
+    if( acc > m_clusterLvlSliderValue )
     {
         tmp.at( curIndex ) = true;
     }

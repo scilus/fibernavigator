@@ -23,7 +23,7 @@ public:
 	void SetTextureFromSlider( int sliderValue );
 	void SetTextureFromNetwork();
 	void SetCorrThreshold( float thresh ) { m_corrThreshold = thresh; }
-	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
+	void SetClusterLvlSliderValue (float value ) { m_clusterLvlSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void SetAlphaSliderValue (float value ) { m_alpha = value; }
 
@@ -76,7 +76,7 @@ private:
     float m_voxelSizeZ;
 	DatasetIndex m_index;
 	float m_corrThreshold;
-	float m_colorSliderValue;
+	float m_clusterLvlSliderValue;
 	int m_rowsL;
 	int m_columnsL;
 	int m_framesL;

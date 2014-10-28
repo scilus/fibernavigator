@@ -85,16 +85,16 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow5->Add( m_pTxtCorrThreshBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow5, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pTextColorMap = new wxStaticText( this, wxID_ANY, wxT("Max Z-Color range"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderColorMap = new MySlider( this, wxID_ANY, 0, 1, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderColorMap->SetValue( 50 );
-	Connect( m_pSliderColorMap->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderColorMoved) );
-    m_pTxtColorMapBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+	m_pTextClusterLvl = new wxStaticText( this, wxID_ANY, wxT("Cluster level"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderClusterLvl = new MySlider( this, wxID_ANY, 0, 0, 18, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderClusterLvl->SetValue( 9 );
+	Connect( m_pSliderClusterLvl->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderClusterLevelMoved) );
+    m_pTxtClusterLvlBox = new wxTextCtrl( this, wxID_ANY, wxT("9.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow6 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow6->Add( m_pTextColorMap, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow6->Add( m_pSliderColorMap,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow6->Add( m_pTxtColorMapBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxRow6->Add( m_pTextClusterLvl, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRow6->Add( m_pSliderClusterLvl,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+	pBoxRow6->Add( m_pTxtClusterLvlBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow6, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
@@ -196,11 +196,11 @@ void FMRIWindow::OnSliderCorrThreshMoved(  wxCommandEvent& WXUNUSED(event) )
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
-void FMRIWindow::OnSliderColorMoved(  wxCommandEvent& WXUNUSED(event) )
+void FMRIWindow::OnSliderClusterLevelMoved(  wxCommandEvent& WXUNUSED(event) )
 {
-	float sliderValue = m_pSliderColorMap->GetValue() / 10.0f;
-	m_pTxtColorMapBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetColorSliderValue( sliderValue );
+	float sliderValue = m_pSliderClusterLvl->GetValue();
+	m_pTxtClusterLvlBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetClusterLvlSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
