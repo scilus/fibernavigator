@@ -260,13 +260,13 @@ void FMRIWindow::onGenerateClusters( wxCommandEvent& WXUNUSED(event) )
     std::vector<std::vector<float>* > clusters = DatasetManager::getInstance()->m_pRestingStateNetwork->getClusters();
     for(unsigned int i=0; i < clusters.size(); i++)
     {
-	    int indx = DatasetManager::getInstance()->createAnatomy( clusters[i], OVERLAY );
+	    int indx = DatasetManager::getInstance()->createAnatomy( clusters[i], HEAD_SHORT );
     
 	    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
         pNewAnatomy->setShowFS(false);
 
-        pNewAnatomy->setType(OVERLAY);
-        pNewAnatomy->setDataType(16);
+        pNewAnatomy->setType(HEAD_SHORT);
+        pNewAnatomy->setDataType(4);
 	    pNewAnatomy->setShowFS(true);
         pNewAnatomy->setName( wxString::Format ( wxT("Cluster %u"), i ));
 	    pNewAnatomy->setThreshold( 0.01f );

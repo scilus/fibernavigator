@@ -778,12 +778,10 @@ vector<vector<float>* > RestingStateNetwork::getClusters()
     vector<vector<float>*> clusters;
     vector<float>* zMap = getZscores();
     vector<float> visited(m_datasetSizeL,0.0f);
-    vector<float>* singleClust = new vector<float>;
-    singleClust->assign(m_datasetSizeL,0.0f);
+    
     bool first = true;
     bool foundClust = false;
     
- 
     //Intensity of the current voxel
 
     std::list<Vector> toVisit;
@@ -798,7 +796,8 @@ vector<vector<float>* > RestingStateNetwork::getClusters()
 		{
 			for(int zz = 0; zz < m_framesL; zz++)
 			{
-                
+                vector<float>* singleClust = new vector<float>;
+
 				int i = zz * m_columnsL * m_rowsL + yy *m_columnsL + xx;
 
                 if(zMap->at(i) != 0 && first)
