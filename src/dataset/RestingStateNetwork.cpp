@@ -418,7 +418,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
         pSnippletSort = new unsigned int[siz + 1];
       
 
-        for( int i = 0; i < siz; ++i )
+        for(unsigned int i = 0; i < siz; ++i )
         {
             zVals[i] = ( m_3Dpoints[i].first.x * projMatrix[2] + m_3Dpoints[i].first.y * projMatrix[6]
                           + m_3Dpoints[i].first.z * projMatrix[10] + projMatrix[14] ) / ( m_3Dpoints[i].first.x * projMatrix[3]
@@ -766,6 +766,130 @@ std::vector<float>* RestingStateNetwork::getZscores()
 	}
 
 	return &m_zMap;
+}
+
+float RestingStateNetwork::getElement(int i,int j,int k, std::vector<float>* vect)
+{
+    return (*vect)[ i + ( j * m_columnsL ) + ( k * m_rowsL * m_columnsL ) ];
+}
+
+vector<vector<float>* > RestingStateNetwork::getClusters()
+{
+    vector<vector<float>*> clusters;
+    vector<float>* zMap = getZscores();
+    vector<float> visited(m_datasetSizeL,0.0f);
+    vector<float>* singleClust = new vector<float>;
+    singleClust->assign(m_datasetSizeL,0.0f);
+    bool first = true;
+    bool foundClust = false;
+    
+ 
+    //Intensity of the current voxel
+
+    std::list<Vector> toVisit;
+    int north, south, east, west, front, back, x, y, z;
+    float NorthV, EastV, SouthV, WestV, FrontV, BackV;
+    float resultNorth, resultEast, resultSouth, resultWest, resultFront, resultBack;
+
+    //Add pixel to the top
+    for(int xx = 0; xx < m_columnsL; xx++)
+	{
+		for(int yy = 0; yy < m_rowsL; yy++)
+		{
+			for(int zz = 0; zz < m_framesL; zz++)
+			{
+                
+				int i = zz * m_columnsL * m_rowsL + yy *m_columnsL + xx;
+
+                if(zMap->at(i) != 0 && first)
+                {  
+                    singleClust->assign(m_datasetSizeL,0.0f);
+                    visited[i] = 1.0f;
+                    singleClust->at( i ) = 1.0f; //Mark as read
+                    toVisit.push_front(Vector(xx,yy,zz));
+                    first = false;
+                }
+                else if(zMap->at(i) != 0 && visited[i] == 0)
+                {
+                    singleClust->assign(m_datasetSizeL,0.0f);
+                    visited[i] = 1.0f;
+                    singleClust->at( i ) = 1.0f; //Mark as read
+                    toVisit.push_front(Vector(xx,yy,zz));
+                }
+
+                //While there's still pixel to visit
+                while(!toVisit.empty())
+                {
+                    foundClust = true;
+                    x = toVisit.front()[0];
+                    y = toVisit.front()[1];
+                    z = toVisit.front()[2];
+                    toVisit.pop_front();
+
+                    singleClust->at( x + y * m_columnsL + z * m_rowsL * m_columnsL ) = 1.0f; //Mark as read
+                    visited[x + y * m_columnsL + z * m_rowsL * m_columnsL] = 1.0f;
+
+                    north = std::max( 0, y - 1 );
+                    south = std::min( m_rowsL - 1, y + 1 );
+                    east  = std::min( m_columnsL - 1, x + 1 );
+                    west  = std::max( 0, x - 1 );
+                    front = std::max( 0, z - 1 );
+                    back  = std::min( m_framesL - 1, z + 1 );
+
+                    NorthV = getElement( x, north, z, zMap );
+                    SouthV = getElement( x, south, z, zMap );
+                    EastV = getElement( east, y, z, zMap );
+                    WestV = getElement( west, y, z, zMap );
+                    FrontV = getElement( x, y, front, zMap );
+                    BackV = getElement( x, y, back, zMap );
+
+                    resultNorth = getElement( x, north, z, singleClust );
+                    resultSouth = getElement( x, south, z, singleClust );
+                    resultEast = getElement( east, y, z, singleClust );
+                    resultWest = getElement( west, y, z, singleClust );
+                    resultFront = getElement( x, y, front, singleClust );
+                    resultBack = getElement( x, y, back, singleClust );
+
+                    if(NorthV > 0.0f && resultNorth != 1.0f) //North
+                    {
+                        toVisit.push_front(Vector(x,north,z));
+                    }
+
+                    if(SouthV > 0.0f && resultSouth != 1.0f) //South
+                    {
+                        toVisit.push_front(Vector(x,south,z));
+                    }
+
+                    if(EastV > 0.0f && resultEast != 1.0f) //East
+                    {
+                        toVisit.push_front(Vector(east,y,z));
+                    }
+
+                    if(WestV > 0.0f && resultWest != 1.0f) //West
+                    {
+                        toVisit.push_front(Vector(west,y,z));
+                    }
+
+                    if(FrontV > 0.0f && resultFront != 1.0f) //Front
+                    {
+                        toVisit.push_front(Vector(x,y,front));
+                    }
+
+                    if(BackV > 0.0f && resultBack != 1.0f) //Back
+                    {
+                        toVisit.push_front(Vector(x,y,back));
+                    }
+                }
+
+                if(foundClust)
+                {
+                    clusters.push_back(singleClust);
+                    foundClust = false;
+                }
+            }
+        }
+    }
+    return clusters;
 }
 
 void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int curIndex)

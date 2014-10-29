@@ -35,11 +35,13 @@ public:
 	bool isBoxMoving() { return m_boxMoving; }
 
 	std::vector<float>* getZscores();
+    std::vector<std::vector<float>* > getClusters();
 	DatasetIndex getIndex()   { return m_index; }
 	DatasetIndex getColumns() { return m_columns; }
 	DatasetIndex getRows()    { return m_rows; }
 	DatasetIndex getFrames()  { return m_frames; }
 	DatasetIndex getBands()   { return m_bands; }
+    float getElement(int,int,int,std::vector<float>*);
 	
 	std::vector<float> data; //Used for texture mapping
 	

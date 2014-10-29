@@ -113,7 +113,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	m_pSliderAlpha = new MySlider( this, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderAlpha->SetValue( 50 );
 	Connect( m_pSliderAlpha->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderAlphaMoved) );
-    m_pTxtAlphaBox = new wxTextCtrl( this, wxID_ANY, wxT("0.8"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtAlphaBox = new wxTextCtrl( this, wxID_ANY, wxT("0.5"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow8 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow8->Add( m_pTextAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
@@ -254,21 +254,24 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 
 void FMRIWindow::onGenerateClusters( wxCommandEvent& WXUNUSED(event) )
 {
-	//Convert to anat
+	//Convert to anat each cluster inside the zmap
 	DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
 
-	std::vector<float>* data = DatasetManager::getInstance()->m_pRestingStateNetwork->getZscores();
-	int indx = DatasetManager::getInstance()->createAnatomy( data, OVERLAY );
+    std::vector<std::vector<float>* > clusters = DatasetManager::getInstance()->m_pRestingStateNetwork->getClusters();
+    for(unsigned int i=0; i < clusters.size(); i++)
+    {
+	    int indx = DatasetManager::getInstance()->createAnatomy( clusters[i], OVERLAY );
     
-	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
-    pNewAnatomy->setShowFS(false);
+	    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+        pNewAnatomy->setShowFS(false);
 
-    pNewAnatomy->setType(OVERLAY);
-    pNewAnatomy->setDataType(16);
-	pNewAnatomy->setShowFS(true);
-    pNewAnatomy->setName( wxT("Z-score map") );
-	pNewAnatomy->setThreshold( 0.01f );
-    MyApp::frame->m_pListCtrl->InsertItem( indx );
+        pNewAnatomy->setType(OVERLAY);
+        pNewAnatomy->setDataType(16);
+	    pNewAnatomy->setShowFS(true);
+        pNewAnatomy->setName( wxString::Format ( wxT("Cluster %u"), i ));
+	    pNewAnatomy->setThreshold( 0.01f );
+        MyApp::frame->m_pListCtrl->InsertItem( indx );
+    }
 
 	RTFMRIHelper::getInstance()->setRTFMRIReady(false);
 
