@@ -42,7 +42,7 @@ m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
 m_corrThreshold( 1.65f ),
-m_clusterLvlSliderValue( 9.0f ),
+m_clusterLvlSliderValue( 20.0f ),
 m_boxMoving( false ),
 m_originL(0,0,0),
 m_origin(0,0,0)
@@ -660,15 +660,16 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 1; z < m_frames-1; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(binErode[i])
+				if(binErode[i] && !tmp[i])
 				{
-					erode(tmp,binErode,i);
-
-					if(tmp[i])
-					{
-						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zErode[i]));
-					}
+					erode(tmp,binErode,x,y,z);
 				}
+
+				if(tmp[i])
+				{
+					m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zErode[i]));
+				}
+				
 			}
 		}
 	}
@@ -891,9 +892,94 @@ vector<vector<float>* > RestingStateNetwork::getClusters()
     return clusters;
 }
 
-void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int curIndex)
+void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int xx, int yy, int zz)
 {
-	float acc  = inMap[curIndex - 1]
+
+	float nbConnectedVoxels = 1;
+	std::vector<bool> temp(tmp);
+    
+    std::list<Vector> toVisit;
+    int north, south, east, west, front, back, x, y, z;
+    bool NorthV, EastV, SouthV, WestV, FrontV, BackV;
+    bool resultNorth, resultEast, resultSouth, resultWest, resultFront, resultBack;
+
+	toVisit.push_front(Vector(xx,yy,zz));
+
+	while(!toVisit.empty())
+    {
+		x = toVisit.front()[0];
+        y = toVisit.front()[1];
+        z = toVisit.front()[2];
+        toVisit.pop_front();
+		int curIndex = x + y * m_columns + z * m_rows * m_columns;
+
+        tmp.at( curIndex ) = true; //Mark as read
+
+        north = std::max( 0, y - 1 );
+        south = std::min( m_rows - 1, y + 1 );
+        east  = std::min( m_columns - 1, x + 1 );
+        west  = std::max( 0, x - 1 );
+        front = std::max( 0, z - 1 );
+        back  = std::min( m_frames - 1, z + 1 );
+
+        NorthV =inMap[x + ( north * m_columns ) + ( z * m_rows * m_columns ) ];
+        SouthV = inMap[x+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        EastV = inMap[east+ ( y * m_columns ) + ( z * m_rows * m_columns ) ];
+        WestV = inMap[west+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        FrontV = inMap[x+ ( y * m_columns ) + ( front * m_rows * m_columns ) ];
+        BackV = inMap[x+ ( y * m_columns ) + ( back * m_rows * m_columns ) ];
+
+        resultNorth =tmp[x + ( north * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultSouth = tmp[x+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultEast = tmp[east+ ( y * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultWest = tmp[west+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultFront = tmp[x+ ( y * m_columns ) + ( front * m_rows * m_columns ) ];
+        resultBack = tmp[x+ ( y * m_columns ) + ( back * m_rows * m_columns ) ];
+
+        if(NorthV && !resultNorth) //North
+        {
+            toVisit.push_front(Vector(x,north,z));
+			nbConnectedVoxels++;
+        }
+
+        if(SouthV && !resultSouth) //South
+        {
+            toVisit.push_front(Vector(x,south,z));
+			nbConnectedVoxels++;
+        }
+
+        if(EastV  && !resultEast) //East
+        {
+            toVisit.push_front(Vector(east,y,z));
+			nbConnectedVoxels++;
+        }
+
+        if(WestV && !resultWest) //West
+        {
+            toVisit.push_front(Vector(west,y,z));
+			nbConnectedVoxels++;
+        }
+
+        if(FrontV && !resultFront) //Front
+        {
+            toVisit.push_front(Vector(x,y,front));
+			nbConnectedVoxels++;
+        }
+
+        if(BackV && !resultBack) //Back
+        {
+            toVisit.push_front(Vector(x,y,back));
+			nbConnectedVoxels++;
+        }			
+    }
+
+	if(nbConnectedVoxels < m_clusterLvlSliderValue)
+	{
+		tmp = temp;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	/*float acc  = inMap[curIndex - 1]
     + inMap[curIndex + 1]
     + inMap[curIndex - m_columns - 1]
     + inMap[curIndex - m_columns]
@@ -915,7 +1001,7 @@ void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> 
     if( acc > m_clusterLvlSliderValue )
     {
         tmp.at( curIndex ) = true;
-    }
+    }*/
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

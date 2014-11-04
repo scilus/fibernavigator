@@ -86,10 +86,10 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	m_pFMRISizer->Add( pBoxRow5, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextClusterLvl = new wxStaticText( this, wxID_ANY, wxT("Cluster level"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderClusterLvl = new MySlider( this, wxID_ANY, 0, 0, 18, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderClusterLvl->SetValue( 9 );
+	m_pSliderClusterLvl = new MySlider( this, wxID_ANY, 0, 0, 40, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderClusterLvl->SetValue( 20 );
 	Connect( m_pSliderClusterLvl->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderClusterLevelMoved) );
-    m_pTxtClusterLvlBox = new wxTextCtrl( this, wxID_ANY, wxT("9.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtClusterLvlBox = new wxTextCtrl( this, wxID_ANY, wxT("20.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow6 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow6->Add( m_pTextClusterLvl, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );

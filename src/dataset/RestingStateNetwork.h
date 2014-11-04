@@ -50,7 +50,7 @@ private:
 	void correlate(std::vector< float >& position);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 	std::vector<int> get3DIndexes(int x, int y, int z);
-	void erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int curIndex);
+	void erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int x, int y, int z);
 	
     
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
