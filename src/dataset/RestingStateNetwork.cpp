@@ -719,13 +719,13 @@ std::vector<float>* RestingStateNetwork::getZscores()
 
 				if(xx >1 && yy >1 && zz >1 && xx < m_columns && yy < m_rows && zz < m_frames)
 				{
-                    const int x = (unsigned int) std::min( (int)std::floor(xx / DatasetManager::getInstance()->getVoxelX() ), m_columns-1 );
-					const int y = (unsigned int) std::min( (int)std::floor(yy / DatasetManager::getInstance()->getVoxelY() ), m_rows-1 );
-					const int z = (unsigned int) std::min( (int)std::floor(zz / DatasetManager::getInstance()->getVoxelZ() ), m_frames-1 );
+                    const int x = (unsigned int) std::min( (int)std::floor(xx  ), m_columns-1 );
+					const int y = (unsigned int) std::min( (int)std::floor(yy  ), m_rows-1 );
+					const int z = (unsigned int) std::min( (int)std::floor(zz  ), m_frames-1 );
 
-					const float dx = ( xx / DatasetManager::getInstance()->getVoxelX() )-x;
-					const float dy = ( yy / DatasetManager::getInstance()->getVoxelY() )-y;
-					const float dz = ( zz / DatasetManager::getInstance()->getVoxelZ() )-z;
+					const float dx = ( xx  )-x;
+					const float dy = ( yy  )-y;
+					const float dz = ( zz  )-z;
 
 					const int nx = dx > 0.0 ? std::min( std::max(x+1,0), m_columns-1 ) : std::min( std::max(x,0), m_columns-1 );
 					const int ny = dy > 0.0 ? std::min( std::max(y+1,0), m_rows-1 ) : std::min( std::max(y,0), m_rows-1 );
