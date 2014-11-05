@@ -8,6 +8,7 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/RestingStateNetwork.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/RTFMRIHelper.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
@@ -75,9 +76,9 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 
 	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 500, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderCorrThreshold->SetValue( 165 );
+	m_pSliderCorrThreshold->SetValue( 200 );
 	Connect( m_pSliderCorrThreshold->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderCorrThreshMoved) );
-    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("1.65"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("2.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow5 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow5->Add( m_pTextCorrThreshold, 0, wxALIGN_CENTER | wxALL, 1 );
@@ -127,9 +128,14 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     m_pBtnGenerateClusters = new wxButton( this, wxID_ANY,wxT("Generate clusters"), wxDefaultPosition, wxSize(230, -1) );
 	Connect( m_pBtnGenerateClusters->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onGenerateClusters) );
 
+	m_pBtnTractofMRI = new wxToggleButton( this, wxID_ANY,wxT("Initiate tractography"), wxDefaultPosition, wxSize(230, -1) );
+	Connect( m_pBtnTractofMRI->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onInitiateTractography) );
+	m_pBtnTractofMRI->Enable(false);
+
     wxBoxSizer *pBoxRow9 = new wxBoxSizer( wxVERTICAL );
 	pBoxRow9->Add( m_pBtnConvertFMRI,   0, wxALIGN_CENTER | wxALL, 1);
     pBoxRow9->Add( m_pBtnGenerateClusters,   0, wxALIGN_CENTER | wxALL, 1);
+	pBoxRow9->Add( m_pBtnTractofMRI,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow9, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 }
@@ -247,6 +253,8 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 
 	DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+	RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
     m_pBtnStart->SetLabel(wxT("Start correlation"));
     m_pBtnStart->SetValue(false);
 
@@ -274,12 +282,27 @@ void FMRIWindow::onGenerateClusters( wxCommandEvent& WXUNUSED(event) )
     }
 
 	RTFMRIHelper::getInstance()->setRTFMRIReady(false);
+	
 
 	DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+	RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
     m_pBtnStart->SetLabel(wxT("Start correlation"));
     m_pBtnStart->SetValue(false);
 
+}
+
+void FMRIWindow::onInitiateTractography( wxCommandEvent& WXUNUSED(event) )
+{
+	RTFMRIHelper::getInstance()->toogleSeedFromfMRI();
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
+	RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+
+	if( RTFMRIHelper::getInstance()->isSeedFromfMRI() )
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(true);
+	else
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
 }
 
 void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
@@ -290,12 +313,15 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
     if( !RTFMRIHelper::getInstance()->isRTFMRIReady() )
     {
 		DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
-        RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
+		RTTrackingHelper::getInstance()->setRTTDirty(true);
+        RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
         m_pBtnStart->SetLabel(wxT("Start correlation"));
     }
     else
     {
         m_pBtnStart->SetLabel(wxT("Stop correlation"));
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(true);
 	}
 }
 

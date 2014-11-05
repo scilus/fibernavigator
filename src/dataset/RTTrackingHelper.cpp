@@ -14,6 +14,7 @@ RTTrackingHelper::RTTrackingHelper()
     m_isRTTReady( false ),
     m_isTrackActionPlaying( false ),
     m_isPaused( true ),
+	m_isSeedFromfMRI ( false ),
 	m_id( 0 )
 {
 }

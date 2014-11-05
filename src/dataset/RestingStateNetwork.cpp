@@ -4,10 +4,12 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "RestingStateNetwork.h"
+#include "../gui/MainFrame.h"
 
 #include "DatasetManager.h"
 #include "AnatomyHelper.h"
 #include "RTFMRIHelper.h"
+#include "RTTrackingHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
@@ -41,7 +43,7 @@ m_pointSize( 5.0f ),
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_corrThreshold( 1.65f ),
+m_corrThreshold( 2.0f ),
 m_clusterLvlSliderValue( 20.0f ),
 m_boxMoving( false ),
 m_originL(0,0,0),
@@ -370,6 +372,14 @@ void RestingStateNetwork::seedBased()
     }
 
 	render3D(false);
+
+	if(RTFMRIHelper::getInstance()->isSeedFromfMRI())
+	{
+		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setSeedFromfMRI(m_3Dpoints);
+		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setNbSeed(2);
+		RTTrackingHelper::getInstance()->setRTTDirty(true);
+	}
+
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 

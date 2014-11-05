@@ -55,7 +55,9 @@ public:
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
     void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
-	void setSeedMapInfo( Anatomy* info );							  
+	void setSeedMapInfo( Anatomy* info );	
+	void setSeedFromfMRI( const std::vector<std::pair<Vector,float> > &seedFromfMRI )	  { m_pSeedFromfMRI = seedFromfMRI; }
+
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
@@ -105,6 +107,7 @@ private:
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;
     std::vector<float> m_tensorsFA;
+	std::vector<std::pair<Vector,float> > m_pSeedFromfMRI;
     std::vector<std::vector<Vector> > m_fibersRTT;
     std::vector<std::vector<Vector> > m_colorsRTT;
 

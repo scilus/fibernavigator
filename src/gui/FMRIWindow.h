@@ -33,6 +33,7 @@ public:
     wxSizer* getWindowSizer();
 	void SetSelectButton(); 
 	void SetStartButton(){ m_pBtnStart->Enable( true ); m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));}
+	void setInitiateTractoBtn(){ m_pBtnTractofMRI->Enable ( true ); } 
 
 public:
 	void onSwitchViewRaw					   ( wxCommandEvent& event );
@@ -45,6 +46,7 @@ public:
 	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
 	void onConvertRestingState				   ( wxCommandEvent& event );
     void onGenerateClusters				       ( wxCommandEvent& event );
+	void onInitiateTractography                ( wxCommandEvent& event );
 	
 	
 	
@@ -73,6 +75,7 @@ private:
     wxStaticText        *m_pTextAlpha;
 	wxButton			*m_pBtnConvertFMRI;
     wxButton			*m_pBtnGenerateClusters;
+	wxToggleButton      *m_pBtnTractofMRI;
 
 	bool showRawData;
     

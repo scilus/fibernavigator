@@ -59,7 +59,7 @@ public:
 
 public:
     wxToggleButton      *m_pBtnStart;
-    wxTextCtrl          *m_pTxtTotalSeedNbBox;
+    
 
 
 private:
@@ -89,8 +89,8 @@ private:
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
 	wxButton			*m_pBtnConvert;
-    wxSlider            *m_pSliderAxisSeedNb;
-    wxTextCtrl          *m_pTxtAxisSeedNbBox;
+    
+    
     wxStaticText        *m_pTextAxisSeedNb;
     wxStaticText        *m_pTextTotalSeedNb;
     wxStaticLine        *m_pLineSeparator;

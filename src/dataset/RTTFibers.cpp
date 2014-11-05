@@ -4,7 +4,7 @@
  */
 
 #include "RTTFibers.h"
-#include "../main.h"
+
 #include "DatasetManager.h"
 #include "RTTrackingHelper.h"
 #include "../Logger.h"
@@ -23,6 +23,7 @@ using std::sort;
 
 #include <vector>
 using std::vector;
+#include "../main.h"
 
 //////////////////////////////////////////
 //Constructor
@@ -30,7 +31,7 @@ using std::vector;
 RTTFibers::RTTFibers()
 :   m_trackActionStep(std::numeric_limits<unsigned int>::max()),
     m_timerStep( 0 ),
-    m_FAThreshold( 0.10f ),
+    m_FAThreshold( 0.20f ),
     m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
     m_nbSeed ( 10.0f ),
@@ -140,7 +141,7 @@ void RTTFibers::seed()
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	//Evenly distanced seeds
-    if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap())
+	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
@@ -236,6 +237,60 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
+                        
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						{
+							m_fibersRTT.push_back( pointsF ); 
+							m_colorsRTT.push_back( colorF );
+							m_fibersRTT.push_back( pointsB ); 
+							m_colorsRTT.push_back( colorB );
+						}
+					}
+				}
+			}
+		}
+	}
+	//fMRI seeding
+	else if(RTTrackingHelper::getInstance()->isSeedFromfMRI())
+	{
+		RTTrackingHelper::getInstance()->m_pSliderAxisSeedNb->SetValue( m_nbSeed );
+		RTTrackingHelper::getInstance()->m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), m_nbSeed) );
+        RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), m_nbSeed*m_nbSeed*m_nbSeed*m_pSeedFromfMRI.size()) );
+
+		for( size_t k = 0; k < m_pSeedFromfMRI.size(); k++)
+		{
+			float xstep =  xVoxel / float( m_nbSeed - 1.0f );
+			float ystep =  yVoxel / float( m_nbSeed - 1.0f );
+			float zstep =  zVoxel / float( m_nbSeed - 1.0f );
+
+			float xx = m_pSeedFromfMRI[k].first.x * DatasetManager::getInstance()->getVoxelX();
+			float yy = m_pSeedFromfMRI[k].first.y * DatasetManager::getInstance()->getVoxelY();
+			float zz = m_pSeedFromfMRI[k].first.z * DatasetManager::getInstance()->getVoxelZ();
+
+			for( float x = xx - xVoxel; x < xx + xVoxel + xstep/2.0f; x+= xstep )
+			{
+				for( float y = yy - yVoxel; y < yy + yVoxel + ystep/2.0f; y+= ystep )
+				{
+					for( float z = zz - zVoxel; z < zz + zVoxel + zstep/2.0f; z+= zstep )
+					{
+
+						vector<Vector> pointsF; // Points to be rendered Forward
+						vector<Vector> colorF; //Color (local directions)Forward
+						vector<Vector> pointsB; // Points to be rendered Backward
+						vector<Vector> colorB; //Color (local directions) Backward
+                        
+						if(m_isHARDI)
+						{
+							//Track both sides
+							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+							performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+						}
+						else
+						{
+							//Track both sides
+							performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+						}
                         
 						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
 						{

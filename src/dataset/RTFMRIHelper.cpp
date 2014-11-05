@@ -8,7 +8,8 @@ RTFMRIHelper::RTFMRIHelper()
 :   m_isFileSelected( false ),
     m_isRTFMRIActive( false ),
     m_isRTFMRIDirty( false ),
-    m_isRTFMRIReady( false )
+    m_isRTFMRIReady( false ),
+	m_isSeedFromfMRI( false )
 {
 }
 
