@@ -40,6 +40,7 @@ RTTFibers::RTTFibers()
     m_vinvout( 0.2f ),
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
+	m_alpha( 1.0f ),
     m_isHARDI( false )
 {
 }
@@ -395,12 +396,14 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 		    //LINES
 		    else
 		    {
+				glEnable(GL_BLEND);
+			    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			    //Forward
 			    if( m_fibersRTT[j].size() > 2)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
 				    {
-					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
+					    glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
 					    glBegin( GL_LINES );
 						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
 						    glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
@@ -412,13 +415,14 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
 				    {
-					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
+					    glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
 					    glBegin( GL_LINES );
 						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
 						    glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
 					    glEnd();
 				    }
 			    }
+				glDisable(GL_BLEND);
 		    }   
 	    }
 	}   

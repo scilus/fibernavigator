@@ -257,15 +257,27 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxRow12->Add( RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxRow12, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,350), wxSize(230, 30) );
+	m_pTextOpacity = new wxStaticText( this, wxID_ANY, wxT("Opacity"), wxPoint(0,360), wxSize(70, -1), wxALIGN_CENTER );
+    m_pSliderOpacity = new MySlider( this, wxID_ANY, 0, 0, 100, wxPoint(60,360), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderOpacity->SetValue( 100 );
+    Connect( m_pSliderOpacity->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderOpacityMoved) );
+    m_pTxtOpacityBox = new wxTextCtrl( this, wxID_ANY, wxT("1"), wxPoint(190,360), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+	wxBoxSizer *pBoxRow13 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow13->Add( m_pTextOpacity, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRow13->Add( m_pSliderOpacity,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+	pBoxRow13->Add( m_pTxtOpacityBox,   0, wxALIGN_LEFT | wxALL, 1);
+	m_pTrackingSizer->Add( pBoxRow13, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,380), wxSize(230, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
 	m_pTrackingSizer->Add( m_pBtnConvert, 0, wxALL, 2 );
 
     /*-----------------------ANIMATION SECTION -----------------------------------*/
 
-    m_pLineSeparator = new wxStaticLine( this, wxID_ANY, wxPoint(0,390), wxSize(230,-1),wxHORIZONTAL,wxT("Separator"));
+    m_pLineSeparator = new wxStaticLine( this, wxID_ANY, wxPoint(0,430), wxSize(230,-1),wxHORIZONTAL,wxT("Separator"));
 
-    wxTextCtrl *animationZone = new wxTextCtrl( this, wxID_ANY, wxT("Animation"), wxPoint(50,400), wxSize(150, -1), wxTE_CENTER | wxTE_READONLY );
+    wxTextCtrl *animationZone = new wxTextCtrl( this, wxID_ANY, wxT("Animation"), wxPoint(50,410), wxSize(150, -1), wxTE_CENTER | wxTE_READONLY );
     animationZone->SetBackgroundColour( *wxLIGHT_GREY );
     wxFont font = animationZone->GetFont();
     font.SetPointSize( 10 );
@@ -282,10 +294,10 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     wxImage bmpStop(MyApp::iconsPath+ wxT("stop.png"), wxBITMAP_TYPE_PNG);
 
-    m_pPlayPause = new wxBitmapButton( this, wxID_ANY,m_bmpPlay, wxPoint(50,440), wxSize(50, -1) );
+    m_pPlayPause = new wxBitmapButton( this, wxID_ANY,m_bmpPlay, wxPoint(50,450), wxSize(50, -1) );
     Connect( m_pPlayPause->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnPlay) );
 
-    m_pBtnStop = new wxBitmapButton( this, wxID_ANY, bmpStop, wxPoint(100,440), wxSize(50, -1) );
+    m_pBtnStop = new wxBitmapButton( this, wxID_ANY, bmpStop, wxPoint(100,450), wxSize(50, -1) );
     Connect( m_pBtnStop->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnStop) );
 
 	wxBoxSizer *pBoxRowAnim = new wxBoxSizer( wxHORIZONTAL );
@@ -376,6 +388,14 @@ void TrackingWindow::OnSliderMinLengthMoved( wxCommandEvent& WXUNUSED(event) )
     m_pTxtMinLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMinFiberLength( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
+}
+
+void TrackingWindow::OnSliderOpacityMoved( wxCommandEvent& WXUNUSED(event) )
+{
+    float sliderValue = m_pSliderOpacity->GetValue() / 100.0f;
+    m_pTxtOpacityBox->SetValue(wxString::Format( wxT( "%.2f"), sliderValue) );
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setOpacity( sliderValue );
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->renderRTTFibers(false);
 }
 
 void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )

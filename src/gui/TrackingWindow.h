@@ -53,6 +53,7 @@ public:
     void OnSliderAxisSeedNbMoved               ( wxCommandEvent& event );
 	void OnMapSeeding                          ( wxCommandEvent& event );
 	void OnSelectSeedMap                       ( wxCommandEvent& event );
+	void OnSliderOpacityMoved				   ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
@@ -85,6 +86,9 @@ private:
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;
     wxTextCtrl          *m_pTxtMinLengthBox;
+	wxStaticText        *m_pTextOpacity;
+    wxSlider            *m_pSliderOpacity;
+    wxTextCtrl          *m_pTxtOpacityBox;
     wxSlider            *m_pSliderMaxLength;
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
