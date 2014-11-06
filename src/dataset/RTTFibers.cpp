@@ -396,8 +396,10 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 		    //LINES
 		    else
 		    {
-				glEnable(GL_BLEND);
-			    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glPushAttrib( GL_ALL_ATTRIB_BITS );
+        glEnable( GL_BLEND );
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glDepthMask( GL_FALSE );
 			    //Forward
 			    if( m_fibersRTT[j].size() > 2)
 			    {
@@ -423,6 +425,7 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 				    }
 			    }
 				glDisable(GL_BLEND);
+				glPopAttrib();
 		    }   
 	    }
 	}   

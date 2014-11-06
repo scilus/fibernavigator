@@ -25,6 +25,7 @@
 #include <fstream>
 #include <limits>
 #include <vector>
+#include <math.h>
 
 // TODO remove
 //#include "../gfx/Image.h"
@@ -376,7 +377,7 @@ void RestingStateNetwork::seedBased()
 	if(RTFMRIHelper::getInstance()->isSeedFromfMRI())
 	{
 		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setSeedFromfMRI(m_3Dpoints);
-		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setNbSeed(2);
+		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setNbSeed(ceil(m_xL));
 		RTTrackingHelper::getInstance()->setRTTDirty(true);
 	}
 
@@ -470,6 +471,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				B = v;
 			}
 
+			glPushAttrib( GL_ALL_ATTRIB_BITS );
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
@@ -493,6 +495,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
+			glPopAttrib();
 
 			int zz = ((m_3Dpoints[s].first.z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
 				int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
