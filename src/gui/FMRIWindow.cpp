@@ -324,7 +324,10 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
     else
     {
         m_pBtnStart->SetLabel(wxT("Stop correlation"));
-		RTTrackingHelper::getInstance()->setSeedFromfMRI(true);
+        if(RTFMRIHelper::getInstance()->isSeedFromfMRI())
+        {
+		    RTTrackingHelper::getInstance()->setSeedFromfMRI(true);
+        }
 	}
 }
 

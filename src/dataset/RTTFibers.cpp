@@ -412,7 +412,7 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 				    {
                         if(i > m_fibersRTT[j].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
                         {
-                            glPointSize(15.0f);
+                            glPointSize(10.0f);
                             glColor3f( 1.0f,0.0f,0.0f );
 					        glBegin( GL_POINTS );
 						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
@@ -438,7 +438,7 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 				    {
                         if(i > m_fibersRTT[j+1].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
                         {
-                            glPointSize(15.0f);
+                            glPointSize(10.0f);
                             glColor3f( 1.0f, 0.0f, 0.0f );
 					        glBegin( GL_POINTS );
 						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
