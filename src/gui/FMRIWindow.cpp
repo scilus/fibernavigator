@@ -316,6 +316,7 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
 		RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
 		RTTrackingHelper::getInstance()->setRTTDirty(true);
         RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+        m_pBtnTractofMRI->SetValue(false);
         m_pBtnStart->SetLabel(wxT("Start correlation"));
     }
     else

@@ -81,9 +81,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pTextMinLength = new wxStaticText( this, wxID_ANY, wxT("Min length"), wxPoint(0,180), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderMinLength = new MySlider( this, wxID_ANY, 0, 0, 400, wxPoint(60,180), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderMinLength->SetValue( 10 );
+    m_pSliderMinLength->SetValue( 60 );
     Connect( m_pSliderMinLength->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderMinLengthMoved) );
-    m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("10 mm"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("60 mm"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     m_pTextMaxLength = new wxStaticText( this, wxID_ANY, wxT("Max length"), wxPoint(0,210), wxSize(60, -1), wxALIGN_CENTER );
     m_pSliderMaxLength = new MySlider( this, wxID_ANY, 0, 0, 300, wxPoint(60,210), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -215,9 +215,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pTextMinLength = new wxStaticText( this, wxID_ANY, wxT("Min length"), wxPoint(0,240), wxSize(70, -1), wxALIGN_CENTER );
     m_pSliderMinLength = new MySlider( this, wxID_ANY, 0, 0, 400, wxPoint(60,240), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderMinLength->SetValue( 10 );
+    m_pSliderMinLength->SetValue( 60 );
     Connect( m_pSliderMinLength->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderMinLengthMoved) );
-    m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("10 mm"), wxPoint(190,240), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("`60 mm"), wxPoint(190,240), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow9 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow9->Add( m_pTextMinLength, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );

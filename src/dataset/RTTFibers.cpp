@@ -38,7 +38,7 @@ RTTFibers::RTTFibers()
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
     m_vinvout( 0.2f ),
-    m_minFiberLength( 10 ),
+    m_minFiberLength( 60 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
     m_isHARDI( false )
@@ -365,8 +365,13 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 
     if( m_fibersRTT.size() > 0 )
     {
+        glPushAttrib( GL_ALL_ATTRIB_BITS );
+        glEnable( GL_BLEND );
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glDepthMask( GL_FALSE );
 	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
 	    { 
+
 		    //POINTS
 		    if( SceneManager::getInstance()->isPointMode() )
 		    {
@@ -374,8 +379,9 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    if( m_fibersRTT[j].size() > 0 )
 			    {
 					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size(), m_trackActionStep); i++ )
-				    {  
-					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
+				    {
+                        
+					    glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
 					    glBegin( GL_POINTS );
 						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
 					    glEnd();
@@ -386,7 +392,7 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
 					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size(), m_trackActionStep); i++ )
 				    {  
-					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
+					    glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
 					    glBegin( GL_POINTS );
 						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
 					    glEnd();
@@ -396,20 +402,30 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 		    //LINES
 		    else
 		    {
-				glPushAttrib( GL_ALL_ATTRIB_BITS );
-        glEnable( GL_BLEND );
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glDepthMask( GL_FALSE );
+				
 			    //Forward
 			    if( m_fibersRTT[j].size() > 2)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
 				    {
-					    glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
-					    glBegin( GL_LINES );
-						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-						    glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
-					    glEnd();
+                        if(i > m_fibersRTT[j].size() - 5)
+                        {
+                            glPointSize(15.0f);
+                            glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
+					        glBegin( GL_POINTS );
+						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+					        glEnd();
+                        }
+                        else
+                        {
+                            glPointSize(1.0f);
+                            glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
+					        glBegin( GL_LINES );
+						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+						        glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
+					        glEnd();
+                        }
+					    
 				    }
 			    }
 			    //Backward
@@ -417,17 +433,30 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
 				    {
-					    glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
-					    glBegin( GL_LINES );
-						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-						    glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
-					    glEnd();
+                        if(i > m_fibersRTT[j+1].size() - 5)
+                        {
+                            glPointSize(15.0f);
+                            glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
+					        glBegin( GL_POINTS );
+						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+					        glEnd();
+                        }
+                        else
+                        {
+                            glPointSize(1.0f);
+					        glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
+					        glBegin( GL_LINES );
+						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+						        glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
+					        glEnd();
+                        }
 				    }
 			    }
-				glDisable(GL_BLEND);
-				glPopAttrib();
+				
 		    }   
 	    }
+        glDisable(GL_BLEND);
+		glPopAttrib();
 	}   
 }
 
