@@ -26,6 +26,7 @@ public:
 	void SetClusterLvlSliderValue (float value ) { m_clusterLvlSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void SetAlphaSliderValue (float value ) { m_alpha = value; }
+    void setSeedFromTracto( const std::vector<Vector> &seedFromTracto )	  { m_pSeedFromTracto = seedFromTracto; }
 
 	void render3D(bool recalculateTexture);
 	void seedBased();
@@ -59,6 +60,7 @@ private:
 	std::vector<std::pair<Vector,float> > m_3Dpoints; //3D points and their positions
 	std::vector<float> m_smallt; //3x3x3 RGB values
 	std::vector<float> m_zMap; //1x1x1 zscores
+    std::vector<Vector> m_pSeedFromTracto;//Seed from tracto end points
 	
 	float m_zMin;
 	float m_zMax;
@@ -89,7 +91,8 @@ private:
 	bool m_normalize; 
 	bool m_boxMoving;
 	Vector m_originL;
-	Vector m_origin; 
+	Vector m_origin;
+
 
 };
 

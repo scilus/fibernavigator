@@ -337,32 +337,48 @@ void RestingStateNetwork::seedBased()
     Vector minCorner, maxCorner, middle;
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
-	for( unsigned int b = 0; b < selObjs.size(); b++ )
-	{
-		minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
-		maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+    if(!RTFMRIHelper::getInstance()->isSeedFromTracto())
+    {
+	    for( unsigned int b = 0; b < selObjs.size(); b++ )
+	    {
+		    minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
+		    minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
+		    minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+		    maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
+		    maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
+		    maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
 		
-		for( float x = minCorner.x; x <= maxCorner.x; x++)
-		{
-			for( float y = minCorner.y; y <= maxCorner.y; y++)
-			{
-				for( float z = minCorner.z; z <= maxCorner.z; z++)
-				{
-					//Switch to 3x3x3 from t1space
-					int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-					int yy = ((y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y;
-					int xx = ((x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x;
-					int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-					positions.push_back( i );
-				}
-			}
-		}
-		correlate(positions);
-	}
+		    for( float x = minCorner.x; x <= maxCorner.x; x++)
+		    {
+			    for( float y = minCorner.y; y <= maxCorner.y; y++)
+			    {
+				    for( float z = minCorner.z; z <= maxCorner.z; z++)
+				    {
+					    //Switch to 3x3x3 from t1space
+					    int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+					    int yy = ((y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y;
+					    int xx = ((x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x;
+					    int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+					    positions.push_back( i );
+				    }
+			    }
+		    }
+		    correlate(positions);
+	    }
+    }
+    else
+    {
+        for(unsigned int t = 0; t < m_pSeedFromTracto.size(); t++ )
+        {
+            //Switch to 3x3x3 from t1space
+            int zz = (((m_pSeedFromTracto[t].z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z) / m_zL;
+			int yy = (((m_pSeedFromTracto[t].y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y) / m_yL;
+			int xx = (((m_pSeedFromTracto[t].x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x) / m_xL;
+			int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+			positions.push_back( i );
+        }
+        correlate(positions);
+    }
 	
 	//TODO can be done in rendering directly while looping, change from fspace to t1space
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )

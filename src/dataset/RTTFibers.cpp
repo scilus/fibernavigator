@@ -7,6 +7,7 @@
 
 #include "DatasetManager.h"
 #include "RTTrackingHelper.h"
+#include "RTFMRIHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
@@ -369,6 +370,8 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
         glEnable( GL_BLEND );
 		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glDepthMask( GL_FALSE );
+        //for fmri
+        std::vector<Vector> positions; 
 	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
 	    { 
 
@@ -402,19 +405,19 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 		    //LINES
 		    else
 		    {
-				
 			    //Forward
 			    if( m_fibersRTT[j].size() > 2)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
 				    {
-                        if(i > m_fibersRTT[j].size() - 5)
+                        if(i > m_fibersRTT[j].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
                         {
                             glPointSize(15.0f);
-                            glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
+                            glColor3f( 1.0f,0.0f,0.0f );
 					        glBegin( GL_POINTS );
 						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
 					        glEnd();
+                            positions.push_back(Vector(m_fibersRTT[j][i].x,m_fibersRTT[j][i].y,m_fibersRTT[j][i].z));
                         }
                         else
                         {
@@ -433,13 +436,14 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
 				    {
-                        if(i > m_fibersRTT[j+1].size() - 5)
+                        if(i > m_fibersRTT[j+1].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
                         {
                             glPointSize(15.0f);
-                            glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
+                            glColor3f( 1.0f, 0.0f, 0.0f );
 					        glBegin( GL_POINTS );
 						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
 					        glEnd();
+                            positions.push_back(Vector(m_fibersRTT[j+1][i].x,m_fibersRTT[j+1][i].y,m_fibersRTT[j+1][i].z));
                         }
                         else
                         {
@@ -457,6 +461,11 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 	    }
         glDisable(GL_BLEND);
 		glPopAttrib();
+        if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+        {
+            DatasetManager::getInstance()->m_pRestingStateNetwork->setSeedFromTracto(positions);
+            RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+        }
 	}   
 }
 

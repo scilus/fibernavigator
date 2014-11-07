@@ -32,6 +32,7 @@ public:
     void OnPaint( wxPaintEvent &event );
     void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
+    
 
 
     void OnStartTracking                       ( wxCommandEvent& event );
@@ -44,7 +45,7 @@ public:
     void OnSelectFileHARDI                     ( wxCommandEvent& event );
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnShellSeeding                        ( wxCommandEvent& event );
-    void OnSelectMask                           ( wxCommandEvent& event );
+    void OnSelectMask                          ( wxCommandEvent& event );
     void OnInterpolate                         ( wxCommandEvent& event );
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
     void OnSliderMinLengthMoved                ( wxCommandEvent& event );
@@ -54,12 +55,14 @@ public:
 	void OnMapSeeding                          ( wxCommandEvent& event );
 	void OnSelectSeedMap                       ( wxCommandEvent& event );
 	void OnSliderOpacityMoved				   ( wxCommandEvent& event );
+    void OnEnableRSN                           ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
+    
     
 
 
@@ -93,6 +96,7 @@ private:
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
 	wxButton			*m_pBtnConvert;
+    
     
     
     wxStaticText        *m_pTextAxisSeedNb;

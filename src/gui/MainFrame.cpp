@@ -480,6 +480,7 @@ void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
 
     m_pFMRIWindow->SetSelectButton();
     m_pFMRIWindow->SetStartButton();
+    RTTrackingHelper::getInstance()->setEnableTractoRSN();
     refreshAllGLWidgets();
 }
 

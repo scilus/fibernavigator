@@ -128,7 +128,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     m_pBtnGenerateClusters = new wxButton( this, wxID_ANY,wxT("Generate clusters"), wxDefaultPosition, wxSize(230, -1) );
 	Connect( m_pBtnGenerateClusters->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onGenerateClusters) );
 
-	m_pBtnTractofMRI = new wxToggleButton( this, wxID_ANY,wxT("Initiate tractography"), wxDefaultPosition, wxSize(230, -1) );
+	m_pBtnTractofMRI = new wxToggleButton( this, wxID_ANY,wxT("Enable tractography"), wxDefaultPosition, wxSize(230, -1) );
 	Connect( m_pBtnTractofMRI->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onInitiateTractography) );
 	m_pBtnTractofMRI->Enable(false);
 
@@ -255,6 +255,7 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
 	RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
 	RTTrackingHelper::getInstance()->setRTTDirty(true);
+    m_pBtnTractofMRI->SetValue(false);
     m_pBtnStart->SetLabel(wxT("Start correlation"));
     m_pBtnStart->SetValue(false);
 
@@ -288,6 +289,7 @@ void FMRIWindow::onGenerateClusters( wxCommandEvent& WXUNUSED(event) )
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
 	RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
 	RTTrackingHelper::getInstance()->setRTTDirty(true);
+    m_pBtnTractofMRI->SetValue(false);
     m_pBtnStart->SetLabel(wxT("Start correlation"));
     m_pBtnStart->SetValue(false);
 

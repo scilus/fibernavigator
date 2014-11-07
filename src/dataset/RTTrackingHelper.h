@@ -25,6 +25,7 @@ public:
     bool isRTTActive() const    { return m_isRTTActive; }
     bool isTensorsInterpolated() const  { return m_interpolateTensors; }
 	bool isSeedFromfMRI() const { return m_isSeedFromfMRI; }
+    bool isTractoDrivenRSN() const { return m_isTractoDrivenRSN; }
 
     void setFileSelected( bool selected )     { m_isFileSelected = selected; }
     void setShellSeeds( bool shell )          { m_isShellSeeds = shell; }
@@ -46,10 +47,13 @@ public:
 	void setShellSeed(bool enabled) {m_isShellSeeds = enabled;}
 	void setSeedMap(bool enabled) {m_isSeedMap = enabled;}
 	int generateId() {return (++m_id);}
+    bool toogleTractoDrivenRSN()          { return m_isTractoDrivenRSN = !m_isTractoDrivenRSN; }
+    void setEnableTractoRSN(){ m_pBtnToggleEnableRSN->Enable ( true ); } 
 
 	wxSlider            *m_pSliderAxisSeedNb;
 	wxTextCtrl          *m_pTxtTotalSeedNbBox;
 	wxTextCtrl          *m_pTxtAxisSeedNbBox;
+    wxToggleButton      *m_pBtnToggleEnableRSN;
 	
 
 protected:
@@ -72,6 +76,7 @@ private:
     bool m_isTrackActionPlaying;
     bool m_isPaused;
 	bool m_isSeedFromfMRI;
+    bool m_isTractoDrivenRSN;
 	int m_id;
 
 

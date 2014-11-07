@@ -217,7 +217,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     m_pSliderMinLength = new MySlider( this, wxID_ANY, 0, 0, 400, wxPoint(60,240), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderMinLength->SetValue( 60 );
     Connect( m_pSliderMinLength->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderMinLengthMoved) );
-    m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("`60 mm"), wxPoint(190,240), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtMinLengthBox = new wxTextCtrl( this, wxID_ANY, wxT("60 mm"), wxPoint(190,240), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow9 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow9->Add( m_pTextMinLength, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
@@ -269,9 +269,15 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxRow13->Add( m_pTxtOpacityBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxRow13, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,380), wxSize(230, 30) );
+	RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN = new wxToggleButton( this, wxID_ANY,wxT("Enable rs-connectivity"), wxPoint(50,380), wxSize(230, 30) );
+	Connect( RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnEnableRSN) );
+    RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->Enable(false);
+
+    m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,380), wxSize(230, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
-	m_pTrackingSizer->Add( m_pBtnConvert, 0, wxALL, 2 );
+
+	m_pTrackingSizer->Add( RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN, 0, wxALL, 2 );
+    m_pTrackingSizer->Add( m_pBtnConvert, 0, wxALL, 2 );
 
     /*-----------------------ANIMATION SECTION -----------------------------------*/
 
@@ -330,12 +336,18 @@ void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
     {
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
         m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
-        RTTrackingHelper::getInstance()->setRTTDirty( false );
+        //RTTrackingHelper::getInstance()->setRTTDirty( false );
+
+        RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
+		RTTrackingHelper::getInstance()->setRTTDirty(true);
+        RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+        RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->SetValue(false);
         m_pBtnStart->SetLabel(wxT("Start tracking"));
     }
     else
     {
         m_pBtnStart->SetLabel(wxT("Stop tracking"));
+        RTFMRIHelper::getInstance()->setTractoDrivenRSN(true);
     }
 }
 
@@ -672,7 +684,13 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
     m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
-    RTTrackingHelper::getInstance()->setRTTDirty( false );
+    //RTTrackingHelper::getInstance()->setRTTDirty( false );
+
+    RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+	RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
+    RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->SetValue(false);
+
     m_pBtnStart->SetLabel(wxT("Start tracking"));
     m_pBtnStart->SetValue(false);
 
@@ -701,4 +719,16 @@ void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setTrackActionPause(true);
     m_pPlayPause->SetBitmapLabel(m_bmpPlay);
     m_pMainFrame->setTimerSpeed();
+}
+
+void TrackingWindow::OnEnableRSN( wxCommandEvent& WXUNUSED(event) )
+{
+    RTTrackingHelper::getInstance()->toogleTractoDrivenRSN();
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
+	RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+
+	if( RTTrackingHelper::getInstance()->isTractoDrivenRSN() )
+		RTFMRIHelper::getInstance()->setTractoDrivenRSN(true);
+	else
+		RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
 }
