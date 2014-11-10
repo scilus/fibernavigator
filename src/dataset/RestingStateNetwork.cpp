@@ -640,7 +640,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 	//Calculate z-scores, and save them.
 	sigma /= nb-1;
 	sigma = sqrt(sigma);
-	std::cout << "mean: " << meanCorr << "\n" << "std:" << sigma <<"\n\n";
+
 	vector<float> zErode(m_datasetSize, 0);
 	vector<bool> binErode(m_datasetSize, false);
 
