@@ -40,11 +40,11 @@ RestingStateNetwork::RestingStateNetwork():
 m_zMin( 999.0f ),
 m_zMax( 0.0f ),
 m_alpha( 0.5f),
-m_pointSize( 5.0f ),
+m_pointSize( 2.0f ),
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_corrThreshold( 2.0f ),
+m_corrThreshold( 5.0f ),
 m_clusterLvlSliderValue( 20.0f ),
 m_boxMoving( false ),
 m_originL(0,0,0),
@@ -599,6 +599,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
+				float value = 0.0f;
 				if(m_meansAndSigmas[i].first != 0)
 				{
 					float num = 0.0f;
@@ -608,21 +609,13 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 					{
 						num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
 					}
-					float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-					value /= (m_bands);
-				
-					if(value > 0)
-					{
-						corrSum+=value;
-						corrFactors[i] = value;
-						nb++;
-					}
-					else
-						corrFactors[i] = -1;
+					value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
+					value /= (m_bands-1);
 				}
-				else
-					corrFactors[i] = 0.0f;
-			}
+				nb++;
+				corrFactors[i] = value;
+				corrSum+=value;
+			}		
 		}
 	}
 
@@ -636,17 +629,18 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(corrFactors[i] > 0.0f)
-				{
+				//if(corrFactors[i] > 0.0f)
+				//{
 					sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);	
-				}		
+			//	}		
 			}
 		}
 	}
 
 	//Calculate z-scores, and save them.
-	sigma /= nb;
+	sigma /= nb-1;
 	sigma = sqrt(sigma);
+	std::cout << "mean: " << meanCorr << "\n" << "std:" << sigma <<"\n\n";
 	vector<float> zErode(m_datasetSize, 0);
 	vector<bool> binErode(m_datasetSize, false);
 

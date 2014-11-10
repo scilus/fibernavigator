@@ -75,10 +75,10 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	m_pFMRISizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 500, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderCorrThreshold->SetValue( 200 );
+	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 1000, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderCorrThreshold->SetValue( 500 );
 	Connect( m_pSliderCorrThreshold->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderCorrThreshMoved) );
-    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("2.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow5 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow5->Add( m_pTextCorrThreshold, 0, wxALIGN_CENTER | wxALL, 1 );
@@ -100,9 +100,9 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 
 	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderSizeP = new MySlider( this, wxID_ANY, 0, 1, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderSizeP->SetValue( 5 );
+	m_pSliderSizeP->SetValue( 2 );
 	Connect( m_pSliderSizeP->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderSizePMoved) );
-    m_pTxtSizePBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtSizePBox = new wxTextCtrl( this, wxID_ANY, wxT("2.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow7 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow7->Add( m_pTextSizeP, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
