@@ -291,6 +291,10 @@ void Anatomy::setZero( const int sizeX,
     m_frames  = sizeZ;
     m_bands   = 1;
 
+	m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
+
     int datasetSize = m_rows * m_columns * m_frames;
 
     m_floatDataset.clear();
