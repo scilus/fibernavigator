@@ -79,7 +79,7 @@ Anatomy::Anatomy( const wxString &filename )
 }
 
 // Seems to be used for the create a Distance Map
-Anatomy::Anatomy( const Anatomy * const pAnatomy )
+Anatomy::Anatomy( const Anatomy * const pAnatomy, bool Offset )
 : DatasetInfo(),
   m_isSegmentOn( false ),
   m_dataType( 2 ),
@@ -94,11 +94,21 @@ Anatomy::Anatomy( const Anatomy * const pAnatomy )
     m_columns = pAnatomy->m_columns;
     m_rows    = pAnatomy->m_rows;
     m_frames  = pAnatomy->m_frames;
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
     m_bands         = 1;
     m_isLoaded      = true;
     m_type          = HEAD_BYTE;
 
-    createOffset( pAnatomy );
+    if(Offset)
+    {
+        createOffset( pAnatomy );
+    }
+    else
+    {
+        edgeDetect( pAnatomy );
+    }
 }
 
 Anatomy::Anatomy( std::vector< float >* pDataset, 
@@ -1068,6 +1078,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     m_pBtnCut =              new wxButton( pParent, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
     m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );    
     m_pBtnNewDistanceMap =   new wxButton( pParent, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnEdgeDetect =       new wxButton( pParent, wxID_ANY, wxT( "Edge detect" ),            wxDefaultPosition, wxSize( 140, -1 ) );
 #endif
     
     m_pBtnNewOffsetSurface = new wxButton( pParent, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
@@ -1107,6 +1118,8 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxMain->Add( pGridButtons, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
 
     pBoxMain->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnEdgeDetect,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+
 #endif
     
     pBoxMain->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
@@ -1141,6 +1154,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
     pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );    
     pParent->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
+    pParent->Connect( m_pBtnEdgeDetect->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnEdgeDetect ) );
 #endif
     
     pParent->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
@@ -1217,6 +1231,7 @@ void Anatomy::updatePropertiesSizer()
     m_pBtnCut->Enable(      !SceneManager::getInstance()->getSelectionTree().isEmpty() );
 
     m_pBtnNewDistanceMap->Enable( getType() <= OVERLAY );
+    m_pBtnEdgeDetect->Enable( getType() <= OVERLAY );
 #endif
 
     // TODO validate the types here, this kind of test is really bad.
@@ -1385,6 +1400,25 @@ void Anatomy::equalizationSliderChange()
         Logger::getInstance()->printIfGLError( wxT( "Anatomy::equalizationSliderChange - glDeleteTextures") );
         generateTexture();
     }
+}
+
+void Anatomy::edgeDetect( const Anatomy * const pAnatomy )
+{
+    const int nbBands( m_frames );
+    const int nbRows( m_rows );
+    const int nbCols( m_columns );
+    int nbPixels = nbBands * nbRows * nbCols;
+    std::vector<float> tmp( nbPixels, 0.0f );
+    m_floatDataset.assign( nbPixels, 0.0f );
+    tmp = pAnatomy->m_floatDataset;
+
+    //Gauss filter
+
+    //Gradient
+
+    //Edge detect
+
+    m_floatDataset = tmp;
 }
 
 //////////////////////////////////////////////////////////////////////////

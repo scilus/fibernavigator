@@ -46,6 +46,7 @@ public:
 
     void createCutDataset();
     void createDistanceMap();
+    void edgeDetect();
     void createDistanceMapAndIso();
     void createIsoSurface();
     void displayPropertiesSheet();

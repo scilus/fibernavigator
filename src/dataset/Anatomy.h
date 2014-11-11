@@ -52,7 +52,7 @@ public:
     //constructor/destructor
     Anatomy();
     Anatomy( const wxString &filename );
-    Anatomy( const Anatomy * const pAnatomy );
+    Anatomy( const Anatomy * const pAnatomy, bool createOffset );
     Anatomy( std::vector<float> *pDataset, const int sample );
     Anatomy( const int type );
     Anatomy( const wxString &filename, const int type );
@@ -126,6 +126,7 @@ public:
 
 private:
     wxButton        *m_pBtnCut;
+    wxButton        *m_pBtnEdgeDetect;
     wxButton        *m_pBtnMinimize;
     wxButton        *m_pBtnDilate;
     wxButton        *m_pBtnErode;
@@ -145,6 +146,7 @@ private:
     wxSlider        *m_pUpperEqSlider;
 
     void createOffset( const Anatomy * const pAnatomy );
+    void edgeDetect( const Anatomy * const pAnatomy );
     double xxgauss( const double x, const double sigma );   
     
     void dilateInternal( std::vector<bool> &workData, int curIndex );

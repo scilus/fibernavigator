@@ -76,7 +76,7 @@ public:
     // return index of the created dataset
     DatasetIndex createAnatomy()                                                 { return insert( new Anatomy() ); }
     DatasetIndex createAnatomy( DatasetType type )                               { return insert( new Anatomy( type ) ); }
-    DatasetIndex createAnatomy( const Anatomy * const pAnatomy )                 { return insert( new Anatomy( pAnatomy ) ); }
+    DatasetIndex createAnatomy( const Anatomy * const pAnatomy, bool offset )    { return insert( new Anatomy( pAnatomy, offset ) ); }
     // TODO remove
     //DatasetIndex createAnatomy( std::vector<float> *pDataset, int sample )       { return insert( new Anatomy( pDataset, sample ) ); }
     DatasetIndex createAnatomy( std::vector<float> *pDataset, int type )         { return insert( new Anatomy( pDataset, type ) ); }

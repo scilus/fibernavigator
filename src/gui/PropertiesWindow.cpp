@@ -571,6 +571,13 @@ void PropertiesWindow::OnNewDistanceMap (wxCommandEvent& WXUNUSED(event))
     m_pMainFrame->createDistanceMap();
 }
 
+void PropertiesWindow::OnEdgeDetect (wxCommandEvent& WXUNUSED(event))
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnEdgeDetect" ), LOGLEVEL_DEBUG );
+
+    m_pMainFrame->edgeDetect();
+}
+
 void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnNewVoiFromOverlay" ), LOGLEVEL_DEBUG );
