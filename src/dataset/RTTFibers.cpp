@@ -367,9 +367,12 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
     if( m_fibersRTT.size() > 0 )
     {
         glPushAttrib( GL_ALL_ATTRIB_BITS );
-        glEnable( GL_BLEND );
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glDepthMask( GL_FALSE );
+		if(m_alpha != 1.0f)
+		{
+			glEnable( GL_BLEND );
+			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			glDepthMask( GL_FALSE );
+		}
         //for fmri
         std::vector<Vector> positions; 
 	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
