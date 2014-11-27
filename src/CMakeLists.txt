@@ -54,7 +54,7 @@ MARK_AS_ADVANCED( EXECUTABLE_OUTPUT_PATH )
 
 # Set default build type
 IF ( NOT CMAKE_BUILD_TYPE )
-    SET( CMAKE_BUILD_TYPE Debug Release CACHE STRING"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release" FORCE )
+    SET( CMAKE_BUILD_TYPE Debug Release CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release" FORCE )
     MARK_AS_ADVANCED( CMAKE_BUILD_TYPE )
 ENDIF ( NOT CMAKE_BUILD_TYPE )
 
@@ -69,7 +69,7 @@ ELSE (APPLE)
    IF (WIN32)
      FIND_PACKAGE( wxWidgets REQUIRED COMPONENTS adv base core gl net xml )
      FIND_PACKAGE( OPENGL REQUIRED )
-   ELSE (WIN32)    
+   ELSE (WIN32)
      FIND_PACKAGE( wxWidgets REQUIRED )
    ENDIF(WIN32)
 ENDIF(APPLE)
@@ -120,7 +120,7 @@ ENDIF(USE_GEOMETRY_SHADERS)
 
 MARK_AS_ADVANCED( USE_GEOMETRY_SHADERS )
 
-# Option to enable building a lightweight version of the 
+# Option to enable building a lightweight version of the
 # GUI, without features that are not used by lots
 # of users.
 
@@ -179,11 +179,11 @@ file( GLOB LIC_SRC "misc/lic/*.cpp" )
 file( GLOB NIFTI_SRC "misc/nifti/*.c" )
 
 IF( WIN32 )
- ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp 
+ ADD_EXECUTABLE( ${target} WIN32 main.h main.cpp Logger.h Logger.cpp
                  ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC} ${VERSION_SRC}
                  ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${MISC_HDR} ${NIFTI_HDR} ${VERSION_HDR} )
 ELSE( WIN32 )
- ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp 
+ ADD_EXECUTABLE( ${target} main.h main.cpp Logger.h Logger.cpp
                  ${ALGORITHMS_SRC} ${DS_SRC} ${GFX_SRC} ${GUI_SRC} ${FANTOM_SRC} ${ISO_SRC} ${LIC_SRC} ${MISC_SRC} ${NIFTI_SRC} ${VERSION_SRC}
                  ${ALGORITHMS_HDR} ${DS_HDR} ${GFX_HDR} ${GUI_HDR} ${FANTOM_HDR} ${ISO_HDR} ${LIC_HDR} ${MISC_HDR} ${NIFTI_HDR} ${VERSION_HDR} )
 ENDIF( WIN32 )
@@ -193,13 +193,13 @@ IF( WIN32 )
   find_file( wxmsw28ud_adv_vc_custom_dll_found wxmsw28ud_adv_vc_custom.dll REQUIRED )
   find_file( wxmsw28ud_core_vc_custom_dll_found wxmsw28ud_core_vc_custom.dll REQUIRED )
   find_file( wxmsw28ud_gl_vc_custom_dll_found wxmsw28ud_gl_vc_custom.dll REQUIRED )
-  find_file( wxbase28ud_xml_vc_custom_dll_found wxbase28ud_xml_vc_custom.dll REQUIRED )  
-  find_file( wxbase28ud_vc_custom_dll_found wxbase28ud_vc_custom.dll REQUIRED ) 
+  find_file( wxbase28ud_xml_vc_custom_dll_found wxbase28ud_xml_vc_custom.dll REQUIRED )
+  find_file( wxbase28ud_vc_custom_dll_found wxbase28ud_vc_custom.dll REQUIRED )
   find_file( opengl_dll_found opengl32.dll REQUIRED )
   find_file( glu_dll_found glu32.dll REQUIRED )
 ENDIF( WIN32 )
 
-IF (APPLE)  
+IF (APPLE)
    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${OPENGL_LIBRARY} ${wxWidgets_LIBRARIES} z)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/Contents/Resources/icons)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/Contents/Resources/GLSL)
@@ -222,7 +222,7 @@ ELSE(APPLE)
       execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/${BUILD_TYPE}/icons)
     ENDFOREACH(BUILD_TYPE ${CMAKE_BUILD_TYPE})
   ELSE(WIN32)
-    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-2.8 libGL.so libz.so libGLU.so ) 
+    TARGET_LINK_LIBRARIES( ${target} ${GLEW_LIBRARY} ${wxWidgets_LIBRARIES} wx_gtk2u_gl-3.0 libGL.so libz.so libGLU.so )
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/GLSL ${CMAKE_BINARY_DIR}/bin/GLSL)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons ${CMAKE_BINARY_DIR}/bin/icons)
   ENDIF(WIN32)

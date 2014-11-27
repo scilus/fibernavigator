@@ -27,10 +27,17 @@
 SelectionBox::SelectionBox( Vector i_center, Vector i_size )
 :   SelectionObject( i_center, i_size )
 {
-    m_gfxDirty   = true;
     m_name       = wxT( "box" );
     m_objectType = BOX_TYPE;
 
+    update();
+}
+
+SelectionBox::SelectionBox( const wxXmlNode selObjNode )
+: SelectionObject( selObjNode )
+{
+    m_objectType = BOX_TYPE;
+    
     update();
 }
 
@@ -39,10 +46,11 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
 ///////////////////////////////////////////////////////////////////////////
 SelectionBox::~SelectionBox()
 {
-    if( m_isLockedToCrosshair )
-    {
-        SceneManager::getInstance()->setBoxLock( false );
-    }
+}
+
+wxString SelectionBox::getTypeTag() const
+{
+    return wxT( "box" );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -160,6 +168,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
 {
     hitResult hr = { false, 0.0f, 0, NULL };
 
+    // TODO selection remove objectType
     if( m_isVisible && m_isActive && m_objectType == BOX_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();

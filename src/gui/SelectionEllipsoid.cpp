@@ -22,10 +22,16 @@
 SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
 :   SelectionObject( i_center, i_size )
 {
-    m_gfxDirty   = true;
     m_name       = wxT( "ellipsoid" );
     m_objectType = ELLIPSOID_TYPE;
 
+    update();
+}
+
+SelectionEllipsoid::SelectionEllipsoid( const wxXmlNode selObjNode )
+: SelectionObject( selObjNode )
+{
+    m_objectType = ELLIPSOID_TYPE;
     update();
 }
 
@@ -34,6 +40,11 @@ SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
 ///////////////////////////////////////////////////////////////////////////
 SelectionEllipsoid::~SelectionEllipsoid()
 {
+}
+
+wxString SelectionEllipsoid::getTypeTag() const
+{
+    return wxT( "ellipsoid" );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -70,6 +81,7 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
 {
     hitResult hr = { false, 0.0f, 0, NULL };
 
+    // TODO selection remove objectType
     if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();

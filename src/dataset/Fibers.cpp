@@ -111,8 +111,8 @@ Fibers::Fibers()
 Fibers::~Fibers()
 {
     Logger::getInstance()->print( wxT( "Executing fibers destructor" ), LOGLEVEL_DEBUG );
-
-    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getName() );
+    
+    SceneManager::getInstance()->getSelectionTree().removeFiberDataset( getDatasetIndex() );
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
@@ -1944,7 +1944,8 @@ void Fibers::colorWithDistance( float *pColorData )
 
         for( unsigned int j = 0; j < simplifiedList.size(); ++j )
         {
-            if( simplifiedList[j]->m_sourceAnatomy != NULL )
+            // TODO selection VOI adjust
+            /*if( simplifiedList[j]->m_sourceAnatomy != NULL )
             {
                 float curValue = simplifiedList[j]->m_sourceAnatomy->at( index );
 
@@ -1952,7 +1953,7 @@ void Fibers::colorWithDistance( float *pColorData )
                 {
                     minDistance = curValue;
                 }
-            }
+            }*/
         }
 
         float thresh = m_threshold / 2.0f;
@@ -2021,13 +2022,13 @@ void Fibers::colorWithMinDistance( float *pColorData )
 
             for( unsigned int k = 0; k < simplifiedList.size(); ++k )
             {
-                // TODO selection m_sourceanat
-                float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
+                // TODO selection VOI m_sourceanat
+                /*float curValue = simplifiedList[k]->m_sourceAnatomy->at( index );
 
                 if( curValue < minDistance )
                 {
                     minDistance = curValue;
-                }
+                }*/
             }
         }
 
@@ -2330,12 +2331,12 @@ void Fibers::save( wxString filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Fibers::save( wxXmlNode *pNode ) const
+bool Fibers::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
 
     return true;
 }
@@ -2792,7 +2793,7 @@ void Fibers::draw()
         return;
     }
 
-    if( m_useTransparency )
+    if( m_useTransparency && !m_useIntersectedFibers )
     {
         glPushAttrib( GL_ALL_ATTRIB_BITS );
         glEnable( GL_BLEND );
@@ -2807,7 +2808,19 @@ void Fibers::draw()
     // Otherwise, use the drawCrossingFibers
     if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
-        drawCrossingFibers();
+        if( m_useTransparency )
+        {
+            glPushAttrib( GL_ALL_ATTRIB_BITS );
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_ONE, GL_ONE );
+            glDepthMask( GL_FALSE );
+            drawCrossingFibers();
+            glPopAttrib();
+        }
+        else
+        {
+            drawCrossingFibers();
+        }
         return;
     }
 
@@ -3811,7 +3824,7 @@ void Fibers::setShader()
         ShaderHelper::getInstance()->getFibersShader()->bind();
         ShaderHelper::getInstance()->setFiberShaderVars();
         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useTex", !pDsInfo->getUseTex() );
-//         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
+         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
         ShaderHelper::getInstance()->getFibersShader()->setUniInt( "useOverlay", pDsInfo->getShowFS() );
     }
 }

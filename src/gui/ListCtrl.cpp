@@ -111,11 +111,11 @@ void ListCtrl::InsertItem( DatasetIndex datasetIndex )
     for( long i = index; i != pos; --i )
     {
         Swap( i, i - 1);
-        Update( i );
+        update_internal( i );
     }
 
     SetItemState( pos, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED );
-    Update( pos );
+    update_internal( pos );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -199,7 +199,7 @@ void ListCtrl::MoveItemDown()
         // Refresh items
         for( set<long>::iterator it = refreshNeeded.begin(); it != refreshNeeded.end(); ++it )
         {
-            Update( *it );
+            update_internal( *it );
         }
     }
 }
@@ -282,7 +282,7 @@ void ListCtrl::MoveItemUp()
         // Refresh items
         for( set<long>::iterator it = refreshNeeded.begin(); it != refreshNeeded.end(); ++it )
         {
-            Update( *it );
+            update_internal( *it );
         }
     }
 }
@@ -303,7 +303,7 @@ void ListCtrl::UpdateFibers()
     {
         if( FIBERS == DatasetManager::getInstance()->getDataset( GetItem( index ) )->getType() )
         {
-            Update( index );
+            update_internal( index );
         }
     }
 }
@@ -320,11 +320,11 @@ void ListCtrl::UpdateSelected()
         {
             for( long i( index + 1); i < GetItemCount() && FIBERS == DatasetManager::getInstance()->getDataset( GetItem( i ) )->getType(); ++i )
             {
-                Update( i );
+                update_internal( i );
             }
         }
 
-        Update( index );
+        update_internal( index );
     }
 }
 
@@ -364,14 +364,14 @@ void ListCtrl::onActivate( wxListEvent& evt )
             unsigned int count = DatasetManager::getInstance()->getFibersCount();
             for( unsigned int i = 1; i <= count; ++i )
             {
-                Update( i + index );
+                update_internal( i + index );
             }
         }
-        Update( index );
+        update_internal( index );
         break;
     case 1:
         pDataset->toggleShowFS();
-        Update( index );
+        update_internal( index );
         break;
     case 3:
     default:
@@ -423,7 +423,7 @@ void ListCtrl::Swap( long i, long j )
     SetItemData( j, tmp );
 }
 
-void ListCtrl::Update( long index )
+void ListCtrl::update_internal( long index )
 {
     DatasetInfo *pDataset = DatasetManager::getInstance()->getDataset( GetItem( index ) );
     SetItem( index, 0, wxT( "" ), pDataset->getShow() ? 0 : 2 );

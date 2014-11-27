@@ -8,6 +8,8 @@
 
 #include "SelectionObject.h"
 
+#include <wx/xml/xml.h>
+
 #include <map>
 using std::map;
 #include <vector>
@@ -41,6 +43,8 @@ public:
     SelectionObjectVector getChildrenObjects( const int itemId ) const;
     SelectionObjectVector getChildrenObjects( SelectionObject *pSelObj ) const;
     
+    SelectionObjectVector getDirectChildrenObjects( const int itemId ) const;
+    
     int getActiveChildrenObjectsCount( SelectionObject *pSelObject ) const;
     
     bool isEmpty() const
@@ -49,11 +53,11 @@ public:
     }
     
     bool containsId( const int itemId ) const;
+    bool isFirstLevel( SelectionObject *pSelObj ) const;
     
     void unselectAll();
+    void clear();
     
-    // TODO selection remove if not needed
-    //void removeAllObjects();
     void notifyAllObjectsNeedUpdating();
     
     // Methods related to fiber selection.
@@ -68,9 +72,8 @@ public:
     void notifyStatsNeedUpdating( SelectionObject *pSelObject );
     
     // Methods related to saving and loading.
-    // TODO selection saving
-    //bool populateXMLNode( wxXmlNode *pRootSelObjNode );
-    //bool loadFromXMLNode( wxXmlNode *pRootSelObjNode, DatasetHelper *pDH );
+    bool populateXMLNode( wxXmlNode *pRootSelObjNode, const wxString &rootPath );
+    bool loadFromXMLNode( wxXmlNode *pRootSelObjNode, const wxString &rootPath );
     
 private:
     class SelectionTreeNode
@@ -84,6 +87,7 @@ private:
         
         SelectionObjectVector getAllSelectionObjects() const;
         SelectionObjectVector getAllChildrenSelectionObjects() const;
+        SelectionObjectVector getDirectChildrenSelectionObjects() const;
         
         int getActiveDirectChildrenCount() const;
 
@@ -108,9 +112,10 @@ private:
         
         int getId() const;
         
-        // TODO selection saving
-        // TODO selection set pos, size sur voi
-        //bool populateXMLNode( wxXmlNode *pParentNode );
+        bool populateXMLNode( wxXmlNode *pParentNode, const wxString &rootPath );
+        bool loadChildrenFromXMLNode( wxXmlNode *pChildContainingNode, 
+                                      SelectionTree *pSelTree, 
+                                      const wxString &rootPath );
         
     private:
         SelectionTreeNode();    // Disable default constructor.

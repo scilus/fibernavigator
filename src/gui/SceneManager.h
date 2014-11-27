@@ -131,10 +131,6 @@ public:
     bool isIsoSurfaceFiltered() const       { return m_filterIsoSurface; }
     bool toggleIsoSurfaceFiltered()         { return m_filterIsoSurface = !m_filterIsoSurface; }
 
-    void setBoxLock( const bool lock )      { m_isBoxLocked = lock; }
-
-    void setBoxAtCrosshair( SelectionObject * pBox ) { m_pBoxAtCrosshair = pBox; }
-
     bool isSelBoxChanged() const            { return m_selBoxChanged; }
     // TODO selection do we need to update on this?
     void setSelBoxChanged( bool changed )   { m_selBoxChanged = changed; }
@@ -161,7 +157,7 @@ private:
     SceneManager( const SceneManager & );
     SceneManager &operator=( const SceneManager & );
 
-    bool loadOldVersion( wxXmlNode * pRoot );
+    bool loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath );
 
 private:
     static SceneManager *m_pInstance;
@@ -222,9 +218,7 @@ private:
     int   m_colorMap;
 
     bool  m_filterIsoSurface;
-    bool  m_isBoxLocked;
-
-    SelectionObject *m_pBoxAtCrosshair;
+    
     SelectionTree   *m_pSelTree;
 
     bool  m_selBoxChanged;

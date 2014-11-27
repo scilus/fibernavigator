@@ -31,7 +31,7 @@ public:
     }
 
     void    save( wxString filename );
-    bool    save( wxXmlNode *pNode ) const;
+    bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
 
     void    saveDMRI( wxString filename );
 

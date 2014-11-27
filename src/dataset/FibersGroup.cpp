@@ -228,22 +228,25 @@ void FibersGroup::save( wxString filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool FibersGroup::save( wxXmlNode *pNode ) const
+bool FibersGroup::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
     wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
 
     if( NULL != pStatus )
     {
-        wxXmlProperty *pProp = getXmlPropertyByName( wxT( "isFiberGroup" ), pStatus );
+        //wxXmlProperty *pProp = pStatus->GetAttribute
+        pStatus->DeleteAttribute( "isFiberGroup" );
+        pStatus->AddAttribute( "isFiberGroup", "yes" );
+        /*pProp = getXmlPropertyByName( "isFiberGroup", pStatus );
 
         if( NULL != pProp )
         {
             pProp->SetValue( wxT( "yes" ) );
-        }
+        }*/
     }
 
     return true;

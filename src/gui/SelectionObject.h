@@ -1,12 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:            SelectionObject.h
-// Author:          Imagicien ->LAMIRANDE-NADEAU Julien & NAZRATI Réda<-
-// Creation Date:   10/26/2009
 //
 // Description: SelectionObject class.
 //
-// Last modifications:
-//      by : GGirard - 19/02/2011
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef SELECTIONOBJECT_H_
@@ -15,12 +10,13 @@
 #include "BoundingBox.h"
 #include "SceneObject.h"
 
+#include "../dataset/DatasetIndex.h"
 #include "../misc/Algorithms/Face3D.h"
-#include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/Vector.h"
 
 #include <GL/glew.h>
 
+#include <wx/xml/xml.h>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -76,7 +72,9 @@ struct FibersInfoGridParams
 class SelectionObject : public SceneObject, public wxTreeItemData
 {
 public :
+    // TODO selection should be pure virtual
     SelectionObject( Vector i_center, Vector i_size );
+    SelectionObject( const wxXmlNode selObjNode );
     virtual ~SelectionObject();
 
     virtual hitResult hitTest( Ray* i_ray ) = 0;
@@ -84,8 +82,7 @@ public :
     virtual void objectUpdate();
 
     void draw();
-    void drawIsoSurface();
-    void lockToCrosshair();
+
     void moveBack();
     void moveDown();
     void moveForward();
@@ -122,9 +119,6 @@ public :
 
     void       setName( wxString i_name )             { m_name = i_name;                       };
     wxString   getName()                              { return m_name;                         };
-
-    void       setIsFirstLevel( bool i_isFirstLevel );
-    bool       getIsFirstLevel()                          { return m_isFirstLevel;                     };
     
     bool       toggleIsNOT();
     void       setIsNOT( bool i_isNOT );
@@ -136,9 +130,6 @@ public :
                                                       { setSize( Vector( sizeX, sizeY, sizeZ ) ); }
     void       setSize( Vector i_size )               { m_size = i_size; update(); notifyInBoxNeedsUpdating(); m_boxResized = true; };
     Vector     getSize()                              { return m_size;};
-
-    void       setThreshold( float i_threshold );
-    float      getThreshold()                         { return m_threshold;                    };
 
     void       setTreeId( wxTreeItemId i_treeId )     { m_treeId = i_treeId;                   };
     wxTreeItemId getTreeId()                          { return m_treeId;                       };
@@ -166,7 +157,7 @@ public :
     FibersColorationMode getMeanFiberColorMode()     { return m_meanFiberColorationMode;        };
     
     // Methods related to the different fiber bundles selection.
-    typedef    wxString FiberIdType;
+    typedef DatasetIndex FiberIdType;
     struct SelectionState
     {
         public: 
@@ -184,9 +175,7 @@ public :
     SelectionState& getState(           const FiberIdType &fiberId );
     
     // Methods related to saving and loading.
-    // TODO selection saving
-    //bool populateXMLNode( wxXmlNode *pCurNode );
-    //virtual bool loadFromXMLNode( wxXmlNode *pSelObjNode );
+    virtual bool populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath );
     
     virtual wxString getTypeTag() const;
 
@@ -199,7 +188,6 @@ public :
     virtual void flipNormals() {};
 
     // Variables
-    Anatomy *           m_sourceAnatomy;
     bool                m_boxMoved;
     bool                m_boxResized;
 
@@ -212,28 +200,20 @@ protected :
     void  updateStatusBar();
     float getAxisParallelMovement( int i_x1, int i_y1, int i_x2, int i_y2, Vector i_n, GLdouble i_projection[16], GLint i_viewport[4], GLdouble i_modelview[16] );
     
-    Vector          m_center;
-    
-    std::list< Face3D >  m_hullTriangles;
-
-    wxColour        m_color;         // Used for coloring the isosurface.
-
-    bool            m_mustUpdateConvexHull;
-    bool            m_gfxDirty;
-    float           m_handleRadius;
-    hitResult       m_hitResult;
-    bool            m_isActive;
-    bool            m_isLockedToCrosshair;
-    bool            m_isFirstLevel;
-    bool            m_isNOT;
-    CIsoSurface*    m_isosurface;
-    bool            m_isSelected;
-    bool            m_isVisible;
     wxString        m_name;
     ObjectType      m_objectType;
+    Vector          m_center;
     Vector          m_size;
+    bool            m_isActive;
+    bool            m_isNOT;
+    bool            m_isSelected;
+    bool            m_isVisible;
     int             m_stepSize;
-    float           m_threshold;
+
+    wxColour        m_color;         // Used for coloring the isosurface.
+    
+    hitResult       m_hitResult;
+    
     wxTreeItemId    m_treeId;
     
     bool            m_statsAreBeingComputed;
@@ -244,6 +224,9 @@ protected :
 
     wxColour m_convexHullColor;
     float    m_convexHullOpacity; //Between 0 and 1
+    bool     m_mustUpdateConvexHull;
+    std::list< Face3D >  m_hullTriangles;
+
     
     //Mean fiber coloring variables
     wxColour m_meanFiberColor; //Custom color chose by the user
@@ -264,6 +247,11 @@ protected :
     
     void notifyInBoxNeedsUpdating();
     void notifyInBranchNeedsUpdating();
+    
+    SelectionObject();
+
+private:
+    void doBasicInit();
 
     /******************************************************************************************
     * Functions/variables related to the fiber info calculation.

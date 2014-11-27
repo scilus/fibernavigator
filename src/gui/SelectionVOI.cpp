@@ -2,44 +2,100 @@
 #include "SelectionVOI.h"
 
 #include "../main.h"
+#include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 
+#include "../misc/XmlHelper.h"
+#include "../misc/Algorithms/Helper.h"
 #include "../misc/IsoSurface/CBoolIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
+
+#include <wx/filename.h>
 
 #include <algorithm>
 #include <functional>
 #include <limits>
 
-// TODO comments
-
-///////////////////////////////////////////////////////////////////////////
-// Constructor
-// i_center             : The center of the ellipsoid.
-// i_size               : The size of the ellipsoid.
-// i_dataHelper         : The datasetHelper associated with this ellipsoid.
-///////////////////////////////////////////////////////////////////////////
-/*SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size, DatasetHelper* i_datasetHelper ) :
-SelectionObject( i_center, i_size, i_datasetHelper )
-{
-    m_gfxDirty   = true;
-    m_name       = wxT( "ellipsoid" );
-    m_objectType = ELLIPSOID_TYPE;
+SelectionVOI::SelectionVOI( Anatomy *pSourceAnatomy, const float threshold, const ThresholdingOperationType opType )
+    : SelectionObject( Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) ),
+      m_voiSize( 0 ),
+      m_generationThreshold( threshold ),
+      m_thresType( opType ),
+      m_pIsoSurface( NULL ),
+      m_sourceAnatIndex( pSourceAnatomy->getDatasetIndex() )
+{   
+    wxString mystring(wxT("[VOI] - ") + pSourceAnatomy->getName());
+    m_name          = mystring;
+    m_objectType    = VOI_TYPE;
     
-    update();
-}*/
-
-///////////////////////////////////////////////////////////////////////////
-// Destructor
-///////////////////////////////////////////////////////////////////////////
-/*SelectionEllipsoid::~SelectionEllipsoid()
-{
+    buildSurface( pSourceAnatomy );
     
-}*/
+    setColor( wxColour( 240, 30, 30 ) );
+}
 
-SelectionVOI::SelectionVOI( /*DatasetHelper *pDH, */Anatomy *pSourceAnatomy, const float threshold, const ThresholdingOperationType opType )
-    : SelectionObject( Vector(0.0, 0.0, 0.0), Vector(0.0, 0.0, 0.0) ),
-      m_voiSize( 0 )
+SelectionVOI::SelectionVOI( const wxXmlNode selObjNode, const wxString &rootPath )
+: SelectionObject( selObjNode ),
+  m_voiSize( 0 ),
+  m_generationThreshold( 0.0f ),
+  m_thresType( THRESHOLD_INVALID ),
+  m_pIsoSurface( NULL ),
+  m_sourceAnatIndex( 0 )
+{
+    m_objectType = VOI_TYPE;
+    
+    wxXmlNode *pChildNode = selObjNode.GetChildren();
+    
+    while( pChildNode != NULL )
+    {
+        wxString nodeName = pChildNode->GetName();
+        wxString propVal;
+        
+        if( nodeName == wxT("voi_properties") )
+        {
+            double temp;
+            pChildNode->GetAttribute( wxT("gen_threshold"), &propVal );
+            propVal.ToDouble(&temp);
+            m_generationThreshold = temp;
+            
+            pChildNode->GetAttribute( wxT("thres_op_type"), &propVal );
+            m_thresType = Helper::getThresholdingTypeFromString( propVal );
+            
+            wxXmlNode *pAnatNode = pChildNode->GetChildren();
+            if( pAnatNode->GetName() == wxT("generation_anatomy") )
+            {
+                wxString anatPath = pAnatNode->GetNodeContent();
+
+                // Get full path, since this is how it is stored in the dataset.
+                wxFileName fullAnatPath( rootPath + wxFileName::GetPathSeparator() + anatPath );
+                               
+                // Find the anatomy related to this file.
+                vector< Anatomy* > anats = DatasetManager::getInstance()->getAnatomies();
+                for( vector< Anatomy* >::iterator anatIt( anats.begin() ); anatIt != anats.end(); ++anatIt )
+                {
+                    if( (*anatIt)->getPath() == fullAnatPath.GetFullPath() )
+                    {
+                        m_sourceAnatIndex = (*anatIt)->getDatasetIndex();
+                        break;
+                    }
+                }
+                
+                if( !m_sourceAnatIndex.isOk() )
+                {
+                    wxString err( wxT("Anatomy: ") );
+                    err << anatPath << wxT(" does not exist when creating VOI called: ") << getName() << wxT(".");
+                    throw  err;
+                }
+                
+                Anatomy *pCurAnat = dynamic_cast< Anatomy* >( DatasetManager::getInstance()->getDataset( m_sourceAnatIndex ) );
+                buildSurface( pCurAnat );
+            }
+        }
+        
+        pChildNode = pChildNode->GetNext();
+    }
+}
+
+void SelectionVOI::buildSurface( Anatomy *pSourceAnatomy )
 {
     m_nbRows   = pSourceAnatomy->getRows();
     m_nbCols   = pSourceAnatomy->getColumns();
@@ -49,46 +105,36 @@ SelectionVOI::SelectionVOI( /*DatasetHelper *pDH, */Anatomy *pSourceAnatomy, con
     
     m_includedVoxels.assign( pAnatDataset->size(), false );
     
-    if( opType == THRESHOLD_EQUAL )
+    if( m_thresType == THRESHOLD_EQUAL )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
-                       m_includedVoxels.begin(), bind2nd( std::equal_to< float >(), threshold ) );
+                       m_includedVoxels.begin(), bind2nd( std::equal_to< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_GREATER )
+    else if( m_thresType == THRESHOLD_GREATER )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
-                       m_includedVoxels.begin(), bind2nd( std::greater< float >(), threshold ) );
+                       m_includedVoxels.begin(), bind2nd( std::greater< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_GREATER_EQUAL )
+    else if( m_thresType == THRESHOLD_GREATER_EQUAL )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
-                       m_includedVoxels.begin(), bind2nd( std::greater_equal< float >(), threshold ) );
+                       m_includedVoxels.begin(), bind2nd( std::greater_equal< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_SMALLER )
+    else if( m_thresType == THRESHOLD_SMALLER )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
-                       m_includedVoxels.begin(), bind2nd( std::less< float >(), threshold ) );
+                       m_includedVoxels.begin(), bind2nd( std::less< float >(), m_generationThreshold ) );
     }
-    else if( opType == THRESHOLD_SMALLER_EQUAL )
+    else if( m_thresType == THRESHOLD_SMALLER_EQUAL )
     {
         std::transform( pAnatDataset->begin(), pAnatDataset->end(),
-                       m_includedVoxels.begin(), bind2nd( std::less_equal< float >(), threshold ) );
-
+                       m_includedVoxels.begin(), bind2nd( std::less_equal< float >(), m_generationThreshold ) );
     }
-
-    //m_isosurface    = new CIsoSurface( m_datasetHelper, pSourceAnatomy );
+    
     m_pIsoSurface = new CBoolIsoSurface( m_includedVoxels );
-    //m_isosurface->setThreshold( threshold );
-    //m_isosurface->GenerateWithThreshold();
     m_pIsoSurface->GenerateSurface();
     
-    wxString mystring(wxT("[VOI] - ") + pSourceAnatomy->getName());
-    m_name          = mystring;
-    m_objectType    = VOI_TYPE;
-
-    //m_sourceAnatomy = i_anatomy;*/
-    // TODO selection HERE was going to compute the value of the 
-    // m_center and m_size params.
+    // Compute the size and position of the bounding box of the VOI.
     unsigned int xIdxMin( m_nbCols );
     unsigned int yIdxMin( m_nbRows );
     unsigned int zIdxMin( m_nbFrames );
@@ -129,13 +175,10 @@ SelectionVOI::SelectionVOI( /*DatasetHelper *pDH, */Anatomy *pSourceAnatomy, con
     float spaceXMax( ( xIdxMax + 1 ) * pDM->getVoxelX() - 0.1 * pDM->getVoxelX() );
     float spaceYMax( ( yIdxMax + 1 ) * pDM->getVoxelY() - 0.1 * pDM->getVoxelY() );
     float spaceZMax( ( zIdxMax + 1 ) * pDM->getVoxelZ() - 0.1 * pDM->getVoxelZ() );
-    //float spaceXMax( ( xIdxMax  ) * pDH->m_xVoxel  );
-    //float spaceYMax( ( yIdxMax  ) * pDH->m_yVoxel  );
-    //float spaceZMax( ( zIdxMax  ) * pDH->m_zVoxel  );
     
     setCenter( ( spaceXMax + spaceXMin ) / 2.0f, 
-               ( spaceYMax + spaceYMin ) / 2.0f, 
-               ( spaceZMax + spaceZMin ) / 2.0f );
+              ( spaceYMax + spaceYMin ) / 2.0f, 
+              ( spaceZMax + spaceZMin ) / 2.0f );
     
     setSize( spaceXMax - spaceXMin, spaceYMax - spaceYMin, spaceZMax - spaceZMin );
     
@@ -181,209 +224,31 @@ void SelectionVOI::drawObject( GLfloat * pColor )
     glDepthMask(GL_TRUE);*/
 }
 
-///////////////////////////////////////////////////////////////////////////
-// COMMENT
-//
-// i_ray        :
-///////////////////////////////////////////////////////////////////////////
 hitResult SelectionVOI::hitTest( Ray* i_ray )
 {    
     hitResult hr = { false, 0.0f, 0, NULL };
     
-    /*if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 
-    {
-        int   picked  = 0;
-        float tpicked = 0;
-        float cx = m_center.x;
-        float cy = m_center.y;
-        float cz = m_center.z;
-        float sx = m_size.x * m_datasetHelper->m_xVoxel;
-        float sy = m_size.y * m_datasetHelper->m_yVoxel;
-        float sz = m_size.z * m_datasetHelper->m_zVoxel;
-        
-        if( wxGetKeyState( WXK_CONTROL ) )
-        {
-            BoundingBox *bb = new BoundingBox( cx, cy, cz, sx, sy, sz );
-            
-            bb->setCenter( m_minX , cy, cz );
-            bb->setSize( sx, sy, sz );
-            bb->setSizeX( m_datasetHelper->m_xVoxel );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit )
-            {
-                
-                if( picked == 0 )
-                {
-                    picked = 11;
-                    tpicked = hr.tmin;
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked )
-                    {
-                        picked = 11;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-            bb->setCenter( m_maxX, cy, cz );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit ) 
-            {
-                if( picked == 0 ) 
-                {
-                    picked = 12;
-                    tpicked = hr.tmin;
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked ) 
-                    {
-                        picked  = 12;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-            bb->setCenter( cx, m_minY, cz );
-            bb->setSize( sx, sy, sz);
-            bb->setSizeY( m_datasetHelper->m_yVoxel );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit )
-            {
-                if( picked == 0 )
-                {
-                    picked = 13;
-                    tpicked = hr.tmin;
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked ) 
-                    {
-                        picked = 13;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-            bb->setCenter( cx, m_maxY, cz );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit)
-            {
-                if( picked == 0 )
-                {
-                    picked = 14;
-                    tpicked = hr.tmin;
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked ) 
-                    {
-                        picked = 14;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-            bb->setCenter( cx, cy, m_minZ );
-            bb->setSize( sx, sy, sz );
-            bb->setSizeZ( m_datasetHelper->m_zVoxel );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit ) 
-            {
-                if( picked == 0 )
-                {
-                    picked  = 15;
-                    tpicked = hr.tmin;
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked )
-                    {
-                        picked = 15;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-            bb->setCenter( cx, cy, m_maxZ );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit )
-            {
-                if( picked == 0 ) 
-                {
-                    picked = 16;
-                    tpicked = hr.tmin;
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked ) 
-                    {
-                        picked = 16;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-            
-        }
-        else  // if (wxGetKeyState(WXK_CONTROL))
-        {
-            BoundingBox *bb = new BoundingBox( cx, cy, cz, sx, sy, sz );
-            hr = bb->hitTest( i_ray );
-            if( hr.hit )
-            {
-                if( picked == 0 )
-                {
-                    picked = 10;
-                    tpicked = hr.tmin;
-                    
-                }
-                else 
-                {
-                    if( hr.tmin < tpicked )
-                    {
-                        picked = 10;
-                        tpicked = hr.tmin;
-                    }
-                }
-            }
-        }
-        if( picked != 0 )
-        {
-            hr.hit = true;
-            hr.tmin = tpicked;
-            hr.picked = picked;
-            hr.object = this;
-        }
-        
-    }*/
-    
     m_hitResult = hr;
     
-    return hr;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// This function set the proper radius of the ellipsoid.
-///////////////////////////////////////////////////////////////////////////
-void SelectionVOI::objectUpdate()
-{
-    /*m_xRadius = ( m_maxX - m_minX ) / 2.0f;
-    m_yRadius = ( m_maxY - m_minY ) / 2.0f;
-    m_zRadius = ( m_maxZ - m_minZ ) / 2.0f;*/
+    return m_hitResult;
 }
 
 bool SelectionVOI::isPointInside( const float xPos, const float yPos, const float zPos ) const
 {
+    // According to the nifti standard, a voxel index is mapped to the coordinate of the 
+    // center of that voxel in real space.
+    // Therefore, points considered in a voxel (x, y, z) range from 
+    // (x - 0.5dx, y - 0.5dy, z - 0.5dz) to (x + 0.5dx, y + 0.5dy, z + 0.5dz).
+    // That is why we need to shift the coordinates before computing the coordinate.
     DatasetManager *pDM( DatasetManager::getInstance() );
-    unsigned int xVoxelCoord( static_cast< unsigned int >( ( xPos / pDM->getVoxelX() ) ) );
-    unsigned int yVoxelCoord( static_cast< unsigned int >( ( yPos / pDM->getVoxelY() ) ) );
-    unsigned int zVoxelCoord( static_cast< unsigned int >( ( zPos / pDM->getVoxelZ() )  ) );
+    
+    unsigned int xVoxelCoord( static_cast< unsigned int >( ( xPos / pDM->getVoxelX() ) + 0.5 ) );
+    unsigned int yVoxelCoord( static_cast< unsigned int >( ( yPos / pDM->getVoxelY() ) + 0.5 ) );
+    unsigned int zVoxelCoord( static_cast< unsigned int >( ( zPos / pDM->getVoxelZ() ) + 0.5 ) );
     
     unsigned int dataCoord( zVoxelCoord * m_nbCols * m_nbRows + yVoxelCoord * m_nbCols + xVoxelCoord );
     
     return m_includedVoxels.at( dataCoord );
-}
-
-wxString SelectionVOI::getTypeTag() const
-{
-    return wxT( "selectionVOI" );
 }
 
 void SelectionVOI::flipNormals()
@@ -393,6 +258,46 @@ void SelectionVOI::flipNormals()
         m_pIsoSurface->m_tMesh->flipNormals();
         m_pIsoSurface->clean();
     }
+}
+
+wxString SelectionVOI::getTypeTag() const
+{
+    return wxT( "voi" );
+}
+
+bool SelectionVOI::populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath )
+{
+    bool result( SelectionObject::populateXMLNode( pCurNode, rootPath ) );
+    
+    if( result )
+    {
+        wxString floatPrecision = wxT( ".8" );
+        
+        wxXmlNode *pVoiNode = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "voi_properties" ) );
+        pCurNode->AddChild( pVoiNode );
+        
+        pVoiNode->AddAttribute( new wxXmlAttribute( wxT( "gen_threshold" ), wxStrFormat( m_generationThreshold, floatPrecision ) ) );
+        pVoiNode->AddAttribute( new wxXmlAttribute( wxT( "thres_op_type" ), Helper::getThresholdingTypeString( m_thresType ) ) );
+        
+        wxXmlNode *pVoiGenAnatPath = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "generation_anatomy" ) );
+        pVoiNode->AddChild( pVoiGenAnatPath );
+        
+        // Get the dataset to be able to get the index.
+        DatasetInfo *pDS = DatasetManager::getInstance()->getDataset( m_sourceAnatIndex );
+        if( pDS )
+        {
+            wxFileName tempName( pDS->getPath() );
+            tempName.MakeRelativeTo( rootPath );
+            pVoiGenAnatPath->AddChild( new wxXmlNode( NULL, wxXML_TEXT_NODE, wxT( "path"), tempName.GetFullPath() ) );
+        }
+        else
+        {
+            // Should never happen.
+            result = false;
+        }
+    }
+    
+    return result;
 }
 
 void SelectionVOI::createPropertiesSizer( PropertiesWindow *pParent )
@@ -438,6 +343,7 @@ void SelectionVOI::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 }
 
+// TODO update the fields to try to hide the remaining things.
 void SelectionVOI::updatePropertiesSizer()
 {
     SelectionObject::updatePropertiesSizer();

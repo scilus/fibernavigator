@@ -28,7 +28,9 @@ using std::vector;
 //Constructor
 //////////////////////////////////////////
 RTTFibers::RTTFibers()
-:   m_FAThreshold( 0.10f ),
+:   m_trackActionStep(std::numeric_limits<unsigned int>::max()),
+    m_timerStep( 0 ),
+    m_FAThreshold( 0.10f ),
     m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
     m_nbSeed ( 10.0f ),
@@ -37,9 +39,7 @@ RTTFibers::RTTFibers()
     m_vinvout( 0.2f ),
     m_minFiberLength( 10 ),
     m_maxFiberLength( 200 ),
-    m_isHARDI( false ),
-	m_trackActionStep(std::numeric_limits<unsigned int>::max()),
-	m_timerStep( 0 )
+    m_isHARDI( false )
 {
 }
 
