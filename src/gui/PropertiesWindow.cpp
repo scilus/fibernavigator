@@ -627,14 +627,17 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
         newSelectionObjectId = m_pMainFrame->m_pTreeWidget->AppendItem( pCurObj->getTreeId(), pSelectionObject->getName(), 0, -1, pTreeItem );
     }
+
     
 	pSelectionObject->setTreeId( newSelectionObjectId );  
+
     m_pMainFrame->m_pTreeWidget->EnsureVisible( newSelectionObjectId );
     m_pMainFrame->m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelectionObject->getIcon() );
     
     // New items are always set to green.
     m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
     m_pMainFrame->m_pTreeWidget->SelectItem(newSelectionObjectId, true);
+
      
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
