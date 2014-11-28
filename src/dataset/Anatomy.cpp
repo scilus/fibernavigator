@@ -1407,15 +1407,8 @@ void Anatomy::edgeDetect( const Anatomy * const pAnatomy )
 
     int nbPixels = m_frames * m_rows * m_columns;
     std::vector<float> tmpGradient( nbPixels, 0.0f );
-	std::vector<float> tmpTheta( nbPixels, 0.0f );
-	std::vector<float> tmpPhi( nbPixels, 0.0f );
-	std::vector<float> tmpRho( nbPixels, 0.0f );
-	std::vector<float> tmpMap( nbPixels, 0.0f );
 
     m_floatDataset.assign( nbPixels, 0.0f );
-	float PI = 3.1416;
-
-    //Gauss filter not needed ? since NLM on T1 already loading most of the time
 
     //Gradient in x,y,z
 	float col;
@@ -1436,9 +1429,9 @@ void Anatomy::edgeDetect( const Anatomy * const pAnatomy )
 
 				if(!pAnatomy->m_useEqualizedDataset)
 				{
-					col = std::pow((pAnatomy->m_equalizedDataset[xPlus1] - pAnatomy->m_equalizedDataset[xMoins1])/2.0,2);
-					col += std::pow((pAnatomy->m_equalizedDataset[yPlus1] - pAnatomy->m_equalizedDataset[yMoins1])/2.0,2);
-					col += std::pow((pAnatomy->m_equalizedDataset[zPlus1] - pAnatomy->m_equalizedDataset[zMoins1])/2.0,2);
+					col = std::pow((pAnatomy->m_floatDataset[xPlus1] - pAnatomy->m_floatDataset[xMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_floatDataset[yPlus1] - pAnatomy->m_floatDataset[yMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_floatDataset[zPlus1] - pAnatomy->m_floatDataset[zMoins1])/2.0,2);
 				}
 				else
 				{
@@ -1446,166 +1439,14 @@ void Anatomy::edgeDetect( const Anatomy * const pAnatomy )
 					col += std::pow((pAnatomy->m_equalizedDataset[yPlus1] - pAnatomy->m_equalizedDataset[yMoins1])/2.0,2);
 					col += std::pow((pAnatomy->m_equalizedDataset[zPlus1] - pAnatomy->m_equalizedDataset[zMoins1])/2.0,2);
 				}
+				
 				tmpGradient[i] = sqrt(col);
-
 			}
 		}
 	}
 
-	//// Troisieme etape
-	//for( int x = 0; x < m_columns; x++)
-	//{
-	//	for( int y = 0; y < m_rows; y++)
-	//	{
-	//		for( int z = 0; z < m_frames; z++)
-	//		{
-	//			int i = z * m_columns * m_rows + y *m_columns + x;
-	//			int xPlus1 = z * m_columns * m_rows + y *m_columns + std::min((x+1), m_columns-1);
-	//			int xMoins1 = z * m_columns * m_rows + y *m_columns + std::max((x-1), 0);
-	//			int yPlus1 = z * m_columns * m_rows + std::min((y+1), m_rows-1) *m_columns + x;
-	//			int yMoins1 = z * m_columns * m_rows + std::max((y-1), 0) *m_columns + x;
-	//			int zPlus1 = std::min(z+1, m_frames -1) * m_columns * m_rows + y *m_columns + x;
-	//			int zMoins1 = std::max(z-1, 0) * m_columns * m_rows + y *m_columns + x;
-
-	//			tmpTheta[i] = atan(((tmpGradient[yPlus1] - tmpGradient[yMoins1])/2.0)/((tmpGradient[xPlus1] - tmpGradient[xMoins1])/2.0));
-	//			tmpPhi[i] = atan(((tmpGradient[zPlus1] - tmpGradient[zMoins1])/2.0)/((tmpGradient[xPlus1] - tmpGradient[xMoins1])/2.0));
-	//			tmpRho[i] = atan(((tmpGradient[zPlus1] - tmpGradient[zMoins1])/2.0)/((tmpGradient[yPlus1] - tmpGradient[yMoins1])/2.0));
-	//		}
- //       }
- //   }
-
- //   // Quatrieme etape
-	//for( int x = 0; x < m_columns; x++)
-	//{
-	//	for( int y = 0; y < m_rows; y++)
-	//	{
-	//		for( int z = 0; z < m_frames; z++)
-	//		{
-	//			
-	//			int x1, x2, y1, y2, z1, z2;
-
-	//			int i = z * m_columns * m_rows + y *m_columns + x;
-	//			if(tmpTheta[i] > tmpPhi[i] && tmpTheta[i] > tmpRho[i])
-	//			{
-
-	//				x1 = std::min((x+1), m_columns-1);
-	//				x2 = std::max((x-1), 0);
-	//				y1 = std::min((y+1), m_rows -1);
-	//				y2 = std::max((y-1), 0);
-	//				z1 = z;
-	//				z2 = z;
-	//				int xPlus1 = z * m_columns * m_rows + y *m_columns + x1;
-	//				int xPlus1yMoins1 = z * m_columns * m_rows + y2 *m_columns + x1;
-	//				int xMoins1 = z * m_columns * m_rows + y *m_columns + x2;
-	//				int xMoins1yPlus1 = z * m_columns * m_rows + y1 *m_columns + x2;
-	//				int yPlus1 = z * m_columns * m_rows + y1 *m_columns + x;
-	//				int yMoins1 = z * m_columns * m_rows + y2 *m_columns + x;
-	//				int xyMoins1 = z * m_columns * m_rows + y2 *m_columns + x2;
-	//				int xyPlus1 = z * m_columns * m_rows + y1 *m_columns + x1;
-
-	//				if (tmpTheta[i] >= -3*PI/8 && tmpTheta[i] < -PI/8)
-	//				{
-	//					if (tmpGradient[xPlus1yMoins1] > tmpGradient[i] || tmpGradient[xMoins1yPlus1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else if (tmpTheta[i] >= -PI/8 && tmpTheta[i] < PI/8)
-	//				{
-	//					if (tmpGradient[xPlus1] > tmpGradient[i] || tmpGradient[xMoins1] >tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else if (tmpTheta[i] >= PI/8 && tmpTheta[i] < 3*PI/8)
-	//				{
-	//					if (tmpGradient[xyMoins1] > tmpGradient[i] || tmpGradient[xyPlus1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else
-	//				{
-	//					if (tmpGradient[yPlus1] > tmpGradient[i] || tmpGradient[yMoins1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}	
-	//			}
-	//			else if(tmpPhi[i] > tmpTheta[i] && tmpPhi[i] > tmpRho[i])
-	//			{
-
-	//				x1 = std::min((x+1), m_columns-1);
-	//				x2 = std::max((x-1), 0);
-	//				y1 = y;
-	//				y2 = y;
-	//				z1 = std::min(z+1, m_frames -1);
-	//				z2 = std::max(z-1, 0);
-	//				int xPlus1 = z * m_columns * m_rows + y *m_columns + x1;
-	//				int xPlus1zMoins1 = z2 * m_columns * m_rows + y *m_columns + x1;
-	//				int xMoins1 = z * m_columns * m_rows + y *m_columns + x2;
-	//				int xMoins1zPlus1 = z1 * m_columns * m_rows + y *m_columns + x2;
-	//				int yPlus1 = z1 * m_columns * m_rows + y *m_columns + x;
-	//				int zMoins1 = z2 * m_columns * m_rows + y *m_columns + x;
-	//				int xzMoins1 = z2 * m_columns * m_rows + y *m_columns + x2;
-	//				int xzPlus1 = z1 * m_columns * m_rows + y *m_columns + x1;
-
-	//				if (tmpPhi[i] >= -3*PI/8 && tmpPhi[i] < -PI/8)
-	//				{
-	//					if (tmpGradient[xPlus1zMoins1] > tmpGradient[i] || tmpGradient[xMoins1zPlus1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else if (tmpPhi[i] >= -PI/8 && tmpPhi[i] < PI/8)
-	//				{
-	//					if (tmpGradient[xPlus1] > tmpGradient[i] || tmpGradient[xMoins1] >tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else if (tmpPhi[i] >= PI/8 && tmpPhi[i] < 3*PI/8)
-	//				{
-	//					if (tmpGradient[xzMoins1] > tmpGradient[i] || tmpGradient[xzPlus1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else
-	//				{
-	//					if (tmpGradient[yPlus1] > tmpGradient[i] || tmpGradient[zMoins1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}	
-	//			}
-	//			else
-	//			{
-	//				x1 = x;
-	//				x2 = x;
-	//				y1 = std::min((y+1), m_rows -1);
-	//				y2 = std::max((y-1), 0);
-	//				z1 = std::min(z+1, m_frames -1);
-	//				z2 = std::max(z-1, 0);
-	//				int zPlus1 = z1 * m_columns * m_rows + y *m_columns + x;
-	//				int zPlus1yMoins1 = z1 * m_columns * m_rows + y2 *m_columns + x;
-	//				int zMoins1 = z2 * m_columns * m_rows + y *m_columns + x;
-	//				int zMoins1yPlus1 = z2 * m_columns * m_rows + y1 *m_columns + x;
-	//				int yPlus1 = z * m_columns * m_rows + y1 *m_columns + x;
-	//				int yMoins1 = z2 * m_columns * m_rows + y2 *m_columns + x;
-	//				int zyMoins1 = z2 * m_columns * m_rows + y2 *m_columns + x;
-	//				int zyPlus1 = z1 * m_columns * m_rows + y1 *m_columns + x;
-
-	//				if (tmpRho[i] >= -3*PI/8 && tmpRho[i] < -PI/8)
-	//				{
-	//					if (tmpGradient[zPlus1yMoins1] > tmpGradient[i] || tmpGradient[zMoins1yPlus1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else if (tmpRho[i] >= -PI/8 && tmpRho[i] < PI/8)
-	//				{
-	//					if (tmpGradient[zPlus1] > tmpGradient[i] || tmpGradient[zMoins1] >tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else if (tmpRho[i] >= PI/8 && tmpRho[i] < 3*PI/8)
-	//				{
-	//					if (tmpGradient[zyMoins1] > tmpGradient[i] || tmpGradient[zyPlus1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}
-	//				else
-	//				{
-	//					if (tmpGradient[yPlus1] > tmpGradient[i] || tmpGradient[yMoins1] > tmpGradient[i])
-	//						tmpGradient[i] = 0;
-	//				}	
-	//			}	
-	//		}
-	//	}
-	//}
 	m_floatDataset = tmpGradient;
-	equalizeHistogram();
+	equalizeHistogram(); //For scaling purposes
 	m_floatDataset = m_equalizedDataset;
 }
 

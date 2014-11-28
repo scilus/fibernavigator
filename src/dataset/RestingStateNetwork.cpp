@@ -44,7 +44,7 @@ m_pointSize( 2.0f ),
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_corrThreshold( 5.0f ),
+m_corrThreshold( 4.5f ),
 m_clusterLvlSliderValue( 20.0f ),
 m_boxMoving( false ),
 m_originL(0,0,0),
@@ -436,7 +436,6 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
         glGetFloatv( GL_PROJECTION_MATRIX, projMatrix );
         size_t siz = m_3Dpoints.size();
 
-    
         // Compute z values of lines (in our case: starting points only).
         vector< float > zVals( siz );
 
@@ -486,19 +485,12 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				G = 1.0f;
 				B = v;
 			}
-
-			
+		
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
 			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
 			glColor4f(R,G,B,(m_3Dpoints[s].second / m_zMax) * m_alpha + 0.1f);
-
-			//glActiveTexture(GL_TEXTURE0);
-			//glEnable( GL_TEXTURE_2D );
-			//glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-			//glBindTexture(GL_TEXTURE_2D, m_lookupTex);
 
             if(render)
             {
@@ -508,56 +500,20 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
                 render = true;
             }
 
-			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
 			
 
 			int zz = ((m_3Dpoints[s].first.z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-				int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-				int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+			int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+			int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
-				int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-				m_smallt[ss*3] = R;
-				m_smallt[ss*3+1] = G;
-				m_smallt[ss*3+2] = B;	
+			int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+			m_smallt[ss*3] = R;
+			m_smallt[ss*3+1] = G;
+			m_smallt[ss*3+2] = B;	
 		}
 
-
-		//TEXTURE
-		//if(recalculateTexture)
-		//{
-
-		//	for(int x = 0; x < m_columnsL; x++)
-		//	{
-		//		for(int y = 0; y < m_rowsL; y++)
-		//		{
-		//			for(int z = 0; z < m_framesL; z++)
-		//			{
-		//				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
-
-		//				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-		//				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-		//				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
-
-		//				if(xx >=0 && yy >=0 && zz >=0 && xx < m_columns && yy < m_rows && zz < m_frames)
-		//				{
-		//					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-
-		//					texture[i*3] = m_smallt[s*3];
-		//					texture[i*3 + 1] = m_smallt[s*3+1];
-		//					texture[i*3 + 2] = m_smallt[s*3+2];
-		//				}
-
-		//			}
-		//		}
-		//	}
-
-		//	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-		//	pNewAnatomy->setFloatDataset(texture);
-		//	pNewAnatomy->generateTexture();
-
-		//}
         delete[] pSnippletSort;
         glPopAttrib();
 	}
@@ -629,10 +585,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				//if(corrFactors[i] > 0.0f)
-				//{
-					sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);	
-			//	}		
+				sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);		
 			}
 		}
 	}
@@ -666,7 +619,6 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 						m_zMax = zScore;
 					if(zScore > m_corrThreshold)
 					{
-						//m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 						zErode[i] = zScore;
 						binErode[i] = 1;
 					}
@@ -727,16 +679,6 @@ std::vector<float>* RestingStateNetwork::getZscores()
 			{
 				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
 
-				//int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-				//int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-				//int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
-
-				//if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
-				//{
-				//	int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-				//	m_zMap[i] = dataf[s];
-				//}
-
 				float zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
 				float yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
 				float xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
@@ -784,8 +726,7 @@ std::vector<float>* RestingStateNetwork::getZscores()
 
 					m_zMap[i] = (1-dz) * valy0 + (dz) * valy1;
 
-				}
-				
+				}		
 			}
 		}
 	}
@@ -1001,31 +942,6 @@ void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> 
 	{
 		tmp = temp;
 	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	/*float acc  = inMap[curIndex - 1]
-    + inMap[curIndex + 1]
-    + inMap[curIndex - m_columns - 1]
-    + inMap[curIndex - m_columns]
-    + inMap[curIndex - m_columns + 1]
-    + inMap[curIndex + m_columns - 1]
-    + inMap[curIndex + m_columns]
-    + inMap[curIndex + m_columns + 1]
-    + inMap[curIndex - m_columns * m_rows - 1]
-    + inMap[curIndex - m_columns * m_rows]
-    + inMap[curIndex - m_columns * m_rows + 1]
-    + inMap[curIndex + m_columns * m_rows - 1]
-    + inMap[curIndex + m_columns * m_rows]
-    + inMap[curIndex + m_columns * m_rows + 1]
-    + inMap[curIndex - m_columns * m_rows - m_columns]
-    + inMap[curIndex - m_columns * m_rows + m_columns]
-    + inMap[curIndex + m_columns * m_rows - m_columns]
-    + inMap[curIndex + m_columns * m_rows + m_columns];
-
-    if( acc > m_clusterLvlSliderValue )
-    {
-        tmp.at( curIndex ) = true;
-    }*/
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

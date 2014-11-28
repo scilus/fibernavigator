@@ -349,9 +349,9 @@ void MainFrame::initLayout()
     m_pFMRIWindow->EnableScrolling( true, true );
 
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
-    m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
     m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
+	m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 

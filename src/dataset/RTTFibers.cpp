@@ -39,7 +39,7 @@ RTTFibers::RTTFibers()
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
     m_vinvout( 0.2f ),
-    m_minFiberLength( 60 ),
+    m_minFiberLength( 90 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
     m_isHARDI( false )

@@ -76,9 +76,9 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 
 	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 1000, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderCorrThreshold->SetValue( 500 );
+	m_pSliderCorrThreshold->SetValue( 450 );
 	Connect( m_pSliderCorrThreshold->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderCorrThreshMoved) );
-    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("4.5"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow5 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow5->Add( m_pTextCorrThreshold, 0, wxALIGN_CENTER | wxALL, 1 );
