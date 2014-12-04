@@ -109,6 +109,8 @@ ODFs::~ODFs()
 
 bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 {
+    const float VOXEL_SIZE_EPSILON(0.0001f);	
+
     m_columns = pHeader->dim[1]; //80
     m_rows    = pHeader->dim[2]; //1
     m_frames  = pHeader->dim[3]; //72
@@ -124,8 +126,27 @@ bool ODFs::load( nifti_image *pHeader, nifti_image *pBody )
 
     if( m_voxelSizeX != voxelX || m_voxelSizeY != voxelY || m_voxelSizeZ != voxelZ )
     {
-        Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
-        return false;
+	if( std::abs(m_voxelSizeX - voxelX) < VOXEL_SIZE_EPSILON &&
+            std::abs(m_voxelSizeY - voxelY) < VOXEL_SIZE_EPSILON &&
+            std::abs(m_voxelSizeZ - voxelZ) < VOXEL_SIZE_EPSILON )
+        {
+            // NOTE TO THE TEAM: THIS IS NOT A VERY GOOD THING TO DO. We do it to support
+            // different software that save the metadata with incorrect rounding / conversion.
+            // In this case, we are in the expected error range between something coming from an integer
+            // and something coming from a float. We accept it, make sure thesizes fit for the new anatomy, 
+            // and still display a debug message for developers.
+            m_voxelSizeX = voxelX;
+            m_voxelSizeY = voxelY;
+            m_voxelSizeZ = voxelZ;
+               
+            Logger::getInstance()->print( wxT( "Voxel sizes did not exactly fit. In expected float range error. Using the already loaded voxel sizes." ),
+                                              LOGLEVEL_DEBUG );
+        }
+        else
+        {
+            Logger::getInstance()->print( wxT( "Voxel size different from anatomy." ), LOGLEVEL_ERROR );
+            return false;
+        }
     }
 
     m_type = ODFS;
