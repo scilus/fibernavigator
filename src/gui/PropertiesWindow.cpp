@@ -638,7 +638,6 @@ void PropertiesWindow::OnNewVoiFromOverlay( wxCommandEvent& WXUNUSED(event) )
     m_pMainFrame->m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
     m_pMainFrame->m_pTreeWidget->SelectItem(newSelectionObjectId, true);
 
-     
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
