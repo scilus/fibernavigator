@@ -98,6 +98,10 @@ public:
     void    updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     std::vector< bool >  getFilteredFibers();
 
+    void    updateAlpha();
+    void    setAxisView(bool value);
+    void    setFuncOpac(bool value);
+
     void    flipAxis( AxisType i_axe );
     
     int     getFibersCount() const { return m_countLines; }
@@ -150,6 +154,8 @@ public:
 
     // Inherited from DatasetInfo
     bool    toggleShow();
+    bool    getViewRadValue() { return m_pRadAxisView->GetValue(); }
+	bool    getFuncValue() { return m_pRadFuncOpac->GetValue(); }
 
 private:
     Fibers( const Fibers & );
@@ -221,6 +227,12 @@ private:
     Octree                *m_pOctree;
 
     bool            m_cfDrawDirty;
+    float           m_exponent;
+	float           m_xAngle;
+	float           m_yAngle;
+	float           m_zAngle;
+	bool            m_axisView;
+	bool			m_funcOpac;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
@@ -239,6 +251,12 @@ private:
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
     wxSlider       *m_pSliderInterFibersThickness;
+
+    wxSlider       *m_pSliderFibersAlpha;
+    wxSlider       *m_pSliderFibersXVector;
+    wxSlider       *m_pSliderFibersYVector;
+    wxSlider       *m_pSliderFibersZVector;
+
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxButton       *m_pSelectConstantFibersColor;
@@ -249,6 +267,8 @@ private:
     wxRadioButton  *m_pRadCurvature;
     wxRadioButton  *m_pRadTorsion;
     wxRadioButton  *m_pRadConstant;
+    wxToggleButton  *m_pRadAxisView;
+	wxToggleButton  *m_pRadFuncOpac;
 };
 
 #endif /* FIBERS_H_ */

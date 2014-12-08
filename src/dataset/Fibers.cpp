@@ -103,7 +103,15 @@ Fibers::Fibers()
     m_pRadMinDistanceAnchoring( NULL ),
     m_pRadCurvature( NULL ),
     m_pRadTorsion( NULL ),
-    m_pRadConstant( NULL )
+    m_pRadConstant( NULL ),
+    m_exponent( 3.0f ),
+ 	m_xAngle( 0.0f ),
+ 	m_yAngle( 0.0f ),
+    m_zAngle( 1.0f ),
+	m_axisView( true ),
+	m_funcOpac( true ),
+    m_pRadAxisView( NULL ),
+	m_pRadFuncOpac( NULL )
 {
     m_bufferObjects = new GLuint[3];
 }
@@ -3093,12 +3101,58 @@ void Fibers::drawSortedLines()
             int idx3 = idx * 3;
             int id2  = pLineIds[( pSnippletSort[i] << 1 ) + 1];
             int id23 = id2 * 3;
-            glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
+            /* --------------OPACITY TEST -------------*/
+            Matrix4fT transform = SceneManager::getInstance()->getTransform();
+            float dots[8];
+            Vector3fT v1 = { { 0, 0, 1 } };
+            Vector3fT v2 = { { 1, 1, 1 } };
+            Vector3fT view;
+
+            Vector3fMultMat4( &view, &v1, &transform );
+            dots[0] = Vector3fDot( &v2, &view );
+
+		
+            Vector normalVector = Vector(m_pointArray[id23 + 0]-m_pointArray[idx3 + 0],m_pointArray[id23 + 1]-m_pointArray[idx3 + 1],m_pointArray[id23 + 2]-m_pointArray[idx3 + 2]);
+            normalVector.normalize();
+			
+			Vector zVector;
+            if(m_axisView)
+			{
+				zVector = Vector(view.s.X, view.s.Y, view.s.Z); //View vec
+				zVector.normalize();
+			}
+			else
+			{
+				zVector = Vector(m_xAngle,m_yAngle,m_zAngle); //Fixed test
+			}
+
+			float alphaValue;
+			if(m_funcOpac)
+			{
+				alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
+			}
+			else
+			{
+				alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
+			}
+
+            alphaValue = std::pow(alphaValue,m_exponent);
+
+            //glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
+			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
+            glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
+            glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
+            //glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
+			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
+            glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
+            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
+
+            /*glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
             glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
             glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
             glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   m_alpha );
             glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
-            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
+            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );*/
         }
     }
 
@@ -3460,6 +3514,11 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
                                             FIBERS_SUBSAMPLING_RANGE_MAX ,
                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersAlpha->SetValue( 30.0f );
+     m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+     m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+     m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY,         180,         0,       180, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
@@ -3479,6 +3538,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     m_pRadConstant             = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant" ) );
+    m_pRadAxisView             = new wxToggleButton( pParent, wxID_ANY, wxT( "View Axis" ) );
+	m_pRadFuncOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -3495,6 +3556,19 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersAlpha, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "X vector" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersXVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Y Vector" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersYVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Z Vector" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersZVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
@@ -3530,6 +3604,25 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     pBoxMain->Add( pBoxColoring, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
 
+    	// HERE
+	wxBoxSizer *pBoxAlpha = new wxBoxSizer( wxVERTICAL );
+    pBoxAlpha->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering axis:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    wxBoxSizer *pBoxViewRadios = new wxBoxSizer( wxVERTICAL );
+	pBoxViewRadios->Add( m_pRadAxisView,       0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxAlpha->Add( pBoxViewRadios, 0, wxALIGN_LEFT | wxLEFT, 50 );
+
+	wxBoxSizer *pBoxOpac = new wxBoxSizer( wxVERTICAL );
+    pBoxOpac->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering function:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+
+    wxBoxSizer *pBoxOpacBtn = new wxBoxSizer( wxVERTICAL );
+	pBoxOpacBtn->Add( m_pRadFuncOpac,       0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxOpac->Add( pBoxOpacBtn, 0, wxALIGN_LEFT | wxLEFT, 50 );
+
+    pBoxMain->Add( pBoxAlpha, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
+	pBoxMain->Add( pBoxOpac, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
+
+
     //////////////////////////////////////////////////////////////////////////
 
     m_pPropertiesSizer->Add( pBoxMain, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
@@ -3540,6 +3633,10 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
+    pParent->Connect( m_pSliderFibersAlpha->GetId(),             wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersXVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersYVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersZVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pSelectConstantFibersColor->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnSelectConstantColor ) );
@@ -3554,6 +3651,9 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     pParent->Connect( m_pRadConstant->GetId(),                   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithConstantColor ) );
+    pParent->Connect( m_pRadAxisView->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAxisChange ) );
+	pParent->Connect( m_pRadFuncOpac->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFuncChange ) );
+
 
 #if !_USE_LIGHT_GUI
     pParent->Connect( pBtnGeneratesDensityVolume->GetId(),
@@ -3936,4 +4036,44 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
     m_name = wxT( "RTTFibers" + id );
 
 	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+}
+void Fibers::updateAlpha()
+{
+    m_exponent = m_pSliderFibersAlpha->GetValue() / 10.0f;
+	m_xAngle = m_pSliderFibersXVector->GetValue() / 180.0f;
+	m_yAngle = m_pSliderFibersZVector->GetValue() / 180.0f;
+	m_zAngle = m_pSliderFibersYVector->GetValue() / 180.0f;
+	m_yAngle = m_pSliderFibersYVector->GetValue() / 180.0f;
+	m_zAngle = m_pSliderFibersZVector->GetValue() / 180.0f;
+}
+
+void Fibers::setAxisView(bool value)
+{
+	m_axisView = !value;
+	if(value)
+		m_pRadAxisView->SetLabel( wxT("Fixed axis") );
+	else
+		m_pRadAxisView->SetLabel( wxT("View axis") );
+}
+
+void Fibers::setFuncOpac(bool value)
+{
+	m_funcOpac = !value;
+	if(value)
+		m_pRadFuncOpac->SetLabel( wxT("Opacity mode") );
+	else
+		m_pRadFuncOpac->SetLabel( wxT("Transparent mode") );
+}
+
+void PropertiesWindow::OnFibersAlpha( wxCommandEvent& WXUNUSED( event ) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
+
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() );
+
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
+    if( pTmpFib != NULL )
+    {
+        pTmpFib->updateAlpha();
+    }
 }

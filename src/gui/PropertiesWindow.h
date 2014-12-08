@@ -88,6 +88,10 @@ public:
     void OnColorWithConstantColor           ( wxCommandEvent& event );
     void OnSelectConstantColor              ( wxCommandEvent& event );
     void ColorFibers();
+    void OnFibersAlpha                      ( wxCommandEvent& event );
+
+    void OnAxisChange                       ( wxCommandEvent& event );
+	void OnFuncChange						( wxCommandEvent& event );
 
     void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
     void OnCustomMeanFiberColoring          ( wxCommandEvent& event );
