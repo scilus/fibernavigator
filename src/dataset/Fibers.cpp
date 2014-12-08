@@ -84,6 +84,7 @@ Fibers::Fibers()
     m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
     m_useIntersectedFibers( false ),
     m_thickness( 2.5f ),
+    m_tubeRadius( 3.175f ),
     m_xDrawn( 0.0f ),
     m_yDrawn( 0.0f ),
     m_zDrawn( 0.0f ),
@@ -94,6 +95,7 @@ Fibers::Fibers()
     m_pSliderFibersFilterMax( NULL ),
     m_pSliderFibersSampling( NULL ),
     m_pSliderInterFibersThickness( NULL ),
+    m_pTubeRadius( NULL ),
     m_pToggleLocalColoring( NULL ),
     m_pToggleNormalColoring( NULL ),
     m_pSelectConstantFibersColor( NULL ),
@@ -3514,6 +3516,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
                                             FIBERS_SUBSAMPLING_RANGE_MAX ,
                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTubeRadius = new wxSlider(  pParent, wxID_ANY, m_tubeRadius, 1, 10, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersAlpha->SetValue( 30.0f );
      m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -3556,6 +3559,9 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Tube radius" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pTubeRadius, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderFibersAlpha, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
@@ -3633,6 +3639,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
+    pParent->Connect( m_pTubeRadius->GetId(),                    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnTubeRadius ) );
     pParent->Connect( m_pSliderFibersAlpha->GetId(),             wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pSliderFibersXVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pSliderFibersYVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
@@ -3788,6 +3795,16 @@ void Fibers::updateCrossingFibersThickness()
 
 //////////////////////////////////////////////////////////////////////////
 
+void Fibers::updateTubeRadius()
+{
+    if ( NULL != m_pTubeRadius )
+    {
+        m_tubeRadius = m_pTubeRadius->GetValue();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void Fibers::findCrossingFibers()
 {
     if (   m_cfDrawDirty
@@ -3888,7 +3905,7 @@ void Fibers::setShader()
         ShaderHelper::getInstance()->getFakeTubesShader()->setUniInt  ( "globalColor", getShowFS() );
         ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimX", (float)MyApp::frame->m_pMainGL->GetSize().x );
         ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "dimY", (float)MyApp::frame->m_pMainGL->GetSize().y );
-        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "thickness", GLfloat( 3.175 ) );
+        ShaderHelper::getInstance()->getFakeTubesShader()->setUniFloat( "thickness", GLfloat( m_tubeRadius ) );
     }
     else if( SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {

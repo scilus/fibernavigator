@@ -162,6 +162,7 @@ public:
 
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
+    void OnTubeRadius                       ( wxCommandEvent& event );
     
     bool SelectColor                        ( wxColour &col );
 

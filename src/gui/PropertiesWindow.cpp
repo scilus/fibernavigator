@@ -2010,6 +2010,19 @@ void PropertiesWindow::OnCrossingFibersThicknessChange( wxCommandEvent& WXUNUSED
     }
 }
 
+void PropertiesWindow::OnTubeRadius( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCrossingFibersThicknessChange" ), LOGLEVEL_DEBUG );
+
+    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1 )
+    {
+        if( ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() == FIBERS )
+        {
+            ((Fibers*)m_pMainFrame->m_pCurrentSceneObject)->updateTubeRadius();
+        }
+    }
+}
+
 bool PropertiesWindow::SelectColor( wxColour &col )
 {
     wxColourData colorData;

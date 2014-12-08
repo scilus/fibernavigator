@@ -149,6 +149,7 @@ public:
 
     void    toggleCrossingFibers() { m_useIntersectedFibers = !m_useIntersectedFibers; }
     void    updateCrossingFibersThickness();
+    void    updateTubeRadius();
 
 	void    convertFromRTT( std::vector<std::vector<Vector> >* RTT );
 
@@ -238,6 +239,7 @@ private:
     bool            m_sagittalShown;
     bool            m_useIntersectedFibers;
     float           m_thickness;
+    float           m_tubeRadius;
     float           m_xDrawn;
     float           m_yDrawn;
     float           m_zDrawn;
@@ -251,6 +253,7 @@ private:
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
     wxSlider       *m_pSliderInterFibersThickness;
+    wxSlider       *m_pTubeRadius;
 
     wxSlider       *m_pSliderFibersAlpha;
     wxSlider       *m_pSliderFibersXVector;
