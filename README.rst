@@ -61,3 +61,9 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _Mesh display and interaction: http://www.youtube.com/watch?v=VONdX7iTNSI
 .. _Drawing tool: http://www.youtube.com/watch?v=4vYkQLrdYaY
 .. _Fiber navigation: http://www.youtube.com/watch?v=8c4Smi9gZOA
+
+Acknowledgements
+-------------------------------------
+If you use the Fibernavigator, please make sure that you quote the following reference in any publications:
+
+*Chamberland M., Whittinstall K., Fortin D., Mathieu D., and Descoteaux M., "Real-time multi-peak tractography for instantaneous connectivity display." Frontiers in Neuroinformatics, 8 (59): 1-15, 2014.*
