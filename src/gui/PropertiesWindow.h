@@ -91,7 +91,8 @@ public:
     void OnFibersAlpha                      ( wxCommandEvent& event );
 
     void OnAxisChange                       ( wxCommandEvent& event );
-	void OnFuncChange						( wxCommandEvent& event );
+	void OnModeOpacChange				    ( wxCommandEvent& event );
+    void OnRenderFuncChange                 ( wxCommandEvent& event );
 
     void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
     void OnCustomMeanFiberColoring          ( wxCommandEvent& event );

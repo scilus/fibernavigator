@@ -2078,7 +2078,7 @@ void PropertiesWindow::OnAxisChange( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
-void PropertiesWindow::OnFuncChange( wxCommandEvent& WXUNUSED(event) )
+void PropertiesWindow::OnModeOpacChange( wxCommandEvent& WXUNUSED(event) )
 {
 	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
     
@@ -2088,7 +2088,26 @@ void PropertiesWindow::OnFuncChange( wxCommandEvent& WXUNUSED(event) )
         Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
         if( pFibers != NULL )
         {
-			pFibers->setFuncOpac(pFibers->getFuncValue());
+			pFibers->setModeOpac(pFibers->getModeOpacValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnRenderFuncChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+			pFibers->setRenderFunc(pFibers->getRenderFuncValue());
         }
     }
     else

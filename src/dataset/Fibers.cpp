@@ -111,9 +111,11 @@ Fibers::Fibers()
  	m_yAngle( 0.0f ),
     m_zAngle( 1.0f ),
 	m_axisView( true ),
-	m_funcOpac( true ),
+	m_ModeOpac( true ),
+    m_RenderFunc( true ),
     m_pRadAxisView( NULL ),
-	m_pRadFuncOpac( NULL )
+	m_pRadModeOpac( NULL ),
+    m_pRadRenderFunc( NULL )
 {
     m_bufferObjects = new GLuint[3];
 }
@@ -3103,6 +3105,7 @@ void Fibers::drawSortedLines()
             int idx3 = idx * 3;
             int id2  = pLineIds[( pSnippletSort[i] << 1 ) + 1];
             int id23 = id2 * 3;
+
             /* --------------OPACITY TEST -------------*/
             Matrix4fT transform = SceneManager::getInstance()->getTransform();
             float dots[8];
@@ -3129,13 +3132,32 @@ void Fibers::drawSortedLines()
 			}
 
 			float alphaValue;
-			if(m_funcOpac)
+			if(m_ModeOpac)
 			{
-				alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
+                //Transparent
+                if(m_RenderFunc)
+                {
+                    //Alpha func
+				    alphaValue = 1-std::abs(normalVector.Dot(zVector)); 
+                }
+                else
+                {
+                    //Linear func
+                }
+
 			}
 			else
 			{
-				alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
+                //Opaque
+                if(m_RenderFunc)
+                {
+                    //Alpha func
+				    alphaValue = std::abs(normalVector.Dot(zVector)); 
+                }
+                else
+                {
+                    //Linear func
+                }
 			}
 
             alphaValue = std::pow(alphaValue,m_exponent);
@@ -3519,6 +3541,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pTubeRadius = new wxSlider(  pParent, wxID_ANY, m_tubeRadius, 1, 10, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     
     // OPACITY
+    //ALPHA
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTxtAlphaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("3"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
@@ -3526,6 +3549,23 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxRow->Add( m_pSliderFibersAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
 	pBoxRow->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
 
+    //Linear func a
+    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         2,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("2"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+    wxBoxSizer *pBoxRowlina = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowlina->Add( m_pSliderFibersLina, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+	pBoxRowlina->Add( m_pTxtlina,   0, wxALIGN_LEFT | wxALL, 1);
+
+    //Linear func b
+    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+    wxBoxSizer *pBoxRowlinb = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowlinb->Add( m_pSliderFibersLinb, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+	pBoxRowlinb->Add( m_pTxtlinb,   0, wxALIGN_LEFT | wxALL, 1);
+
+    //THETA
     m_pSliderFibersTheta  = new wxSlider( pParent, wxID_ANY,         90,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTxtThetaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("90"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
@@ -3533,6 +3573,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxRow1->Add( m_pSliderFibersTheta, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
 	pBoxRow1->Add( m_pTxtThetaBox,   0, wxALIGN_LEFT | wxALL, 1);
 
+    //PHI
     m_pSliderFibersPhi  = new wxSlider( pParent, wxID_ANY,         0,         -180,       180, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTxtPhiBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
@@ -3559,7 +3600,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     m_pRadConstant             = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant" ) );
     m_pRadAxisView             = new wxToggleButton( pParent, wxID_ANY, wxT( "View Axis" ) );
-	m_pRadFuncOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
+	m_pRadModeOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
+    m_pRadRenderFunc		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Alpha function" ) );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -3582,6 +3624,12 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( pBoxRow, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "a" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( pBoxRowlina, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "b" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( pBoxRowlinb, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Theta" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( pBoxRow1, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
@@ -3633,10 +3681,11 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxAlpha->Add( pBoxViewRadios, 0, wxALIGN_LEFT | wxLEFT, 50 );
 
 	wxBoxSizer *pBoxOpac = new wxBoxSizer( wxVERTICAL );
-    pBoxOpac->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering function:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxOpac->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering functions:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
 
     wxBoxSizer *pBoxOpacBtn = new wxBoxSizer( wxVERTICAL );
-	pBoxOpacBtn->Add( m_pRadFuncOpac,       0, wxALIGN_LEFT | wxALL, 1 );
+	pBoxOpacBtn->Add( m_pRadModeOpac,       0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxOpacBtn->Add( m_pRadRenderFunc, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxOpac->Add( pBoxOpacBtn, 0, wxALIGN_LEFT | wxLEFT, 50 );
 
     pBoxMain->Add( pBoxAlpha, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
@@ -3672,7 +3721,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     pParent->Connect( m_pRadConstant->GetId(),                   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithConstantColor ) );
     pParent->Connect( m_pRadAxisView->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAxisChange ) );
-	pParent->Connect( m_pRadFuncOpac->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnFuncChange ) );
+	pParent->Connect( m_pRadModeOpac->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnModeOpacChange ) );
+    pParent->Connect( m_pRadRenderFunc->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenderFuncChange ) );
 
 
 #if !_USE_LIGHT_GUI
@@ -4093,13 +4143,22 @@ void Fibers::setAxisView(bool value)
 		m_pRadAxisView->SetLabel( wxT("View axis") );
 }
 
-void Fibers::setFuncOpac(bool value)
+void Fibers::setModeOpac(bool value)
 {
-	m_funcOpac = !value;
+	m_ModeOpac = !value;
 	if(value)
-		m_pRadFuncOpac->SetLabel( wxT("Opacity mode") );
+        m_pRadModeOpac->SetLabel( wxT("Transparent mode") );
 	else
-		m_pRadFuncOpac->SetLabel( wxT("Transparent mode") );
+		m_pRadModeOpac->SetLabel( wxT("Opacity mode") );
+}
+
+void Fibers::setRenderFunc(bool value)
+{
+	m_RenderFunc = !value;
+	if(value)
+        m_pRadRenderFunc->SetLabel( wxT("Linear function") );
+	else
+		m_pRadRenderFunc->SetLabel( wxT("Alpha function") );
 }
 
 void PropertiesWindow::OnFibersAlpha( wxCommandEvent& WXUNUSED( event ) )

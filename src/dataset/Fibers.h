@@ -100,7 +100,8 @@ public:
 
     void    updateAlpha();
     void    setAxisView(bool value);
-    void    setFuncOpac(bool value);
+    void    setModeOpac(bool value);
+    void    setRenderFunc(bool value);
 
     void    flipAxis( AxisType i_axe );
     
@@ -156,7 +157,8 @@ public:
     // Inherited from DatasetInfo
     bool    toggleShow();
     bool    getViewRadValue() { return m_pRadAxisView->GetValue(); }
-	bool    getFuncValue() { return m_pRadFuncOpac->GetValue(); }
+	bool    getModeOpacValue() { return m_pRadModeOpac->GetValue(); }
+    bool    getRenderFuncValue() { return m_pRadRenderFunc->GetValue(); }
 
 private:
     Fibers( const Fibers & );
@@ -233,7 +235,8 @@ private:
 	float           m_yAngle;
 	float           m_zAngle;
 	bool            m_axisView;
-	bool			m_funcOpac;
+	bool			m_ModeOpac;
+    bool            m_RenderFunc;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
@@ -256,11 +259,15 @@ private:
     wxSlider       *m_pTubeRadius;
 
     wxSlider       *m_pSliderFibersAlpha;
+    wxSlider       *m_pSliderFibersLina;
+    wxSlider       *m_pSliderFibersLinb;
     wxSlider       *m_pSliderFibersPhi;
     wxSlider       *m_pSliderFibersTheta;
     wxTextCtrl     *m_pTxtAlphaBox;
     wxTextCtrl     *m_pTxtThetaBox;
     wxTextCtrl     *m_pTxtPhiBox;
+    wxTextCtrl     *m_pTxtlina;
+    wxTextCtrl     *m_pTxtlinb;
 
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
@@ -273,7 +280,8 @@ private:
     wxRadioButton  *m_pRadTorsion;
     wxRadioButton  *m_pRadConstant;
     wxToggleButton  *m_pRadAxisView;
-	wxToggleButton  *m_pRadFuncOpac;
+	wxToggleButton  *m_pRadModeOpac;
+    wxToggleButton  *m_pRadRenderFunc;
 };
 
 #endif /* FIBERS_H_ */
