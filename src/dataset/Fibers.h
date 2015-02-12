@@ -256,9 +256,8 @@ private:
     wxSlider       *m_pTubeRadius;
 
     wxSlider       *m_pSliderFibersAlpha;
-    wxSlider       *m_pSliderFibersXVector;
-    wxSlider       *m_pSliderFibersYVector;
-    wxSlider       *m_pSliderFibersZVector;
+    wxSlider       *m_pSliderFibersPhi;
+    wxSlider       *m_pSliderFibersTheta;
 
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;

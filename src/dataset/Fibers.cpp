@@ -3519,9 +3519,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pTubeRadius = new wxSlider(  pParent, wxID_ANY, m_tubeRadius, 1, 10, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersAlpha->SetValue( 30.0f );
-     m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-     m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-     m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY,         180,         0,       180, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersTheta  = new wxSlider( pParent, wxID_ANY,         90,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersPhi  = new wxSlider( pParent, wxID_ANY,         0,         -180,       180, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
@@ -3566,14 +3565,11 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderFibersAlpha, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "X vector" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderFibersXVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Theta" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersTheta, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Y Vector" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderFibersYVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Z Vector" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderFibersZVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Phi" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersPhi, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
@@ -3641,9 +3637,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
     pParent->Connect( m_pTubeRadius->GetId(),                    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnTubeRadius ) );
     pParent->Connect( m_pSliderFibersAlpha->GetId(),             wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
-    pParent->Connect( m_pSliderFibersXVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
-    pParent->Connect( m_pSliderFibersYVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
-    pParent->Connect( m_pSliderFibersZVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersTheta->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersPhi->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pSelectConstantFibersColor->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnSelectConstantColor ) );
@@ -4057,11 +4052,14 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 void Fibers::updateAlpha()
 {
     m_exponent = m_pSliderFibersAlpha->GetValue() / 10.0f;
-	m_xAngle = m_pSliderFibersXVector->GetValue() / 180.0f;
-	m_yAngle = m_pSliderFibersZVector->GetValue() / 180.0f;
-	m_zAngle = m_pSliderFibersYVector->GetValue() / 180.0f;
-	m_yAngle = m_pSliderFibersYVector->GetValue() / 180.0f;
-	m_zAngle = m_pSliderFibersZVector->GetValue() / 180.0f;
+
+    float phi = m_pSliderFibersPhi->GetValue() * M_PI / 180.0f;
+    float theta = m_pSliderFibersTheta->GetValue() * M_PI / 180.0f;
+
+    m_xAngle = std::cos(phi)*std::sin(theta);
+    m_yAngle = std::sin(phi)*std::sin(theta);
+    m_zAngle = std::cos(theta);
+
 }
 
 void Fibers::setAxisView(bool value)
