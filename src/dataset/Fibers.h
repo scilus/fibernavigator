@@ -258,6 +258,9 @@ private:
     wxSlider       *m_pSliderFibersAlpha;
     wxSlider       *m_pSliderFibersPhi;
     wxSlider       *m_pSliderFibersTheta;
+    wxTextCtrl     *m_pTxtAlphaBox;
+    wxTextCtrl     *m_pTxtThetaBox;
+    wxTextCtrl     *m_pTxtPhiBox;
 
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;

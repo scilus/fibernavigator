@@ -3517,10 +3517,28 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTubeRadius = new wxSlider(  pParent, wxID_ANY, m_tubeRadius, 1, 10, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    
+    // OPACITY
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersAlpha->SetValue( 30.0f );
+    m_pTxtAlphaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("3"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+    wxBoxSizer *pBoxRow = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow->Add( m_pSliderFibersAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+	pBoxRow->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
+
     m_pSliderFibersTheta  = new wxSlider( pParent, wxID_ANY,         90,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtThetaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("90"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+    wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow1->Add( m_pSliderFibersTheta, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+	pBoxRow1->Add( m_pTxtThetaBox,   0, wxALIGN_LEFT | wxALL, 1);
+
     m_pSliderFibersPhi  = new wxSlider( pParent, wxID_ANY,         0,         -180,       180, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtPhiBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+    wxBoxSizer *pBoxRow2 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow2->Add( m_pSliderFibersPhi, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+	pBoxRow2->Add( m_pTxtPhiBox,   0, wxALIGN_LEFT | wxALL, 1);
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
@@ -3563,13 +3581,13 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( m_pTubeRadius, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderFibersAlpha, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( pBoxRow, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Theta" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderFibersTheta, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( pBoxRow1, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Phi" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderFibersPhi, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( pBoxRow2, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
@@ -4060,6 +4078,10 @@ void Fibers::updateAlpha()
     m_yAngle = std::sin(phi)*std::sin(theta);
     m_zAngle = std::cos(theta);
 
+    //Boxes
+    m_pTxtAlphaBox->SetValue(wxString::Format( wxT( "%.1f"), m_pSliderFibersAlpha->GetValue()/10.0f));
+    m_pTxtThetaBox->SetValue(wxString::Format( wxT( "%i"), m_pSliderFibersTheta->GetValue()));
+    m_pTxtPhiBox->SetValue(wxString::Format( wxT( "%i"), m_pSliderFibersPhi->GetValue()));
 }
 
 void Fibers::setAxisView(bool value)
@@ -4089,6 +4111,6 @@ void PropertiesWindow::OnFibersAlpha( wxCommandEvent& WXUNUSED( event ) )
     Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
     if( pTmpFib != NULL )
     {
-        pTmpFib->updateAlpha();
+        pTmpFib->updateAlpha();  
     }
 }
