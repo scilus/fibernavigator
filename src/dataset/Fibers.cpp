@@ -110,9 +110,11 @@ Fibers::Fibers()
  	m_xAngle( 0.0f ),
  	m_yAngle( 0.0f ),
     m_zAngle( 1.0f ),
+    m_lina(20.0f),
+    m_linb(-10.0f),
 	m_axisView( true ),
 	m_ModeOpac( true ),
-    m_RenderFunc( true ),
+    m_isAlphaFunc( true ),
     m_pRadAxisView( NULL ),
 	m_pRadModeOpac( NULL ),
     m_pRadRenderFunc( NULL )
@@ -3098,7 +3100,7 @@ void Fibers::drawSortedLines()
     {
         int i = 0;
 
-        for( int c = 0; c < nbSnipplets; ++c )
+        for( int c = 1; c < nbSnipplets; ++c )
         {
             i = c;
             int idx  = pLineIds[pSnippletSort[i] << 1];
@@ -3116,9 +3118,9 @@ void Fibers::drawSortedLines()
             Vector3fMultMat4( &view, &v1, &transform );
             dots[0] = Vector3fDot( &v2, &view );
 
-		
             Vector normalVector = Vector(m_pointArray[id23 + 0]-m_pointArray[idx3 + 0],m_pointArray[id23 + 1]-m_pointArray[idx3 + 1],m_pointArray[id23 + 2]-m_pointArray[idx3 + 2]);
             normalVector.normalize();
+
 			
 			Vector zVector;
             if(m_axisView)
@@ -3135,48 +3137,67 @@ void Fibers::drawSortedLines()
 			if(m_ModeOpac)
 			{
                 //Transparent
-                if(m_RenderFunc)
+                if(m_isAlphaFunc)
                 {
                     //Alpha func
 				    alphaValue = 1-std::abs(normalVector.Dot(zVector)); 
+                    alphaValue = std::pow(alphaValue,m_exponent);
                 }
                 else
                 {
                     //Linear func
-                }
+                    float theta = std::acos(std::abs(normalVector.Dot(zVector)));
 
+                    if(theta > (1-m_linb)/m_lina)
+                    {
+                        alphaValue = 1.0f;
+                    }
+                    else if(theta < (-m_linb)/m_lina)
+                    {
+                        alphaValue = 0.0f;
+                    }
+                    else
+                    {
+                        alphaValue = (m_lina*theta+m_linb);
+                    }
+                }
 			}
 			else
 			{
                 //Opaque
-                if(m_RenderFunc)
+                if(m_isAlphaFunc)
                 {
                     //Alpha func
 				    alphaValue = std::abs(normalVector.Dot(zVector)); 
+                    alphaValue = std::pow(alphaValue,m_exponent);
                 }
                 else
                 {
                     //Linear func
+                    float theta = std::acos(std::abs(normalVector.Dot(zVector)));
+
+                    if(theta > (1-m_linb)/m_lina)
+                    {
+                        alphaValue = 1-1.0f;
+                    }
+                    else if(theta < (-m_linb)/m_lina)
+                    {
+                        alphaValue = 1-0.0f;
+                    }
+                    else
+                    {
+                        alphaValue = 1-m_lina*theta+m_linb;
+                    }
                 }
 			}
 
-            alphaValue = std::pow(alphaValue,m_exponent);
-
-            //glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
 			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
             glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
             glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
-            //glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
+
 			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
             glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
             glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
-
-            /*glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
-            glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
-            glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
-            glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   m_alpha );
-            glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
-            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );*/
         }
     }
 
@@ -3543,23 +3564,23 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     // OPACITY
     //ALPHA
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtAlphaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("3"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtAlphaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("3.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRow = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow->Add( m_pSliderFibersAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
 	pBoxRow->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
 
     //Linear func a
-    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         2,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("2"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         200,         2.0f/M_PI,       1000, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("20.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRowlina = new wxBoxSizer( wxHORIZONTAL );
     pBoxRowlina->Add( m_pSliderFibersLina, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
 	pBoxRowlina->Add( m_pTxtlina,   0, wxALIGN_LEFT | wxALL, 1);
 
     //Linear func b
-    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -10,         1-M_PI*m_pSliderFibersLina->GetValue()/2.0f,       0, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("-10.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRowlinb = new wxBoxSizer( wxHORIZONTAL );
     pBoxRowlinb->Add( m_pSliderFibersLinb, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
@@ -3706,6 +3727,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersAlpha->GetId(),             wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pSliderFibersTheta->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pSliderFibersPhi->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersLina->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersLinb->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );
     pParent->Connect( m_pSelectConstantFibersColor->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnSelectConstantColor ) );
@@ -4128,10 +4151,18 @@ void Fibers::updateAlpha()
     m_yAngle = std::sin(phi)*std::sin(theta);
     m_zAngle = std::cos(theta);
 
+    m_lina = m_pSliderFibersLina->GetValue();
+    m_linb = m_pSliderFibersLinb->GetValue();
+
+    //Linear b change
+    m_pSliderFibersLinb->SetMin(1-M_PI*m_pSliderFibersLina->GetValue()/2.0f);
+
     //Boxes
     m_pTxtAlphaBox->SetValue(wxString::Format( wxT( "%.1f"), m_pSliderFibersAlpha->GetValue()/10.0f));
     m_pTxtThetaBox->SetValue(wxString::Format( wxT( "%i"), m_pSliderFibersTheta->GetValue()));
     m_pTxtPhiBox->SetValue(wxString::Format( wxT( "%i"), m_pSliderFibersPhi->GetValue()));
+    m_pTxtlina->SetValue(wxString::Format( wxT( "%.1f"), m_pSliderFibersLina->GetValue()/10.0f));
+    m_pTxtlinb->SetValue(wxString::Format( wxT( "%.1f"), m_pSliderFibersLinb->GetValue()/10.0f));
 }
 
 void Fibers::setAxisView(bool value)
@@ -4154,7 +4185,7 @@ void Fibers::setModeOpac(bool value)
 
 void Fibers::setRenderFunc(bool value)
 {
-	m_RenderFunc = !value;
+	m_isAlphaFunc = !value;
 	if(value)
         m_pRadRenderFunc->SetLabel( wxT("Linear function") );
 	else

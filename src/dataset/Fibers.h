@@ -234,9 +234,11 @@ private:
 	float           m_xAngle;
 	float           m_yAngle;
 	float           m_zAngle;
+    float           m_lina;
+    float           m_linb;
 	bool            m_axisView;
 	bool			m_ModeOpac;
-    bool            m_RenderFunc;
+    bool            m_isAlphaFunc;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
