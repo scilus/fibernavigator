@@ -736,10 +736,14 @@ void TheScene::renderODFs()
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::lightsOn()
 {
-    GLfloat ambientLight[]  = { 0.1f, 0.1f, 0.1f, 1.0f };
+  /*  GLfloat ambientLight[]  = { 0.1f, 0.1f, 0.1f, 1.0f };
     GLfloat diffuseLight[]  = { 0.4f, 0.4f, 0.4f, 1.0f };
     GLfloat specularLight[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-    GLfloat specRef[]       = { 0.8f, 0.8f, 0.8f, 0.6f };
+    GLfloat specRef[]       = { 0.8f, 0.8f, 0.8f, 0.6f };*/
+    GLfloat ambientLight[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
+    GLfloat diffuseLight[]  = { 0.49f, 0.49f, 0.49f, 1.0f };
+    GLfloat specularLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat specRef[]       = { 0.7f, 0.7f, 0.7f, 1.0f };
     Vector3fT v1 = { { 0, 0, -1 } };
     Vector3fT l;
     Matrix4fT transform = SceneManager::getInstance()->getTransform();
@@ -759,7 +763,7 @@ void TheScene::lightsOn()
     glEnable( GL_COLOR_MATERIAL );
     glColorMaterial( GL_FRONT_AND_BACK, GL_DIFFUSE );
     glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specRef );
-    glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 64 );
+    glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 32 );
 
     Logger::getInstance()->printIfGLError( wxT( "Setup lights" ) );
 }
