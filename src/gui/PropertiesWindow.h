@@ -93,6 +93,7 @@ public:
     void OnAxisChange                       ( wxCommandEvent& event );
 	void OnModeOpacChange				    ( wxCommandEvent& event );
     void OnRenderFuncChange                 ( wxCommandEvent& event );
+    void OnLocalGlobalChange                ( wxCommandEvent& event );
 
     void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
     void OnCustomMeanFiberColoring          ( wxCommandEvent& event );

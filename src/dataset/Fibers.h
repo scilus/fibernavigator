@@ -102,6 +102,7 @@ public:
     void    setAxisView(bool value);
     void    setModeOpac(bool value);
     void    setRenderFunc(bool value);
+    void    setLocalGlobal(bool value);
 
     void    flipAxis( AxisType i_axe );
     
@@ -156,9 +157,10 @@ public:
 
     // Inherited from DatasetInfo
     bool    toggleShow();
-    bool    getViewRadValue() { return m_pRadAxisView->GetValue(); }
-	bool    getModeOpacValue() { return m_pRadModeOpac->GetValue(); }
-    bool    getRenderFuncValue() { return m_pRadRenderFunc->GetValue(); }
+    bool    getViewRadValue() { return m_pToggleAxisView->GetValue(); }
+	bool    getModeOpacValue() { return m_pToggleModeOpac->GetValue(); }
+    bool    getRenderFuncValue() { return m_pToggleRenderFunc->GetValue(); }
+    bool    getLocalGlobalValue() { return m_pToggleLocalGlobal->GetValue(); }
 
 private:
     Fibers( const Fibers & );
@@ -196,6 +198,8 @@ private:
     void            setShader();
     void            releaseShader();
 
+    void            computeGLobalProperties();
+
 private:
     // Variables
     bool                  m_isSpecialFiberDisplay;
@@ -223,6 +227,8 @@ private:
     bool                  m_fibersInverted;
     bool                  m_useFakeTubes;
     bool                  m_useTransparency;
+    std::vector< float >  m_tractDirection;
+    std::vector< float >  m_dispFactors;
 
     bool                  m_isColorationUpdated;
     FibersColorationMode  m_fiberColorationMode;
@@ -239,6 +245,7 @@ private:
 	bool            m_axisView;
 	bool			m_ModeOpac;
     bool            m_isAlphaFunc;
+    bool            m_isLocalRendering;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
@@ -281,9 +288,10 @@ private:
     wxRadioButton  *m_pRadCurvature;
     wxRadioButton  *m_pRadTorsion;
     wxRadioButton  *m_pRadConstant;
-    wxToggleButton  *m_pRadAxisView;
-	wxToggleButton  *m_pRadModeOpac;
-    wxToggleButton  *m_pRadRenderFunc;
+    wxToggleButton  *m_pToggleAxisView;
+	wxToggleButton  *m_pToggleModeOpac;
+    wxToggleButton  *m_pToggleRenderFunc;
+    wxToggleButton  *m_pToggleLocalGlobal;
 };
 
 #endif /* FIBERS_H_ */

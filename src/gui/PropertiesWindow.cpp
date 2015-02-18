@@ -2061,7 +2061,7 @@ bool PropertiesWindow::SelectColor( wxColour &col )
 
 void PropertiesWindow::OnAxisChange( wxCommandEvent& WXUNUSED(event) )
 {
-	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAxisChange" ), LOGLEVEL_DEBUG );
     
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
@@ -2074,13 +2074,13 @@ void PropertiesWindow::OnAxisChange( wxCommandEvent& WXUNUSED(event) )
     }
     else
     {
-        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnAxisChange - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
 
 void PropertiesWindow::OnModeOpacChange( wxCommandEvent& WXUNUSED(event) )
 {
-	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnModeOpacChange" ), LOGLEVEL_DEBUG );
     
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
@@ -2093,13 +2093,13 @@ void PropertiesWindow::OnModeOpacChange( wxCommandEvent& WXUNUSED(event) )
     }
     else
     {
-        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnModeOpacChange - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
 
 void PropertiesWindow::OnRenderFuncChange( wxCommandEvent& WXUNUSED(event) )
 {
-	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnColorWithConstantColor" ), LOGLEVEL_DEBUG );
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenderFuncChange" ), LOGLEVEL_DEBUG );
     
     long index = MyApp::frame->getCurrentListIndex();
     if( -1 != index )
@@ -2112,6 +2112,25 @@ void PropertiesWindow::OnRenderFuncChange( wxCommandEvent& WXUNUSED(event) )
     }
     else
     {
-        Logger::getInstance()->print( wxT( "PropertiesWindow::OnColorWithConstantColor - Current index is -1" ), LOGLEVEL_ERROR );
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnRenderFuncChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnLocalGlobalChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnLocalGlobalChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->setLocalGlobal(pFibers->getLocalGlobalValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnLocalGlobalChange - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }

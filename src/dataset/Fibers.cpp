@@ -115,9 +115,11 @@ Fibers::Fibers()
 	m_axisView( true ),
 	m_ModeOpac( true ),
     m_isAlphaFunc( true ),
-    m_pRadAxisView( NULL ),
-	m_pRadModeOpac( NULL ),
-    m_pRadRenderFunc( NULL )
+    m_isLocalRendering( true ),
+    m_pToggleAxisView( NULL ),
+	m_pToggleModeOpac( NULL ),
+    m_pToggleRenderFunc( NULL ),
+    m_pToggleLocalGlobal( NULL )
 {
     m_bufferObjects = new GLuint[3];
 }
@@ -182,6 +184,9 @@ bool Fibers::load( const wxString &filename )
 
     /* OcTree points classification */
     m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+
+    //Global properties for opacity rendering
+    computeGLobalProperties();
 
     return res;
 }
@@ -2789,6 +2794,114 @@ void Fibers::initializeBuffer()
     }
 }
 
+//Compute T matrix for each fiber and extract the first eigen vec (t0), and the K term using eigen values.
+void Fibers::computeGLobalProperties()
+{
+    m_tractDirection.max_size();
+    m_tractDirection.resize( m_countLines * 3 );
+
+    m_dispFactors.max_size();
+    m_dispFactors.resize( m_countLines );
+
+    int t = 0;
+    //For each fiber
+    for( int i = 0; i < m_countLines; ++i )
+    {        
+        
+        int idx1 = getStartIndexForLine( i ) * 3;
+        int idx2 = idx1+3;
+        
+        FMatrix T(3,3);
+
+        //for each segment
+        for( int k = 0; k < getPointsPerLine( i ) - 1; ++k )
+        {
+            //Extract segment
+            Vector localDir = Vector( m_pointArray[idx2] - m_pointArray[idx1], m_pointArray[idx2 + 1] - m_pointArray[idx1 + 1], m_pointArray[idx2 + 2] - m_pointArray[idx1 + 2]);
+            localDir.normalize();
+
+            FMatrix n(3,1);
+            n(0,0) = localDir.x;
+            n(1,0) = localDir.y;
+            n(2,0) = localDir.z;
+            
+            //Perform Outter product
+            FMatrix n_t = n.transposed();
+            FMatrix tmp = n*n_t;
+            
+            //Accumulate Outter products
+            T += tmp;
+
+            idx1 += 3;
+            idx2 += 3;
+        } 
+
+        //Divide Outter product by number of line
+        T = T * (1.0f/(getPointsPerLine( i )));
+
+        //Extract first eigen Vector and 3 eigen values
+        std::vector< FArray > evecs;
+        FArray evals( 0.0f, 0.0f, 0.0f );
+        T.getEigenSystem( evals, evecs);
+
+        //Sort
+        Vector e1;
+        float B1, B2, B3;
+        if( evals[0] >= evals[1] && evals[0] > evals[2] )
+        {
+            e1.x = evecs[0][0];
+            e1.y = evecs[0][1];
+            e1.z = evecs[0][2];
+            B1 = evals[0];
+            B2 = evals[1];
+            B3 = evals[2];
+        }
+        else if( evals[1] > evals[0] && evals[1] >= evals[2] )
+        {
+            e1.x = evecs[1][0];
+            e1.y = evecs[1][1];
+            e1.z = evecs[1][2];
+            B1 = evals[1];
+            B2 = evals[0];
+            B3 = evals[2];
+        }
+        else if( evals[2] >= evals[0] && evals[2] > evals[1] )
+        {
+            e1.x = evecs[2][0];
+            e1.y = evecs[2][1];
+            e1.z = evecs[2][2];
+            B1 = evals[2];
+            B2 = evals[0];
+            B3 = evals[1];
+        }
+        else
+        {
+            e1.x = evecs[0][0];
+            e1.y = evecs[0][1];
+            e1.z = evecs[0][2];
+            B1 = evals[0];
+            B2 = evals[1];
+            B3 = evals[2];
+        }
+         
+        //Compute dipersion term from 3 eigen values
+        float K = 1.0f - (sqrt(B2+B3)/2.0f*B1);
+
+        //Save terms 
+        m_tractDirection[t] = e1.x;
+        m_tractDirection[t+1] = e1.y;
+        m_tractDirection[t+2] = e1.z;
+
+        //std::cout << "Evals: " << evals[0] << " " << evals[1] << " " << evals[2] << "\n";
+        //std::cout << "Evecs1: " << evecs[0][0] << " " << evecs[0][1] << " " << evecs[0][2] << "\n";
+        //std::cout << "Evecs2: " << evecs[1][0] << " " << evecs[1][1] << " " << evecs[1][2] << "\n";
+        //std::cout << "Evecs3: " << evecs[2][0] << " " << evecs[2][1] << " " << evecs[2][2] << "\n";
+
+        m_dispFactors[i] = K;
+        t+=3;
+    }   
+}
+
 void Fibers::draw()
 {
     setShader();
@@ -2991,6 +3104,7 @@ void Fibers::drawFakeTubes()
 
 void Fibers::drawSortedLines()
 {
+    //SORT LINES
     // Only sort those lines we see.
     unsigned int *pSnippletSort = NULL;
     unsigned int *pLineIds      = NULL;
@@ -3109,6 +3223,7 @@ void Fibers::drawSortedLines()
             int id23 = id2 * 3;
 
             /* --------------OPACITY TEST -------------*/
+            //View vector
             Matrix4fT transform = SceneManager::getInstance()->getTransform();
             float dots[8];
             Vector3fT v1 = { { 0, 0, 1 } };
@@ -3118,19 +3233,28 @@ void Fibers::drawSortedLines()
             Vector3fMultMat4( &view, &v1, &transform );
             dots[0] = Vector3fDot( &v2, &view );
 
+            //Local vector
             Vector normalVector = Vector(m_pointArray[id23 + 0]-m_pointArray[idx3 + 0],m_pointArray[id23 + 1]-m_pointArray[idx3 + 1],m_pointArray[id23 + 2]-m_pointArray[idx3 + 2]);
+            
+            if(!m_isLocalRendering)
+            {
+                int id = getLineForPoint(idx);
+                normalVector = Vector(m_tractDirection[id], m_tractDirection[id+1], m_tractDirection[id+2]);
+            }
+                
             normalVector.normalize();
-
-			
+            
 			Vector zVector;
             if(m_axisView)
 			{
-				zVector = Vector(view.s.X, view.s.Y, view.s.Z); //View vec
+                //View axis
+				zVector = Vector(view.s.X, view.s.Y, view.s.Z); 
 				zVector.normalize();
 			}
 			else
 			{
-				zVector = Vector(m_xAngle,m_yAngle,m_zAngle); //Fixed test
+                //Fixed axis
+				zVector = Vector(m_xAngle,m_yAngle,m_zAngle); 
 			}
 
 			float alphaValue;
@@ -3573,7 +3697,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 	pBoxRow->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
 
     //Linear func a
-    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         200,         2.0f/M_PI,       1000, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         200,         20.0f/M_PI,       1000, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("20.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRowlina = new wxBoxSizer( wxHORIZONTAL );
@@ -3622,9 +3746,10 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     m_pRadConstant             = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant" ) );
-    m_pRadAxisView             = new wxToggleButton( pParent, wxID_ANY, wxT( "View Axis" ) );
-	m_pRadModeOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
-    m_pRadRenderFunc		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Alpha function" ) );
+    m_pToggleAxisView             = new wxToggleButton( pParent, wxID_ANY, wxT( "View Axis" ) );
+	m_pToggleModeOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
+    m_pToggleRenderFunc		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Alpha function" ) );
+    m_pToggleLocalGlobal		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Local rendering" ) );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -3700,15 +3825,16 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxAlpha->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering axis:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
 
     wxBoxSizer *pBoxViewRadios = new wxBoxSizer( wxVERTICAL );
-	pBoxViewRadios->Add( m_pRadAxisView,       0, wxALIGN_LEFT | wxALL, 1 );
+	pBoxViewRadios->Add( m_pToggleAxisView,       0, wxALIGN_LEFT | wxALL, 1 );
     pBoxAlpha->Add( pBoxViewRadios, 0, wxALIGN_LEFT | wxLEFT, 50 );
 
 	wxBoxSizer *pBoxOpac = new wxBoxSizer( wxVERTICAL );
     pBoxOpac->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering functions:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
 
     wxBoxSizer *pBoxOpacBtn = new wxBoxSizer( wxVERTICAL );
-	pBoxOpacBtn->Add( m_pRadModeOpac,       0, wxALIGN_LEFT | wxALL, 1 );
-    pBoxOpacBtn->Add( m_pRadRenderFunc, 0, wxALIGN_LEFT | wxALL, 1 );
+	pBoxOpacBtn->Add( m_pToggleModeOpac,       0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxOpacBtn->Add( m_pToggleRenderFunc, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxOpacBtn->Add( m_pToggleLocalGlobal, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxOpac->Add( pBoxOpacBtn, 0, wxALIGN_LEFT | wxLEFT, 50 );
 
     pBoxMain->Add( pBoxAlpha, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
@@ -3745,9 +3871,10 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 #endif
 
     pParent->Connect( m_pRadConstant->GetId(),                   wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( PropertiesWindow::OnColorWithConstantColor ) );
-    pParent->Connect( m_pRadAxisView->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAxisChange ) );
-	pParent->Connect( m_pRadModeOpac->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnModeOpacChange ) );
-    pParent->Connect( m_pRadRenderFunc->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenderFuncChange ) );
+    pParent->Connect( m_pToggleAxisView->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnAxisChange ) );
+	pParent->Connect( m_pToggleModeOpac->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnModeOpacChange ) );
+    pParent->Connect( m_pToggleRenderFunc->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenderFuncChange ) );
+    pParent->Connect( m_pToggleLocalGlobal->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnLocalGlobalChange ) );
 
 
 #if !_USE_LIGHT_GUI
@@ -4171,27 +4298,36 @@ void Fibers::setAxisView(bool value)
 {
 	m_axisView = !value;
 	if(value)
-		m_pRadAxisView->SetLabel( wxT("Fixed axis") );
+		m_pToggleAxisView->SetLabel( wxT("Fixed axis") );
 	else
-		m_pRadAxisView->SetLabel( wxT("View axis") );
+		m_pToggleAxisView->SetLabel( wxT("View axis") );
 }
 
 void Fibers::setModeOpac(bool value)
 {
 	m_ModeOpac = !value;
 	if(value)
-        m_pRadModeOpac->SetLabel( wxT("Transparent mode") );
+        m_pToggleModeOpac->SetLabel( wxT("Transparent mode") );
 	else
-		m_pRadModeOpac->SetLabel( wxT("Opacity mode") );
+		m_pToggleModeOpac->SetLabel( wxT("Opacity mode") );
 }
 
 void Fibers::setRenderFunc(bool value)
 {
 	m_isAlphaFunc = !value;
 	if(value)
-        m_pRadRenderFunc->SetLabel( wxT("Linear function") );
+        m_pToggleRenderFunc->SetLabel( wxT("Linear function") );
 	else
-		m_pRadRenderFunc->SetLabel( wxT("Alpha function") );
+		m_pToggleRenderFunc->SetLabel( wxT("Alpha function") );
+}
+
+void Fibers::setLocalGlobal(bool value)
+{
+	m_isLocalRendering = !value;
+	if(value)
+        m_pToggleLocalGlobal->SetLabel( wxT("Global rendering") );
+	else
+	    m_pToggleLocalGlobal->SetLabel( wxT("Local rendering") );
 }
 
 void PropertiesWindow::OnFibersAlpha( wxCommandEvent& WXUNUSED( event ) )
