@@ -3239,7 +3239,7 @@ void Fibers::drawSortedLines()
             if(!m_isLocalRendering)
             {
                 int id = getLineForPoint(idx);
-                normalVector = Vector(m_tractDirection[id], m_tractDirection[id+1], m_tractDirection[id+2]);
+                normalVector = Vector(m_tractDirection[id*3], m_tractDirection[id*3+1], m_tractDirection[id*3+2]);
             }
                 
             normalVector.normalize();
