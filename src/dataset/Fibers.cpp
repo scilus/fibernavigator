@@ -116,10 +116,12 @@ Fibers::Fibers()
 	m_ModeOpac( true ),
     m_isAlphaFunc( true ),
     m_isLocalRendering( true ),
+    m_usingEndpts( false ),
     m_pToggleAxisView( NULL ),
 	m_pToggleModeOpac( NULL ),
     m_pToggleRenderFunc( NULL ),
-    m_pToggleLocalGlobal( NULL )
+    m_pToggleLocalGlobal( NULL ),
+    m_pToggleEndpts( NULL )
 {
     m_bufferObjects = new GLuint[3];
 }
@@ -2803,6 +2805,9 @@ void Fibers::computeGLobalProperties()
     m_dispFactors.max_size();
     m_dispFactors.resize( m_countLines );
 
+    m_endPointsVector.max_size();
+    m_endPointsVector.resize( m_countLines * 3);
+
     int t = 0;
     //For each fiber
     for( int i = 0; i < m_countLines; ++i )
@@ -2811,7 +2816,14 @@ void Fibers::computeGLobalProperties()
         int idx1 = getStartIndexForLine( i ) * 3;
         int idx2 = idx1+3;
         
-        FMatrix T(3,3);
+        FMatrix T(3,3); //For watson distribution
+
+        //Also keep end points for comparison
+        int ptsperline = getPointsPerLine( i );
+        Vector startPt = Vector(m_pointArray[idx1], m_pointArray[idx1+1], m_pointArray[idx1+2]);
+        Vector endPt = Vector(m_pointArray[idx1+ptsperline*3-3], m_pointArray[idx1+ptsperline*3-2], m_pointArray[idx1+ptsperline*3-1]);
+        Vector endDir = Vector(endPt - startPt);
+        endDir.normalize();
 
         //for each segment
         for( int k = 0; k < getPointsPerLine( i ) - 1; ++k )
@@ -2891,6 +2903,10 @@ void Fibers::computeGLobalProperties()
         m_tractDirection[t] = e1.x;
         m_tractDirection[t+1] = e1.y;
         m_tractDirection[t+2] = e1.z;
+
+        m_endPointsVector[t] = endDir.x;
+        m_endPointsVector[t+1] = endDir.y;
+        m_endPointsVector[t+2] = endDir.z;
 
         //std::cout << "Evals: " << evals[0] << " " << evals[1] << " " << evals[2] << "\n";
         //std::cout << "Evecs1: " << evecs[0][0] << " " << evecs[0][1] << " " << evecs[0][2] << "\n";
@@ -3239,7 +3255,12 @@ void Fibers::drawSortedLines()
             if(!m_isLocalRendering)
             {
                 int id = getLineForPoint(idx);
-                normalVector = Vector(m_tractDirection[id*3], m_tractDirection[id*3+1], m_tractDirection[id*3+2]);
+                normalVector = Vector(m_tractDirection[id*3], m_tractDirection[id*3+1], m_tractDirection[id*3+2]); 
+
+                if(m_usingEndpts)
+                {
+                    normalVector = Vector(m_endPointsVector[id*3], m_endPointsVector[id*3+1], m_endPointsVector[id*3+2]);
+                }
             }
                 
             normalVector.normalize();
@@ -3750,6 +3771,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 	m_pToggleModeOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
     m_pToggleRenderFunc		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Alpha function" ) );
     m_pToggleLocalGlobal		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Local rendering" ) );
+    m_pToggleEndpts                 = new wxToggleButton( pParent, wxID_ANY, wxT( "End points OFF" ) );
+    m_pToggleEndpts->Enable(false);
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -3835,6 +3858,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 	pBoxOpacBtn->Add( m_pToggleModeOpac,       0, wxALIGN_LEFT | wxALL, 1 );
     pBoxOpacBtn->Add( m_pToggleRenderFunc, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxOpacBtn->Add( m_pToggleLocalGlobal, 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxOpacBtn->Add( m_pToggleEndpts, 0, wxALIGN_LEFT | wxALL, 1 );
     pBoxOpac->Add( pBoxOpacBtn, 0, wxALIGN_LEFT | wxLEFT, 50 );
 
     pBoxMain->Add( pBoxAlpha, 0, wxFIXED_MINSIZE | wxEXPAND | wxTOP | wxBOTTOM, 8 );
@@ -3875,6 +3899,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 	pParent->Connect( m_pToggleModeOpac->GetId(),                   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnModeOpacChange ) );
     pParent->Connect( m_pToggleRenderFunc->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnRenderFuncChange ) );
     pParent->Connect( m_pToggleLocalGlobal->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnLocalGlobalChange ) );
+    pParent->Connect( m_pToggleEndpts->GetId(),                 wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnEndPtsChange ) );
 
 
 #if !_USE_LIGHT_GUI
@@ -4325,9 +4350,24 @@ void Fibers::setLocalGlobal(bool value)
 {
 	m_isLocalRendering = !value;
 	if(value)
+    {
         m_pToggleLocalGlobal->SetLabel( wxT("Global rendering") );
+        m_pToggleEndpts->Enable(true);
+    }
 	else
+    {
 	    m_pToggleLocalGlobal->SetLabel( wxT("Local rendering") );
+        m_pToggleEndpts->Enable(false);
+    }
+}
+
+void Fibers::setUsingEndpts(bool value)
+{
+	m_usingEndpts = value;
+	if(value)
+		m_pToggleEndpts->SetLabel( wxT("End points ON") );
+	else
+		m_pToggleEndpts->SetLabel( wxT("End points OFF") );
 }
 
 void PropertiesWindow::OnFibersAlpha( wxCommandEvent& WXUNUSED( event ) )

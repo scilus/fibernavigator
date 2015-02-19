@@ -103,6 +103,7 @@ public:
     void    setModeOpac(bool value);
     void    setRenderFunc(bool value);
     void    setLocalGlobal(bool value);
+    void    setUsingEndpts(bool value);
 
     void    flipAxis( AxisType i_axe );
     
@@ -161,6 +162,7 @@ public:
 	bool    getModeOpacValue() { return m_pToggleModeOpac->GetValue(); }
     bool    getRenderFuncValue() { return m_pToggleRenderFunc->GetValue(); }
     bool    getLocalGlobalValue() { return m_pToggleLocalGlobal->GetValue(); }
+    bool    getEndPtsValue() { return m_pToggleEndpts->GetValue(); }
 
 private:
     Fibers( const Fibers & );
@@ -229,6 +231,7 @@ private:
     bool                  m_useTransparency;
     std::vector< float >  m_tractDirection;
     std::vector< float >  m_dispFactors;
+    std::vector< float >  m_endPointsVector;
 
     bool                  m_isColorationUpdated;
     FibersColorationMode  m_fiberColorationMode;
@@ -246,6 +249,7 @@ private:
 	bool			m_ModeOpac;
     bool            m_isAlphaFunc;
     bool            m_isLocalRendering;
+    bool            m_usingEndpts;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
@@ -292,6 +296,7 @@ private:
 	wxToggleButton  *m_pToggleModeOpac;
     wxToggleButton  *m_pToggleRenderFunc;
     wxToggleButton  *m_pToggleLocalGlobal;
+    wxToggleButton  *m_pToggleEndpts;
 };
 
 #endif /* FIBERS_H_ */

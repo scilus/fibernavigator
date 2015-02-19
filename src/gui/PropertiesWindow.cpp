@@ -2134,3 +2134,22 @@ void PropertiesWindow::OnLocalGlobalChange( wxCommandEvent& WXUNUSED(event) )
         Logger::getInstance()->print( wxT( "PropertiesWindow::OnLocalGlobalChange - Current index is -1" ), LOGLEVEL_ERROR );
     }
 }
+
+void PropertiesWindow::OnEndPtsChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnEndptsChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->setUsingEndpts(pFibers->getEndPtsValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnEndptsChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
