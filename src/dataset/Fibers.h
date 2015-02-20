@@ -222,6 +222,7 @@ private:
     std::vector< bool >   m_selected;
     std::vector< bool >   m_filtered;
     std::vector< float >  m_length;
+    int                   m_subsampledLines;
     float                 m_maxLength;
     float                 m_minLength;
     std::vector< float  > m_localizedAlpha;
@@ -245,6 +246,7 @@ private:
 	float           m_zAngle;
     float           m_lina;
     float           m_linb;
+    float           m_cl;
 	bool            m_axisView;
 	bool			m_ModeOpac;
     bool            m_isAlphaFunc;
@@ -276,11 +278,14 @@ private:
     wxSlider       *m_pSliderFibersLinb;
     wxSlider       *m_pSliderFibersPhi;
     wxSlider       *m_pSliderFibersTheta;
+    wxSlider       *m_pSliderFiberscl;
+    wxTextCtrl     *m_pTxtSamplingBox;
     wxTextCtrl     *m_pTxtAlphaBox;
     wxTextCtrl     *m_pTxtThetaBox;
     wxTextCtrl     *m_pTxtPhiBox;
     wxTextCtrl     *m_pTxtlina;
     wxTextCtrl     *m_pTxtlinb;
+    wxTextCtrl     *m_pTxtclBox;
 
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
