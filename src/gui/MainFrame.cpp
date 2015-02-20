@@ -755,6 +755,13 @@ void MainFrame::onMenuViewAxes( wxCommandEvent& WXUNUSED(event) )
 
 //////////////////////////////////////////////////////////////////////////
 
+void MainFrame::onMenuViewColorbar( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->toggleColorbarDisplay();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void MainFrame::onMenuViewBack( wxCommandEvent& WXUNUSED(event) )
 {
     Matrix4fT transform = SceneManager::getInstance()->getTransform();

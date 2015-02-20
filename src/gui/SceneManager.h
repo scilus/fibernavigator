@@ -56,6 +56,7 @@ public:
     bool isSagittalDisplayed() const        { return m_showSagittal; }
     bool isCrosshairDisplayed() const       { return m_showCrosshair; }
     bool areAxesDisplayed() const           { return m_showAxes; }
+    bool isColorbarDisplayed() const        { return m_showColorbar; }
 
     bool toggleLightingDisplay()        { return m_lighting       = !m_lighting; }
     bool toggleAlphaBlend()             { return m_blendAlpha     = !m_blendAlpha; }
@@ -65,6 +66,7 @@ public:
     bool toggleSagittalDisplay()        { return m_showSagittal   = !m_showSagittal; }
     bool toggleCrosshairDisplay()       { return m_showCrosshair  = !m_showCrosshair; }
     bool toggleAxesDisplay()            { return m_showAxes       = !m_showAxes; }
+    bool toggleColorbarDisplay()          { return m_showColorbar   = !m_showColorbar; }
     
     float getSliceX() const         { return m_sliceX; }
     float getSliceY() const         { return m_sliceY; }
@@ -180,6 +182,7 @@ private:
 
     bool  m_showCrosshair;
     bool  m_showAxes;
+    bool  m_showColorbar;
 
     float m_sliceX;
     float m_sliceY;

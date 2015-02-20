@@ -123,6 +123,7 @@ private:
     void onMenuViewBack                     ( wxCommandEvent& evt );
     void onMenuViewCrosshair                ( wxCommandEvent& evt );
     void onMenuViewAxes                     ( wxCommandEvent& evt );
+    void onMenuViewColorbar                 ( wxCommandEvent& evt );
     void onMenuLock                         ( wxCommandEvent& evt );
     void onSceneLock                        ( wxCommandEvent& evt );
     void onRotateZ                          ( wxCommandEvent& evt );

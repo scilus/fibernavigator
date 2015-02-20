@@ -351,7 +351,10 @@ void TheScene::renderScene()
         drawSelectionObjects();
     }
     
-    drawColorMapLegend();
+    if(SceneManager::getInstance()->isColorbarDisplayed())
+    {
+        drawColorMapLegend();
+    }
 
     Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
 

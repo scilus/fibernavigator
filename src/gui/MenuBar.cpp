@@ -70,6 +70,7 @@ MenuBar::MenuBar()
 #if !_USE_LIGHT_GUI
     m_itemToggleShowCrosshair = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Crosshair"));
     m_itemToggleShowAxes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Axes"));
+    m_itemToggleShowColorBar = m_menuView->AppendCheckItem(wxID_ANY, wxT("Show Colorbar"));
 #endif
     
     m_itemLockSlizes = m_menuView->AppendCheckItem(wxID_ANY, wxT("Lock Slices\tF"));
@@ -198,6 +199,7 @@ void MenuBar::initMenuBar( MainFrame *mf )
 #if !_USE_LIGHT_GUI
     mf->Connect(m_itemToggleShowCrosshair->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewCrosshair));
     mf->Connect(m_itemToggleShowAxes->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewAxes));
+    mf->Connect(m_itemToggleShowColorBar->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onMenuViewColorbar));
 #endif
     
     mf->Connect(m_itemNewSelectionBox->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MainFrame::onNewSelectionBox));
@@ -343,6 +345,7 @@ void MenuBar::updateMenuBar( MainFrame *mf )
 #if !_USE_LIGHT_GUI
     m_itemToggleShowCrosshair->Check( SceneManager::getInstance()->isCrosshairDisplayed() );
     m_itemToggleShowAxes->Check( SceneManager::getInstance()->areAxesDisplayed() );
+    m_itemToggleShowColorBar->Check( SceneManager::getInstance()->isColorbarDisplayed() );
     m_itemToggleDrawPoints->Check( SceneManager::getInstance()->isPointMode() );
     m_itemToggleDrawVectors->Check( SceneManager::getInstance()->areVectorsDisplayed() );
 #endif
