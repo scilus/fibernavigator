@@ -268,6 +268,7 @@ void TheScene::renderScene()
         glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
         glRotatef( m_rotAngleZ, 0, 0, 1 );
         glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+        
     }
 
     if( m_isRotateY )

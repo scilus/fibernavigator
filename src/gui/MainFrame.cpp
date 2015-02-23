@@ -2350,7 +2350,7 @@ void MainFrame::setTimerSpeed()
         || SceneManager::getInstance()->getScene()->m_isRotateY 
         || SceneManager::getInstance()->getScene()->m_isRotateZ)
     {        
-        m_pTimer->Start( 50 );
+        m_pTimer->Start( 20 );
     }
     else if(!RTTrackingHelper::getInstance()->isTrackActionPaused() )
     {
