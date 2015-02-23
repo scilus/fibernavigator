@@ -23,9 +23,10 @@ public:
 	void SetTextureFromSlider( int sliderValue );
 	void SetTextureFromNetwork();
 	void SetCorrThreshold( float thresh ) { m_corrThreshold = thresh; }
-	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
+	void SetClusterLvlSliderValue (float value ) { m_clusterLvlSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void SetAlphaSliderValue (float value ) { m_alpha = value; }
+    void setSeedFromTracto( const std::vector<Vector> &seedFromTracto )	  { m_pSeedFromTracto = seedFromTracto; }
 
 	void render3D(bool recalculateTexture);
 	void seedBased();
@@ -35,11 +36,13 @@ public:
 	bool isBoxMoving() { return m_boxMoving; }
 
 	std::vector<float>* getZscores();
+    std::vector<std::vector<float>* > getClusters();
 	DatasetIndex getIndex()   { return m_index; }
 	DatasetIndex getColumns() { return m_columns; }
 	DatasetIndex getRows()    { return m_rows; }
 	DatasetIndex getFrames()  { return m_frames; }
 	DatasetIndex getBands()   { return m_bands; }
+    float getElement(int,int,int,std::vector<float>*);
 	
 	std::vector<float> data; //Used for texture mapping
 	
@@ -48,7 +51,7 @@ private:
 	void correlate(std::vector< float >& position);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 	std::vector<int> get3DIndexes(int x, int y, int z);
-	void erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int curIndex);
+	void erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int x, int y, int z);
 	
     
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
@@ -57,6 +60,7 @@ private:
 	std::vector<std::pair<Vector,float> > m_3Dpoints; //3D points and their positions
 	std::vector<float> m_smallt; //3x3x3 RGB values
 	std::vector<float> m_zMap; //1x1x1 zscores
+    std::vector<Vector> m_pSeedFromTracto;//Seed from tracto end points
 	
 	float m_zMin;
 	float m_zMax;
@@ -76,7 +80,7 @@ private:
     float m_voxelSizeZ;
 	DatasetIndex m_index;
 	float m_corrThreshold;
-	float m_colorSliderValue;
+	float m_clusterLvlSliderValue;
 	int m_rowsL;
 	int m_columnsL;
 	int m_framesL;
@@ -87,7 +91,8 @@ private:
 	bool m_normalize; 
 	bool m_boxMoving;
 	Vector m_originL;
-	Vector m_origin; 
+	Vector m_origin;
+
 
 };
 

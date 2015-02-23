@@ -32,6 +32,7 @@ public:
     void OnPaint( wxPaintEvent &event );
     void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
+    
 
 
     void OnStartTracking                       ( wxCommandEvent& event );
@@ -44,7 +45,7 @@ public:
     void OnSelectFileHARDI                     ( wxCommandEvent& event );
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnShellSeeding                        ( wxCommandEvent& event );
-    void OnSelectMask                           ( wxCommandEvent& event );
+    void OnSelectMask                          ( wxCommandEvent& event );
     void OnInterpolate                         ( wxCommandEvent& event );
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
     void OnSliderMinLengthMoved                ( wxCommandEvent& event );
@@ -53,13 +54,16 @@ public:
     void OnSliderAxisSeedNbMoved               ( wxCommandEvent& event );
 	void OnMapSeeding                          ( wxCommandEvent& event );
 	void OnSelectSeedMap                       ( wxCommandEvent& event );
+	void OnSliderOpacityMoved				   ( wxCommandEvent& event );
+    void OnEnableRSN                           ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
-    wxTextCtrl          *m_pTxtTotalSeedNbBox;
+    
+    
 
 
 private:
@@ -85,12 +89,16 @@ private:
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;
     wxTextCtrl          *m_pTxtMinLengthBox;
+	wxStaticText        *m_pTextOpacity;
+    wxSlider            *m_pSliderOpacity;
+    wxTextCtrl          *m_pTxtOpacityBox;
     wxSlider            *m_pSliderMaxLength;
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
 	wxButton			*m_pBtnConvert;
-    wxSlider            *m_pSliderAxisSeedNb;
-    wxTextCtrl          *m_pTxtAxisSeedNbBox;
+    
+    
+    
     wxStaticText        *m_pTextAxisSeedNb;
     wxStaticText        *m_pTextTotalSeedNb;
     wxStaticLine        *m_pLineSeparator;

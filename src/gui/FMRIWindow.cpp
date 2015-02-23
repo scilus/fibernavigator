@@ -8,6 +8,7 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/RestingStateNetwork.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../dataset/RTFMRIHelper.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
@@ -45,7 +46,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxVERTICAL );
 	pBoxRow1->Add( m_pBtnSelectFMRI, 0, wxALIGN_CENTER | wxALL, 1 );
 	pBoxRow1->Add( m_pBtnStart, 0, wxALIGN_CENTER | wxALL, 1 );
-	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
+	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextDisplayMode = new wxStaticText( this, wxID_ANY, wxT( "Display:" ), wxDefaultPosition, wxSize(200, -1) );
     m_pRadShowRawData = new wxRadioButton( this,  wxID_ANY, wxT( "Raw Data" ), wxDefaultPosition, wxSize(160, -1) );
@@ -59,7 +60,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow2->Add( m_pTextDisplayMode, 0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
 	pBoxRow2->Add( m_pRadShowRawData, 0, wxALIGN_CENTER, 1 );
 	pBoxRow2->Add( m_pRadShowNetwork, 0, wxALIGN_CENTER, 1 );
-	m_pFMRISizer->Add( pBoxRow2, 0, wxFIXED_MINSIZE | wxALL, 2 );
+	m_pFMRISizer->Add( pBoxRow2, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextVolumeId = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -69,63 +70,72 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 
 	wxBoxSizer *pBoxRow3 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow3->Add( m_pTextVolumeId, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow3->Add( m_pSliderRest,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow3->Add( m_pTxtRestBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxRow3->Add( m_pSliderRest,   0, wxALIGN_CENTER | wxEXPAND | wxALL, 1);
+	pBoxRow3->Add( m_pTxtRestBox,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 500, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderCorrThreshold->SetValue( 165 );
+	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 1000, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderCorrThreshold->SetValue( 450 );
 	Connect( m_pSliderCorrThreshold->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderCorrThreshMoved) );
-    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("1.65"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("4.5"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow5 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow5->Add( m_pTextCorrThreshold, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow5->Add( m_pSliderCorrThreshold,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow5->Add( m_pTxtCorrThreshBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxRow5->Add( m_pTextCorrThreshold, 0, wxALIGN_CENTER | wxALL, 1 );
+    pBoxRow5->Add( m_pSliderCorrThreshold,   0, wxALIGN_CENTER | wxALL, 1);
+	pBoxRow5->Add( m_pTxtCorrThreshBox,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow5, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pTextColorMap = new wxStaticText( this, wxID_ANY, wxT("Max Z-Color range"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderColorMap = new MySlider( this, wxID_ANY, 0, 1, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderColorMap->SetValue( 50 );
-	Connect( m_pSliderColorMap->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderColorMoved) );
-    m_pTxtColorMapBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+	m_pTextClusterLvl = new wxStaticText( this, wxID_ANY, wxT("Cluster level"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderClusterLvl = new MySlider( this, wxID_ANY, 0, 0, 40, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderClusterLvl->SetValue( 20 );
+	Connect( m_pSliderClusterLvl->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderClusterLevelMoved) );
+    m_pTxtClusterLvlBox = new wxTextCtrl( this, wxID_ANY, wxT("20.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow6 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow6->Add( m_pTextColorMap, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow6->Add( m_pSliderColorMap,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow6->Add( m_pTxtColorMapBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxRow6->Add( m_pTextClusterLvl, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRow6->Add( m_pSliderClusterLvl,   0, wxALIGN_CENTER | wxEXPAND | wxALL, 1);
+	pBoxRow6->Add( m_pTxtClusterLvlBox,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow6, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderSizeP = new MySlider( this, wxID_ANY, 0, 1, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderSizeP->SetValue( 5 );
+	m_pSliderSizeP->SetValue( 2 );
 	Connect( m_pSliderSizeP->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderSizePMoved) );
-    m_pTxtSizePBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtSizePBox = new wxTextCtrl( this, wxID_ANY, wxT("2.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow7 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow7->Add( m_pTextSizeP, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow7->Add( m_pSliderSizeP,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow7->Add( m_pTxtSizePBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxRow7->Add( m_pSliderSizeP,   0, wxALIGN_CENTER | wxEXPAND | wxALL, 1);
+	pBoxRow7->Add( m_pTxtSizePBox,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow7, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextAlpha = new wxStaticText( this, wxID_ANY, wxT("Alpha blend"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
 	m_pSliderAlpha = new MySlider( this, wxID_ANY, 0, 0, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderAlpha->SetValue( 50 );
 	Connect( m_pSliderAlpha->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderAlphaMoved) );
-    m_pTxtAlphaBox = new wxTextCtrl( this, wxID_ANY, wxT("0.8"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtAlphaBox = new wxTextCtrl( this, wxID_ANY, wxT("0.5"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRow8 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow8->Add( m_pTextAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxRow8->Add( m_pSliderAlpha,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-	pBoxRow8->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxRow8->Add( m_pSliderAlpha,   0, wxALIGN_CENTER | wxEXPAND | wxALL, 1);
+	pBoxRow8->Add( m_pTxtAlphaBox,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow8, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pBtnConvertFMRI = new wxButton( this, wxID_ANY,wxT("Convert to Overlay"), wxDefaultPosition, wxSize(230, -1) );
+	m_pBtnConvertFMRI = new wxButton( this, wxID_ANY,wxT("Generate map"), wxDefaultPosition, wxSize(230, -1) );
 	Connect( m_pBtnConvertFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onConvertRestingState) );
 
-	wxBoxSizer *pBoxRow9 = new wxBoxSizer( wxHORIZONTAL );
-	pBoxRow9->Add( m_pBtnConvertFMRI,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pBtnGenerateClusters = new wxButton( this, wxID_ANY,wxT("Generate clusters"), wxDefaultPosition, wxSize(230, -1) );
+	Connect( m_pBtnGenerateClusters->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onGenerateClusters) );
+
+	m_pBtnTractofMRI = new wxToggleButton( this, wxID_ANY,wxT("Enable tractography"), wxDefaultPosition, wxSize(230, -1) );
+	Connect( m_pBtnTractofMRI->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onInitiateTractography) );
+	m_pBtnTractofMRI->Enable(false);
+
+    wxBoxSizer *pBoxRow9 = new wxBoxSizer( wxVERTICAL );
+	pBoxRow9->Add( m_pBtnConvertFMRI,   0, wxALIGN_CENTER | wxALL, 1);
+    pBoxRow9->Add( m_pBtnGenerateClusters,   0, wxALIGN_CENTER | wxALL, 1);
+	pBoxRow9->Add( m_pBtnTractofMRI,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow9, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 }
@@ -196,11 +206,11 @@ void FMRIWindow::OnSliderCorrThreshMoved(  wxCommandEvent& WXUNUSED(event) )
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
-void FMRIWindow::OnSliderColorMoved(  wxCommandEvent& WXUNUSED(event) )
+void FMRIWindow::OnSliderClusterLevelMoved(  wxCommandEvent& WXUNUSED(event) )
 {
-	float sliderValue = m_pSliderColorMap->GetValue() / 10.0f;
-	m_pTxtColorMapBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetColorSliderValue( sliderValue );
+	float sliderValue = m_pSliderClusterLvl->GetValue();
+	m_pTxtClusterLvlBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetClusterLvlSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
@@ -243,9 +253,58 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 
 	DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+	RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
+    m_pBtnTractofMRI->SetValue(false);
     m_pBtnStart->SetLabel(wxT("Start correlation"));
     m_pBtnStart->SetValue(false);
 
+}
+
+void FMRIWindow::onGenerateClusters( wxCommandEvent& WXUNUSED(event) )
+{
+	//Convert to anat each cluster inside the zmap
+	DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
+
+    std::vector<std::vector<float>* > clusters = DatasetManager::getInstance()->m_pRestingStateNetwork->getClusters();
+    for(unsigned int i=0; i < clusters.size(); i++)
+    {
+	    int indx = DatasetManager::getInstance()->createAnatomy( clusters[i], HEAD_SHORT );
+    
+	    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+        pNewAnatomy->setShowFS(false);
+
+        pNewAnatomy->setType(HEAD_SHORT);
+        pNewAnatomy->setDataType(4);
+	    pNewAnatomy->setShowFS(true);
+        pNewAnatomy->setName( wxString::Format ( wxT("Cluster %u"), i ));
+	    pNewAnatomy->setThreshold( 0.01f );
+        MyApp::frame->m_pListCtrl->InsertItem( indx );
+    }
+
+	RTFMRIHelper::getInstance()->setRTFMRIReady(false);
+	
+
+	DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
+	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+	RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
+    m_pBtnTractofMRI->SetValue(false);
+    m_pBtnStart->SetLabel(wxT("Start correlation"));
+    m_pBtnStart->SetValue(false);
+
+}
+
+void FMRIWindow::onInitiateTractography( wxCommandEvent& WXUNUSED(event) )
+{
+	RTFMRIHelper::getInstance()->toogleSeedFromfMRI();
+	RTTrackingHelper::getInstance()->setRTTDirty(true);
+	RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+
+	if( RTFMRIHelper::getInstance()->isSeedFromfMRI() )
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(true);
+	else
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
 }
 
 void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
@@ -256,12 +315,19 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
     if( !RTFMRIHelper::getInstance()->isRTFMRIReady() )
     {
 		DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
-        RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+		RTTrackingHelper::getInstance()->setSeedFromfMRI(false);
+		RTTrackingHelper::getInstance()->setRTTDirty(true);
+        RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+        m_pBtnTractofMRI->SetValue(false);
         m_pBtnStart->SetLabel(wxT("Start correlation"));
     }
     else
     {
         m_pBtnStart->SetLabel(wxT("Stop correlation"));
+        if(RTFMRIHelper::getInstance()->isSeedFromfMRI())
+        {
+		    RTTrackingHelper::getInstance()->setSeedFromfMRI(true);
+        }
 	}
 }
 

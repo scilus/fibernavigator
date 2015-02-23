@@ -4,10 +4,12 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "RestingStateNetwork.h"
+#include "../gui/MainFrame.h"
 
 #include "DatasetManager.h"
 #include "AnatomyHelper.h"
 #include "RTFMRIHelper.h"
+#include "RTTrackingHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
@@ -23,6 +25,7 @@
 #include <fstream>
 #include <limits>
 #include <vector>
+#include <math.h>
 
 // TODO remove
 //#include "../gfx/Image.h"
@@ -37,12 +40,12 @@ RestingStateNetwork::RestingStateNetwork():
 m_zMin( 999.0f ),
 m_zMax( 0.0f ),
 m_alpha( 0.5f),
-m_pointSize( 5.0f ),
+m_pointSize( 2.0f ),
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_corrThreshold( 1.65f ),
-m_colorSliderValue( 5.0f ),
+m_corrThreshold( 4.5f ),
+m_clusterLvlSliderValue( 20.0f ),
 m_boxMoving( false ),
 m_originL(0,0,0),
 m_origin(0,0,0)
@@ -334,32 +337,48 @@ void RestingStateNetwork::seedBased()
     Vector minCorner, maxCorner, middle;
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
-	for( unsigned int b = 0; b < selObjs.size(); b++ )
-	{
-		minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
-		maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+    if(!RTFMRIHelper::getInstance()->isSeedFromTracto())
+    {
+	    for( unsigned int b = 0; b < selObjs.size(); b++ )
+	    {
+		    minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
+		    minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
+		    minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+		    maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
+		    maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
+		    maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
 		
-		for( float x = minCorner.x; x <= maxCorner.x; x++)
-		{
-			for( float y = minCorner.y; y <= maxCorner.y; y++)
-			{
-				for( float z = minCorner.z; z <= maxCorner.z; z++)
-				{
-					//Switch to 3x3x3 from t1space
-					int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-					int yy = ((y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y;
-					int xx = ((x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x;
-					int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-					positions.push_back( i );
-				}
-			}
-		}
-		correlate(positions);
-	}
+		    for( float x = minCorner.x; x <= maxCorner.x; x++)
+		    {
+			    for( float y = minCorner.y; y <= maxCorner.y; y++)
+			    {
+				    for( float z = minCorner.z; z <= maxCorner.z; z++)
+				    {
+					    //Switch to 3x3x3 from t1space
+					    int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+					    int yy = ((y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y;
+					    int xx = ((x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x;
+					    int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+					    positions.push_back( i );
+				    }
+			    }
+		    }
+		    correlate(positions);
+	    }
+    }
+    else
+    {
+        for(unsigned int t = 0; t < m_pSeedFromTracto.size(); t++ )
+        {
+            //Switch to 3x3x3 from t1space
+            int zz = (((m_pSeedFromTracto[t].z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z) / m_zL;
+			int yy = (((m_pSeedFromTracto[t].y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y) / m_yL;
+			int xx = (((m_pSeedFromTracto[t].x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x) / m_xL;
+			int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+			positions.push_back( i );
+        }
+        correlate(positions);
+    }
 	
 	//TODO can be done in rendering directly while looping, change from fspace to t1space
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
@@ -370,6 +389,14 @@ void RestingStateNetwork::seedBased()
     }
 
 	render3D(false);
+
+	if(RTFMRIHelper::getInstance()->isSeedFromfMRI())
+	{
+		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setSeedFromfMRI(m_3Dpoints);
+		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setNbSeed(ceil(m_xL));
+		RTTrackingHelper::getInstance()->setRTTDirty(true);
+	}
+
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
@@ -402,14 +429,13 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 	if( m_3Dpoints.size() > 0 )
     {
 		std::vector<float> texture(m_datasetSizeL*3, 0.0f);
-
+        glPushAttrib( GL_ALL_ATTRIB_BITS );
 
         ////Test Sort////
         GLfloat projMatrix[16];
         glGetFloatv( GL_PROJECTION_MATRIX, projMatrix );
         size_t siz = m_3Dpoints.size();
 
-    
         // Compute z values of lines (in our case: starting points only).
         vector< float > zVals( siz );
 
@@ -418,7 +444,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
         pSnippletSort = new unsigned int[siz + 1];
       
 
-        for( int i = 0; i < siz; ++i )
+        for(unsigned int i = 0; i < siz; ++i )
         {
             zVals[i] = ( m_3Dpoints[i].first.x * projMatrix[2] + m_3Dpoints[i].first.y * projMatrix[6]
                           + m_3Dpoints[i].first.z * projMatrix[10] + projMatrix[14] ) / ( m_3Dpoints[i].first.x * projMatrix[3]
@@ -459,18 +485,12 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				G = 1.0f;
 				B = v;
 			}
-
+		
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
 			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
 			glColor4f(R,G,B,(m_3Dpoints[s].second / m_zMax) * m_alpha + 0.1f);
-
-			//glActiveTexture(GL_TEXTURE0);
-			//glEnable( GL_TEXTURE_2D );
-			//glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-			//glBindTexture(GL_TEXTURE_2D, m_lookupTex);
 
             if(render)
             {
@@ -480,56 +500,22 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
                 render = true;
             }
 
-			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
+			
 
 			int zz = ((m_3Dpoints[s].first.z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-				int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-				int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+			int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+			int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
-				int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-				m_smallt[ss*3] = R;
-				m_smallt[ss*3+1] = G;
-				m_smallt[ss*3+2] = B;	
+			int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+			m_smallt[ss*3] = R;
+			m_smallt[ss*3+1] = G;
+			m_smallt[ss*3+2] = B;	
 		}
 
-
-		//TEXTURE
-		//if(recalculateTexture)
-		//{
-
-		//	for(int x = 0; x < m_columnsL; x++)
-		//	{
-		//		for(int y = 0; y < m_rowsL; y++)
-		//		{
-		//			for(int z = 0; z < m_framesL; z++)
-		//			{
-		//				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
-
-		//				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-		//				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-		//				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
-
-		//				if(xx >=0 && yy >=0 && zz >=0 && xx < m_columns && yy < m_rows && zz < m_frames)
-		//				{
-		//					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-
-		//					texture[i*3] = m_smallt[s*3];
-		//					texture[i*3 + 1] = m_smallt[s*3+1];
-		//					texture[i*3 + 2] = m_smallt[s*3+2];
-		//				}
-
-		//			}
-		//		}
-		//	}
-
-		//	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-		//	pNewAnatomy->setFloatDataset(texture);
-		//	pNewAnatomy->generateTexture();
-
-		//}
         delete[] pSnippletSort;
+        glPopAttrib();
 	}
 }
 
@@ -569,6 +555,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
+				float value = 0.0f;
 				if(m_meansAndSigmas[i].first != 0)
 				{
 					float num = 0.0f;
@@ -578,21 +565,13 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 					{
 						num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
 					}
-					float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-					value /= (m_bands);
-				
-					if(value > 0)
-					{
-						corrSum+=value;
-						corrFactors[i] = value;
-						nb++;
-					}
-					else
-						corrFactors[i] = -1;
+					value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
+					value /= (m_bands-1);
 				}
-				else
-					corrFactors[i] = 0.0f;
-			}
+				nb++;
+				corrFactors[i] = value;
+				corrSum+=value;
+			}		
 		}
 	}
 
@@ -606,17 +585,15 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(corrFactors[i] > 0.0f)
-				{
-					sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);	
-				}		
+				sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);		
 			}
 		}
 	}
 
 	//Calculate z-scores, and save them.
-	sigma /= nb;
+	sigma /= nb-1;
 	sigma = sqrt(sigma);
+
 	vector<float> zErode(m_datasetSize, 0);
 	vector<bool> binErode(m_datasetSize, false);
 
@@ -642,7 +619,6 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 						m_zMax = zScore;
 					if(zScore > m_corrThreshold)
 					{
-						//m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 						zErode[i] = zScore;
 						binErode[i] = 1;
 					}
@@ -660,15 +636,16 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 1; z < m_frames-1; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(binErode[i])
+				if(binErode[i] && !tmp[i])
 				{
-					erode(tmp,binErode,i);
-
-					if(tmp[i])
-					{
-						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zErode[i]));
-					}
+					erode(tmp,binErode,x,y,z);
 				}
+
+				if(tmp[i])
+				{
+					m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zErode[i]));
+				}
+				
 			}
 		}
 	}
@@ -702,29 +679,19 @@ std::vector<float>* RestingStateNetwork::getZscores()
 			{
 				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
 
-				//int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-				//int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-				//int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
-
-				//if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
-				//{
-				//	int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-				//	m_zMap[i] = dataf[s];
-				//}
-
 				float zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
 				float yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
 				float xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
 				if(xx >1 && yy >1 && zz >1 && xx < m_columns && yy < m_rows && zz < m_frames)
 				{
-                    const int x = (unsigned int) std::min( (int)std::floor(xx / DatasetManager::getInstance()->getVoxelX() ), m_columns-1 );
-					const int y = (unsigned int) std::min( (int)std::floor(yy / DatasetManager::getInstance()->getVoxelY() ), m_rows-1 );
-					const int z = (unsigned int) std::min( (int)std::floor(zz / DatasetManager::getInstance()->getVoxelZ() ), m_frames-1 );
+                    const int x = (unsigned int) std::min( (int)std::floor(xx  ), m_columns-1 );
+					const int y = (unsigned int) std::min( (int)std::floor(yy  ), m_rows-1 );
+					const int z = (unsigned int) std::min( (int)std::floor(zz  ), m_frames-1 );
 
-					const float dx = ( xx / DatasetManager::getInstance()->getVoxelX() )-x;
-					const float dy = ( yy / DatasetManager::getInstance()->getVoxelY() )-y;
-					const float dz = ( zz / DatasetManager::getInstance()->getVoxelZ() )-z;
+					const float dx = ( xx  )-x;
+					const float dy = ( yy  )-y;
+					const float dz = ( zz  )-z;
 
 					const int nx = dx > 0.0 ? std::min( std::max(x+1,0), m_columns-1 ) : std::min( std::max(x,0), m_columns-1 );
 					const int ny = dy > 0.0 ? std::min( std::max(y+1,0), m_rows-1 ) : std::min( std::max(y,0), m_rows-1 );
@@ -759,8 +726,7 @@ std::vector<float>* RestingStateNetwork::getZscores()
 
 					m_zMap[i] = (1-dz) * valy0 + (dz) * valy1;
 
-				}
-				
+				}		
 			}
 		}
 	}
@@ -768,31 +734,214 @@ std::vector<float>* RestingStateNetwork::getZscores()
 	return &m_zMap;
 }
 
-void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int curIndex)
+float RestingStateNetwork::getElement(int i,int j,int k, std::vector<float>* vect)
 {
-	float acc  = inMap[curIndex - 1]
-    + inMap[curIndex + 1]
-    + inMap[curIndex - m_columns - 1]
-    + inMap[curIndex - m_columns]
-    + inMap[curIndex - m_columns + 1]
-    + inMap[curIndex + m_columns - 1]
-    + inMap[curIndex + m_columns]
-    + inMap[curIndex + m_columns + 1]
-    + inMap[curIndex - m_columns * m_rows - 1]
-    + inMap[curIndex - m_columns * m_rows]
-    + inMap[curIndex - m_columns * m_rows + 1]
-    + inMap[curIndex + m_columns * m_rows - 1]
-    + inMap[curIndex + m_columns * m_rows]
-    + inMap[curIndex + m_columns * m_rows + 1]
-    + inMap[curIndex - m_columns * m_rows - m_columns]
-    + inMap[curIndex - m_columns * m_rows + m_columns]
-    + inMap[curIndex + m_columns * m_rows - m_columns]
-    + inMap[curIndex + m_columns * m_rows + m_columns];
+    return (*vect)[ i + ( j * m_columnsL ) + ( k * m_rowsL * m_columnsL ) ];
+}
 
-    if( acc > 9.0 )
-    {
-        tmp.at( curIndex ) = true;
+vector<vector<float>* > RestingStateNetwork::getClusters()
+{
+    vector<vector<float>*> clusters;
+    vector<float>* zMap = getZscores();
+    vector<float> visited(m_datasetSizeL,0.0f);
+    
+    bool first = true;
+    bool foundClust = false;
+    
+    //Intensity of the current voxel
+
+    std::list<Vector> toVisit;
+    int north, south, east, west, front, back, x, y, z;
+    float NorthV, EastV, SouthV, WestV, FrontV, BackV;
+    float resultNorth, resultEast, resultSouth, resultWest, resultFront, resultBack;
+
+    //Add pixel to the top
+    for(int xx = 0; xx < m_columnsL; xx++)
+	{
+		for(int yy = 0; yy < m_rowsL; yy++)
+		{
+			for(int zz = 0; zz < m_framesL; zz++)
+			{
+                vector<float>* singleClust = new vector<float>;
+
+				int i = zz * m_columnsL * m_rowsL + yy *m_columnsL + xx;
+
+                if(zMap->at(i) != 0 && first)
+                {  
+                    singleClust->assign(m_datasetSizeL,0.0f);
+                    visited[i] = 1.0f;
+                    singleClust->at( i ) = 1.0f; //Mark as read
+                    toVisit.push_front(Vector(xx,yy,zz));
+                    first = false;
+                }
+                else if(zMap->at(i) != 0 && visited[i] == 0)
+                {
+                    singleClust->assign(m_datasetSizeL,0.0f);
+                    visited[i] = 1.0f;
+                    singleClust->at( i ) = 1.0f; //Mark as read
+                    toVisit.push_front(Vector(xx,yy,zz));
+                }
+
+                //While there's still pixel to visit
+                while(!toVisit.empty())
+                {
+                    foundClust = true;
+                    x = toVisit.front()[0];
+                    y = toVisit.front()[1];
+                    z = toVisit.front()[2];
+                    toVisit.pop_front();
+
+                    singleClust->at( x + y * m_columnsL + z * m_rowsL * m_columnsL ) = 1.0f; //Mark as read
+                    visited[x + y * m_columnsL + z * m_rowsL * m_columnsL] = 1.0f;
+
+                    north = std::max( 0, y - 1 );
+                    south = std::min( m_rowsL - 1, y + 1 );
+                    east  = std::min( m_columnsL - 1, x + 1 );
+                    west  = std::max( 0, x - 1 );
+                    front = std::max( 0, z - 1 );
+                    back  = std::min( m_framesL - 1, z + 1 );
+
+                    NorthV = getElement( x, north, z, zMap );
+                    SouthV = getElement( x, south, z, zMap );
+                    EastV = getElement( east, y, z, zMap );
+                    WestV = getElement( west, y, z, zMap );
+                    FrontV = getElement( x, y, front, zMap );
+                    BackV = getElement( x, y, back, zMap );
+
+                    resultNorth = getElement( x, north, z, singleClust );
+                    resultSouth = getElement( x, south, z, singleClust );
+                    resultEast = getElement( east, y, z, singleClust );
+                    resultWest = getElement( west, y, z, singleClust );
+                    resultFront = getElement( x, y, front, singleClust );
+                    resultBack = getElement( x, y, back, singleClust );
+
+                    if(NorthV > 0.0f && resultNorth != 1.0f) //North
+                    {
+                        toVisit.push_front(Vector(x,north,z));
+                    }
+
+                    if(SouthV > 0.0f && resultSouth != 1.0f) //South
+                    {
+                        toVisit.push_front(Vector(x,south,z));
+                    }
+
+                    if(EastV > 0.0f && resultEast != 1.0f) //East
+                    {
+                        toVisit.push_front(Vector(east,y,z));
+                    }
+
+                    if(WestV > 0.0f && resultWest != 1.0f) //West
+                    {
+                        toVisit.push_front(Vector(west,y,z));
+                    }
+
+                    if(FrontV > 0.0f && resultFront != 1.0f) //Front
+                    {
+                        toVisit.push_front(Vector(x,y,front));
+                    }
+
+                    if(BackV > 0.0f && resultBack != 1.0f) //Back
+                    {
+                        toVisit.push_front(Vector(x,y,back));
+                    }
+                }
+
+                if(foundClust)
+                {
+                    clusters.push_back(singleClust);
+                    foundClust = false;
+                }
+            }
+        }
     }
+    return clusters;
+}
+
+void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int xx, int yy, int zz)
+{
+
+	float nbConnectedVoxels = 1;
+	std::vector<bool> temp(tmp);
+    
+    std::list<Vector> toVisit;
+    int north, south, east, west, front, back, x, y, z;
+    bool NorthV, EastV, SouthV, WestV, FrontV, BackV;
+    bool resultNorth, resultEast, resultSouth, resultWest, resultFront, resultBack;
+
+	toVisit.push_front(Vector(xx,yy,zz));
+
+	while(!toVisit.empty())
+    {
+		x = toVisit.front()[0];
+        y = toVisit.front()[1];
+        z = toVisit.front()[2];
+        toVisit.pop_front();
+		int curIndex = x + y * m_columns + z * m_rows * m_columns;
+
+        tmp.at( curIndex ) = true; //Mark as read
+
+        north = std::max( 0, y - 1 );
+        south = std::min( m_rows - 1, y + 1 );
+        east  = std::min( m_columns - 1, x + 1 );
+        west  = std::max( 0, x - 1 );
+        front = std::max( 0, z - 1 );
+        back  = std::min( m_frames - 1, z + 1 );
+
+        NorthV =inMap[x + ( north * m_columns ) + ( z * m_rows * m_columns ) ];
+        SouthV = inMap[x+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        EastV = inMap[east+ ( y * m_columns ) + ( z * m_rows * m_columns ) ];
+        WestV = inMap[west+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        FrontV = inMap[x+ ( y * m_columns ) + ( front * m_rows * m_columns ) ];
+        BackV = inMap[x+ ( y * m_columns ) + ( back * m_rows * m_columns ) ];
+
+        resultNorth =tmp[x + ( north * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultSouth = tmp[x+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultEast = tmp[east+ ( y * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultWest = tmp[west+ ( south * m_columns ) + ( z * m_rows * m_columns ) ];
+        resultFront = tmp[x+ ( y * m_columns ) + ( front * m_rows * m_columns ) ];
+        resultBack = tmp[x+ ( y * m_columns ) + ( back * m_rows * m_columns ) ];
+
+        if(NorthV && !resultNorth) //North
+        {
+            toVisit.push_front(Vector(x,north,z));
+			nbConnectedVoxels++;
+        }
+
+        if(SouthV && !resultSouth) //South
+        {
+            toVisit.push_front(Vector(x,south,z));
+			nbConnectedVoxels++;
+        }
+
+        if(EastV  && !resultEast) //East
+        {
+            toVisit.push_front(Vector(east,y,z));
+			nbConnectedVoxels++;
+        }
+
+        if(WestV && !resultWest) //West
+        {
+            toVisit.push_front(Vector(west,y,z));
+			nbConnectedVoxels++;
+        }
+
+        if(FrontV && !resultFront) //Front
+        {
+            toVisit.push_front(Vector(x,y,front));
+			nbConnectedVoxels++;
+        }
+
+        if(BackV && !resultBack) //Back
+        {
+            toVisit.push_front(Vector(x,y,back));
+			nbConnectedVoxels++;
+        }			
+    }
+
+	if(nbConnectedVoxels < m_clusterLvlSliderValue)
+	{
+		tmp = temp;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

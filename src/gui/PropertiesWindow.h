@@ -70,6 +70,7 @@ public:
 
     void OnNewOffsetSurface                 ( wxCommandEvent& event );
     void OnNewDistanceMap                   ( wxCommandEvent& event );
+    void OnEdgeDetect                       ( wxCommandEvent& event );
     void OnNewVoiFromOverlay                ( wxCommandEvent& event );
     void OnNewIsoSurface                    ( wxCommandEvent& event ); 
 

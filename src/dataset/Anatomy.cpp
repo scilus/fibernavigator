@@ -79,7 +79,7 @@ Anatomy::Anatomy( const wxString &filename )
 }
 
 // Seems to be used for the create a Distance Map
-Anatomy::Anatomy( const Anatomy * const pAnatomy )
+Anatomy::Anatomy( const Anatomy * const pAnatomy, bool Offset )
 : DatasetInfo(),
   m_isSegmentOn( false ),
   m_dataType( 2 ),
@@ -94,11 +94,21 @@ Anatomy::Anatomy( const Anatomy * const pAnatomy )
     m_columns = pAnatomy->m_columns;
     m_rows    = pAnatomy->m_rows;
     m_frames  = pAnatomy->m_frames;
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
     m_bands         = 1;
     m_isLoaded      = true;
     m_type          = HEAD_BYTE;
 
-    createOffset( pAnatomy );
+    if(Offset)
+    {
+        createOffset( pAnatomy );
+    }
+    else
+    {
+        edgeDetect( pAnatomy );
+    }
 }
 
 Anatomy::Anatomy( std::vector< float >* pDataset, 
@@ -290,6 +300,10 @@ void Anatomy::setZero( const int sizeX,
     m_rows    = sizeY;
     m_frames  = sizeZ;
     m_bands   = 1;
+
+	m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
 
     int datasetSize = m_rows * m_columns * m_frames;
 
@@ -1064,6 +1078,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     m_pBtnCut =              new wxButton( pParent, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
     m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );    
     m_pBtnNewDistanceMap =   new wxButton( pParent, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnEdgeDetect =       new wxButton( pParent, wxID_ANY, wxT( "Edge detect" ),            wxDefaultPosition, wxSize( 140, -1 ) );
 #endif
     
     m_pBtnNewOffsetSurface = new wxButton( pParent, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
@@ -1103,6 +1118,8 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxMain->Add( pGridButtons, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
 
     pBoxMain->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnEdgeDetect,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+
 #endif
     
     pBoxMain->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
@@ -1137,6 +1154,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
     pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );    
     pParent->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
+    pParent->Connect( m_pBtnEdgeDetect->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnEdgeDetect ) );
 #endif
     
     pParent->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
@@ -1213,6 +1231,7 @@ void Anatomy::updatePropertiesSizer()
     m_pBtnCut->Enable(      !SceneManager::getInstance()->getSelectionTree().isEmpty() );
 
     m_pBtnNewDistanceMap->Enable( getType() <= OVERLAY );
+    m_pBtnEdgeDetect->Enable( getType() <= OVERLAY );
 #endif
 
     // TODO validate the types here, this kind of test is really bad.
@@ -1382,6 +1401,57 @@ void Anatomy::equalizationSliderChange()
         generateTexture();
     }
 }
+
+void Anatomy::edgeDetect( const Anatomy * const pAnatomy )
+{
+
+    int nbPixels = m_frames * m_rows * m_columns;
+    std::vector<float> tmpGradient( nbPixels, 0.0f );
+
+    m_floatDataset.assign( nbPixels, 0.0f );
+
+    //Gradient in x,y,z
+	float col;
+
+	for( int x = 0; x < m_columns; x++)
+	{
+		for( int y = 0; y < m_rows; y++)
+		{
+			for( int z = 0; z < m_frames; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				int xPlus1 = z * m_columns * m_rows + y *m_columns + std::min((x+1), m_columns-1);
+				int xMoins1 = z * m_columns * m_rows + y *m_columns + std::max((x-1), 0);
+				int yPlus1 = z * m_columns * m_rows + std::min((y+1), m_rows-1) *m_columns + x;
+				int yMoins1 = z * m_columns * m_rows + std::max((y-1), 0) *m_columns + x;
+				int zPlus1 = std::min((z+1), m_frames-1) * m_columns * m_rows + y *m_columns + x;
+				int zMoins1 = std::max((z-1), 0) * m_columns * m_rows + y *m_columns + x;
+
+				if(!pAnatomy->m_useEqualizedDataset)
+				{
+					col = std::pow((pAnatomy->m_floatDataset[xPlus1] - pAnatomy->m_floatDataset[xMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_floatDataset[yPlus1] - pAnatomy->m_floatDataset[yMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_floatDataset[zPlus1] - pAnatomy->m_floatDataset[zMoins1])/2.0,2);
+				}
+				else
+				{
+					col = std::pow((pAnatomy->m_equalizedDataset[xPlus1] - pAnatomy->m_equalizedDataset[xMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_equalizedDataset[yPlus1] - pAnatomy->m_equalizedDataset[yMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_equalizedDataset[zPlus1] - pAnatomy->m_equalizedDataset[zMoins1])/2.0,2);
+				}
+				
+				tmpGradient[i] = sqrt(col);
+			}
+		}
+	}
+
+	m_floatDataset = tmpGradient;
+	equalizeHistogram(); //For scaling purposes
+	m_floatDataset = m_equalizedDataset;
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////////
 

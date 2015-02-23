@@ -349,9 +349,9 @@ void MainFrame::initLayout()
     m_pFMRIWindow->EnableScrolling( true, true );
 
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
-    m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
     m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
+	m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 
@@ -480,6 +480,7 @@ void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
 
     m_pFMRIWindow->SetSelectButton();
     m_pFMRIWindow->SetStartButton();
+    RTTrackingHelper::getInstance()->setEnableTractoRSN();
     refreshAllGLWidgets();
 }
 
@@ -1169,12 +1170,42 @@ void MainFrame::createDistanceMap()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy );
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy, true );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
 
     pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Distance Map)"));
+
+    m_pListCtrl->InsertItem( index );
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::edgeDetect()
+{
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListIndex();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*)l_info;
+
+    Logger::getInstance()->print( wxT( "Edge detection ..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy, false );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    Logger::getInstance()->print( wxT( "Edge detection done" ), LOGLEVEL_MESSAGE );
+
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Edges)"));
 
     m_pListCtrl->InsertItem( index );
     refreshAllGLWidgets();
@@ -1200,7 +1231,7 @@ void MainFrame::createDistanceMapAndIso()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    Anatomy* l_tmpAnatomy = new Anatomy( l_anatomy );
+    Anatomy* l_tmpAnatomy = new Anatomy( l_anatomy, true );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
     Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
