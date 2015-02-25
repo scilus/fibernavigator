@@ -162,6 +162,13 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxRow4->Add( m_pBtnSelectMap, 0, wxALIGN_CENTER | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxRow4, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
+	m_pBtnSelectExclusion = new wxButton( this, wxID_ANY,wxT("Exclusion map not selected"), wxDefaultPosition, wxSize(230, -1) );
+    Connect( m_pBtnSelectExclusion->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectExclusion) );
+
+	wxBoxSizer *pBoxRowEx = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowEx->Add( m_pBtnSelectExclusion, 0, wxALIGN_CENTER | wxALL, 1 );
+	m_pTrackingSizer->Add( pBoxRowEx, 0, wxFIXED_MINSIZE | wxALL, 2 );
+
     m_pTextFA = new wxStaticText( this, wxID_ANY, wxT("Min Mask"), wxPoint(0,120), wxSize(70, -1), wxALIGN_CENTER );
     m_pSliderFA = new MySlider( this, wxID_ANY, 0, 1, 50, wxPoint(60,120), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFA->SetValue( 20 );
@@ -607,6 +614,20 @@ void TrackingWindow::OnSelectMask( wxCommandEvent& WXUNUSED(event) )
         m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
 		m_pMainFrame->m_pFMRIWindow->setInitiateTractoBtn();
     }
+}
+
+
+void TrackingWindow::OnSelectExclusion( wxCommandEvent& WXUNUSED(event) )
+{
+	//Select map for threshold seeding
+    long item = m_pMainFrame->getCurrentListIndex();
+	Anatomy* pMap = (Anatomy*)DatasetManager::getInstance()->getDataset (MyApp::frame->m_pListCtrl->GetItem( item )); 
+
+	if( pMap != NULL && pMap->getBands() == 1 )
+    {
+		m_pBtnSelectExclusion->SetLabel( wxT("Exclusion:") + pMap->getName() );
+		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setExcludeInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+	}
 }
 
 void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )

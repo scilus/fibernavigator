@@ -55,9 +55,14 @@ public:
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
     void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
+
 	void setOpacity( float alpha )                                    { m_alpha = alpha; }
 	void setSeedMapInfo( Anatomy* info );	
 	void setSeedFromfMRI( const std::vector<std::pair<Vector,float> > &seedFromfMRI )	  { m_pSeedFromfMRI = seedFromfMRI; }
+
+	void setExcludeInfo( Anatomy* info )                              { m_pExcludeInfo = info; }
+	bool checkExclude(unsigned int sticksNumber);
+	void setSeedMapInfo( Anatomy* info );							  
 
 
     float getFAThreshold()                       { return m_FAThreshold; }
@@ -103,8 +108,13 @@ private:
     Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
     Anatomy     *m_pMaskInfo;
+	Anatomy     *m_pExcludeInfo;
 	Anatomy     *m_pSeedMapInfo;
+
 	float m_alpha;
+
+	bool         m_stop;
+
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;
