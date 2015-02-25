@@ -24,6 +24,10 @@ enum FiberFileType
     BINARY_VTK  = 2,
 };
 
+const int FIBERS_SUBSAMPLING_RANGE_MIN(0);
+const int FIBERS_SUBSAMPLING_RANGE_MAX(99);
+const int FIBERS_SUBSAMPLING_RANGE_START(0);
+
 /**
  * This class represents a set of fibers.
  * It supports loading different fibers file types.
@@ -38,6 +42,7 @@ public:
 
     // Fibers loading methods
     bool    load( const wxString &filename );
+    bool    createFrom( const vector<Fibers*>& fibers, wxString name=wxT("Merged"));
 
     void    updateFibersColors();
 
@@ -48,7 +53,7 @@ public:
     void    loadDMRIFibersInFile( std::ofstream &myfile );
 
     void    save( wxString filename );
-    bool    save( wxXmlNode *pNode ) const;
+    bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
     void    saveDMRI( wxString filename );
 
     int     getPointsPerLine(     const int lineId );

@@ -228,22 +228,25 @@ void FibersGroup::save( wxString filename )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool FibersGroup::save( wxXmlNode *pNode ) const
+bool FibersGroup::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
     wxXmlNode *pStatus = getXmlNodeByName( wxT( "status" ), pNode );
 
     if( NULL != pStatus )
     {
-        wxXmlProperty *pProp = getXmlPropertyByName( wxT( "isFiberGroup" ), pStatus );
+        //wxXmlProperty *pProp = pStatus->GetAttribute
+        pStatus->DeleteAttribute( "isFiberGroup" );
+        pStatus->AddAttribute( "isFiberGroup", "yes" );
+        /*pProp = getXmlPropertyByName( "isFiberGroup", pStatus );
 
         if( NULL != pProp )
         {
             pProp->SetValue( wxT( "yes" ) );
-        }
+        }*/
     }
 
     return true;
@@ -301,13 +304,21 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLblColoring    = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0,       0, INT_MAX, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 0,       0,     100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+
+    // We don't set the initial value of this slider to the START value because
+    // it is not used the same way when in the FibersGroup context.
+    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY, 
+                                             FIBERS_SUBSAMPLING_RANGE_MIN,
+                                             FIBERS_SUBSAMPLING_RANGE_MIN,
+                                             FIBERS_SUBSAMPLING_RANGE_MAX,
+                                             DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
-    m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
-    m_pApplyDifferentColors = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
-    m_pToggleInterFibers = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
-    m_pRadNormalColoring       = new wxRadioButton( pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
+    m_pToggleLocalColoring   = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
+    m_pToggleNormalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
+    m_pBtnMergeVisibleFibers = new wxButton(         pParent, wxID_ANY, wxT( "Merge visible bundles" ) );
+    m_pToggleInterFibers     = new wxToggleButton(   pParent, wxID_ANY, wxT( "Intersected Fibers" ) );
+    m_pApplyDifferentColors  = new wxButton(         pParent, wxID_ANY, wxT( "Color bundles differently" ) );
+    m_pRadNormalColoring     = new wxRadioButton(    pParent, wxID_ANY, wxT( "Normal" ), DEF_POS, DEF_SIZE, wxRB_GROUP );
 
 #if !_USE_LIGHT_GUI
     m_pRadDistanceAnchoring    = new wxRadioButton( pParent, wxID_ANY, wxT( "Dist. Anchoring" ) );
@@ -397,12 +408,14 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxMain->Add( m_pBtnGeneratesDensityVolume, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 #endif
     
-    pBoxMain->Add( m_pToggleInterFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pToggleInterFibers,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( m_pBtnMergeVisibleFibers, 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
 
-    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY , wxT( "\n Warning: initial state of \n settings may not represent \n the current state of all fibers bundles."), DEF_POS, wxSize( 100, -1 ), wxALIGN_CENTER ),
-        0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
+    pBoxMain->Add( new wxStaticText( pParent, wxID_ANY,
+                                     wxT( "\n Warning: initial state of \n settings may not represent \n the current state of all fibers bundles."),
+                                     DEF_POS, wxSize( 100, -1 ), wxALIGN_CENTER ), 0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -424,6 +437,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnSubsampling->GetId(),            wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleSubsamplingBtn ) );
     pParent->Connect( m_pToggleInterFibers->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleCrossingFibersBtn ) );
     pParent->Connect( m_pBtnColorMode->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnToggleColorModeBtn ) );
+    pParent->Connect( m_pBtnMergeVisibleFibers->GetId(),     wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnMergeVisibleFibers ) );
     
 #if !_USE_LIGHT_GUI
     pParent->Connect( m_pBtnGeneratesDensityVolume->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnClickGenerateFiberVolumeBtn ) );
@@ -505,9 +519,12 @@ void FibersGroup::OnToggleMinMaxLengthBtn()
         minLength = std::min( minLength, (*it)->getMinFibersLength() );
         maxLength = std::max( maxLength, (*it)->getMaxFibersLength() );
     }
+    
+    int floorMinLength = static_cast<int>( std::floor( minLength ) );
+    int ceilMaxLength = static_cast<int>( std::ceil( maxLength ) );
 
-    m_pSliderFibersFilterMin->SetRange( minLength, maxLength );
-    m_pSliderFibersFilterMax->SetRange( minLength, maxLength );
+    m_pSliderFibersFilterMin->SetRange( floorMinLength, ceilMaxLength );
+    m_pSliderFibersFilterMax->SetRange( floorMinLength, ceilMaxLength );
 
     // Show Min / Max Length controls
     m_pLblMinLength->Show();
@@ -645,8 +662,8 @@ void FibersGroup::updateGroupFilters()
     vector<Fibers *> fibers = DatasetManager::getInstance()->getFibers();
     for( vector<Fibers *>::const_iterator it = fibers.begin(); it != fibers.end(); ++it )
     {
-        int minLength = std::max( min, (int)(*it)->getMinFibersLength() );
-        int maxLength = std::min( max, (int)(*it)->getMaxFibersLength() );
+        int minLength = std::max( min, static_cast<int>( std::floor( (*it)->getMinFibersLength() ) ) );
+        int maxLength = std::min( max, static_cast<int>( std::ceil( (*it)->getMaxFibersLength() ) ) );
         (*it)->updateFibersFilters( minLength, maxLength, subSampling, maxSubSampling );
         (*it)->updateSliderMinLength( minLength );
         (*it)->updateSliderMaxLength( maxLength );

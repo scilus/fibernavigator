@@ -31,7 +31,7 @@ public:
     }
 
     void    save( wxString filename );
-    bool    save( wxXmlNode *pNode ) const;
+    bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
 
     void    saveDMRI( wxString filename );
 
@@ -101,10 +101,12 @@ private:
     wxButton *m_pBtnMinMaxLength;
     wxButton *m_pBtnSubsampling;
     wxButton *m_pBtnColorMode;
+
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxButton       *m_pApplyDifferentColors;
     wxToggleButton *m_pToggleInterFibers;
+    wxButton       *m_pBtnMergeVisibleFibers;
 
     wxButton       *m_pApplyBtn;
     wxButton       *m_pCancelBtn;

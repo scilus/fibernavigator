@@ -12,8 +12,11 @@
 #ifndef HELPER_H_
 #define HELPER_H_
 
-#include <vector>
 #include "../IsoSurface/Vector.h"
+
+#include <wx/string.h>
+
+#include <vector>
 
 #define EPSILON 0.000001f
 
@@ -168,6 +171,12 @@ private:
     ~Helper(){};
 
 public:
+    
+    static wxString getColorationModeString( const FibersColorationMode &colMode );
+    static FibersColorationMode getColorationModeFromString( const wxString &modeStr );
+    
+    static wxString getThresholdingTypeString( const ThresholdingOperationType &opType );
+    static ThresholdingOperationType getThresholdingTypeFromString( const wxString &opStr );
     
     // Color conversion
     static void     HSLtoRGB                 ( float  i_hue, 

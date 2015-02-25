@@ -21,7 +21,9 @@ class ToolBar;
 class MenuBar;
 class SceneObject;
 class SelectionObject;
+class SelectionTree;
 class TrackingWindow;
+class FMRIWindow;
 
 enum DrawMode
 {
@@ -36,6 +38,7 @@ class MainFrame : public wxFrame
     friend class MenuBar;
     friend class PropertiesWindow;
     friend class TrackingWindow;
+    friend class FMRIWindow;
 
 public:
     MainFrame( const wxString &title, const wxPoint &pos, const wxSize &size );
@@ -43,6 +46,7 @@ public:
 
     void createCutDataset();
     void createDistanceMap();
+    void edgeDetect();
     void createDistanceMapAndIso();
     void createIsoSurface();
     void displayPropertiesSheet();
@@ -57,9 +61,12 @@ public:
     void onTreeChange();
     void onLoad                             ( wxCommandEvent& evt );
     void onLoadAsPeaks                      ( wxCommandEvent& evt );
+    void onLoadAsRestingState               ( wxCommandEvent& evt );
     long getCurrentListIndex() const         { return m_currentListIndex; }
     void createNewAnatomy                   ( DatasetType dataType );
     void updateSliders();
+    
+    void clearCachedSceneInfo();
 
     bool canDraw3D() const          { return m_draw3d; }
     bool canDrawRound() const       { return m_drawRound; }
@@ -67,7 +74,6 @@ public:
     bool isDrawerToolActive() const { return m_isDrawerToolActive; }
 
     wxColour  getDrawColor() const  { return m_drawColor; }
-    wxImage & getDrawIcon()         { return m_drawColorIcon; }
     DrawMode  getDrawMode() const   { return m_drawMode; }
     int       getDrawSize() const   { return m_drawSize; }
 
@@ -75,12 +81,13 @@ public:
     void      setDrawSize( const int size ) { m_drawSize = size; }
 
     SelectionObject* getCurrentSelectionObject();
-
+    bool buildSelectionViewFromSelectionTree( SelectionTree *pSelTree );
 
 public:
     PropertiesWindow    *m_pPropertiesWindow;
     TrackingWindow      *m_pTrackingWindow;
     TrackingWindow      *m_pTrackingWindowHardi;
+    FMRIWindow          *m_pFMRIWindow;
     MainCanvas          *m_pMainGL;
     MainCanvas          *m_pGL0;
     MainCanvas          *m_pGL1;
@@ -194,6 +201,7 @@ private:
     void onTimerEvent                       ( wxTimerEvent&   evt );
     void setTimerSpeed();
     void createNewSelectionObject( ObjectType i_newSelectionObjectType );
+    bool buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj );
 
     void onSelectDrawer                     ( wxCommandEvent& evt );
     void onSwitchDrawer                     ( wxCommandEvent& evt );
@@ -221,9 +229,7 @@ private:
     MenuBar             *m_pMenuBar;       
     wxSizer             *m_pCurrentSizer;
     SceneObject         *m_pCurrentSceneObject;
-//     SceneObject         *m_pLastSelectedSceneObject;
     long                m_currentListIndex;
-//     long                m_lastSelectedListItem;
 
     wxString            m_lastPath;
 
@@ -236,7 +242,6 @@ private:
     bool     m_draw3d;
     bool     m_canUseColorPicker;
     wxColor  m_drawColor;
-    wxImage  m_drawColorIcon;
 
 DECLARE_EVENT_TABLE()
 };

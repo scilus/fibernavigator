@@ -1,6 +1,8 @@
 #ifndef DATASETINFO_H_
 #define DATASETINFO_H_
 
+#include "DatasetIndex.h"
+
 #include "../misc/Algorithms/Helper.h"
 #include "../gui/SceneObject.h"
 
@@ -57,7 +59,7 @@ public:
     virtual void createPropertiesSizer(PropertiesWindow *parent); 
     virtual void updatePropertiesSizer();
     virtual bool save( wxString filename ) const { return false; }
-    virtual bool save( wxXmlNode *node ) const;
+    virtual bool save( wxXmlNode *node, const wxString &rootPath ) const;
 
     // Functions
     wxString getName() const                     { return m_name;               };
@@ -105,6 +107,9 @@ public:
     float getVoxelSizeX() const                    { return m_voxelSizeX; }
     float getVoxelSizeY() const                    { return m_voxelSizeY; }
     float getVoxelSizeZ() const                    { return m_voxelSizeZ; }
+    
+    void setDatasetIndex(const DatasetIndex &dsIndex) { m_dsIndex = dsIndex; }
+    DatasetIndex getDatasetIndex() const              { return m_dsIndex; }
 
 public:
     // Trianglemesh
@@ -165,6 +170,9 @@ protected:
     float       m_voxelSizeX;
     float       m_voxelSizeY;
     float       m_voxelSizeZ;
+    
+private:
+    DatasetIndex m_dsIndex;
 };
 
 #endif /*DATASETINFO_H_*/

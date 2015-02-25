@@ -16,6 +16,7 @@
 #include "../misc/nifti/nifti1_io.h"
 
 #include <GL/glew.h>
+#include <wx/filename.h>
 #include <wx/textfile.h>
 #include <wx/tglbtn.h>
 #include <wx/xml/xml.h>
@@ -42,7 +43,6 @@ using std::vector;
 Anatomy::Anatomy( ) 
 : DatasetInfo(),
   m_isSegmentOn( false ),  
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -58,7 +58,6 @@ Anatomy::Anatomy( )
 Anatomy::Anatomy( const wxString &filename ) 
 : DatasetInfo(),
   m_isSegmentOn( false ),  
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -80,10 +79,9 @@ Anatomy::Anatomy( const wxString &filename )
 }
 
 // Seems to be used for the create a Distance Map
-Anatomy::Anatomy( const Anatomy * const pAnatomy )
+Anatomy::Anatomy( const Anatomy * const pAnatomy, bool Offset )
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -96,18 +94,27 @@ Anatomy::Anatomy( const Anatomy * const pAnatomy )
     m_columns = pAnatomy->m_columns;
     m_rows    = pAnatomy->m_rows;
     m_frames  = pAnatomy->m_frames;
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
     m_bands         = 1;
     m_isLoaded      = true;
     m_type          = HEAD_BYTE;
 
-    createOffset( pAnatomy );
+    if(Offset)
+    {
+        createOffset( pAnatomy );
+    }
+    else
+    {
+        edgeDetect( pAnatomy );
+    }
 }
 
 Anatomy::Anatomy( std::vector< float >* pDataset, 
-                  const int sample ) 
+                  const int type )
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -121,19 +128,41 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
     m_rows    = DatasetManager::getInstance()->getRows();
     m_frames  = DatasetManager::getInstance()->getFrames();
     m_bands   = 1;
+    
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
 
-    m_type    = HEAD_BYTE;
+    m_type    = type;
 
     m_isLoaded = true;
 
-    m_floatDataset.resize( m_columns * m_frames * m_rows );
+    int datasetSize = m_columns * m_frames * m_rows;
+    m_floatDataset.resize( datasetSize );
+    
     std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
+    
+    float dataMax = 0.0f;
+    for( int i(0); i < datasetSize; ++i )
+    {
+        if (m_floatDataset[i] > dataMax)
+        {
+            dataMax = m_floatDataset[i];
+        }
+    }
+    
+    for( int i(0); i < datasetSize; ++i )
+    {
+        m_floatDataset[i] = m_floatDataset[i] / dataMax;
+    }
+    
+    m_oldMax    = dataMax;
+    m_newMax    = 1.0;
 }
 
 Anatomy::Anatomy( const int type )
 : DatasetInfo(),
   m_isSegmentOn( false ),
-  m_pRoi( NULL ),
   m_dataType( 2 ),
   m_pTensorField( NULL ),
   m_useEqualizedDataset( false ),
@@ -172,6 +201,52 @@ Anatomy::Anatomy( const int type )
         // Only compiled and runned in debug
         assert(false);
     }
+}
+
+Anatomy::Anatomy( const wxString &filename, const int type )
+: DatasetInfo(),
+m_isSegmentOn( false ),
+m_dataType( 2 ),
+m_pTensorField( NULL ),
+m_useEqualizedDataset( false ),
+m_lowerEqThreshold( LOWER_EQ_THRES ),
+m_upperEqThreshold( UPPER_EQ_THRES ),
+m_currentLowerEqThreshold( -1 ),
+m_currentUpperEqThreshold( -1 ),
+m_originalAxialOrientation( ORIENTATION_UNDEFINED )
+{
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
+    
+    m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
+    
+    if(type == OVERLAY)
+    {
+        m_bands         = 1;
+        m_isLoaded      = true;
+        m_type          = type;
+        
+        m_floatDataset.resize( m_columns * m_frames * m_rows, 0.0f );
+    }
+    if(type == RGB)
+    {
+        m_bands         = 3;
+        m_isLoaded      = true;
+        m_type          = type;
+        
+        m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
+    }
+    
+    m_fullPath = filename;
+    
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 }
 
 void Anatomy::add( Anatomy* pAnatomy )
@@ -225,6 +300,10 @@ void Anatomy::setZero( const int sizeX,
     m_rows    = sizeY;
     m_frames  = sizeZ;
     m_bands   = 1;
+
+	m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+    m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+    m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
 
     int datasetSize = m_rows * m_columns * m_frames;
 
@@ -834,12 +913,12 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
 
 //////////////////////////////////////////////////////////////////////////
 
-bool Anatomy::save( wxXmlNode *pNode ) const
+bool Anatomy::save( wxXmlNode *pNode, const wxString &rootPath ) const
 {
     assert( pNode != NULL );
 
     pNode->SetName( wxT( "dataset" ) );
-    DatasetInfo::save( pNode );
+    DatasetInfo::save( pNode, rootPath );
 
     return true;
 }
@@ -863,12 +942,45 @@ void Anatomy::saveNifti( wxString fileName )
     char fn[1024];
     strcpy( fn, (const char*)fileName.mb_str( wxConvUTF8 ) );
 
-    pImage->qform_code = 1;    
     pImage->datatype   = m_dataType;
     pImage->fname = fn;
     pImage->dx = m_voxelSizeX;
     pImage->dy = m_voxelSizeY;
     pImage->dz = m_voxelSizeZ;
+    
+    // Prepare for transform saving.
+    pImage->qform_code = 1;
+    float qb(0.0f), qc(0.0f), qd(0.0f);
+    float qx(0.0f), qy(0.0f), qz(0.0f);
+    float dx(0.0f), dy(0.0f), dz(0.0f);
+    float qfac(0.0f);
+    
+    FMatrix &system_transform = DatasetManager::getInstance()->getNiftiTransform();
+    mat44 tempTransfo;
+    
+    // Create a temp transform in the type that nifti functions expect,
+    // and set the qto_xyz transform at the same time.
+    for( int i(0); i < 4; ++i)
+    {
+        for( int j(0); j < 4; ++j)
+        {
+            tempTransfo.m[i][j] = system_transform(i, j);
+            pImage->qto_xyz.m[i][j] = tempTransfo.m[i][j];
+        }
+    }
+
+    // The nifti library uses the quatern_x, qoffset_x and qfac field to 
+    // decide the orientation and transform, when saving with a qform_code >= 1.
+    // We get the quaternion params from the transformation matrix.
+    nifti_mat44_to_quatern(tempTransfo, &qb, &qc, &qd, &qx, &qy, &qz, &dx, &dy, &dz, &qfac);
+    
+    pImage->quatern_b = qb;
+    pImage->quatern_c = qc;
+    pImage->quatern_d = qd;
+    pImage->qoffset_x = qx;
+    pImage->qoffset_y = qy;
+    pImage->qoffset_z = qz;
+    pImage->qfac = qfac;
 
     if( m_type == HEAD_BYTE )
     {
@@ -915,6 +1027,20 @@ void Anatomy::saveNifti( wxString fileName )
         pImage->data = &tmp[0];
         nifti_image_write( pImage );
     }
+    else if( m_type == OVERLAY )
+    {
+        vector<float> tmp( pDataset->size() );
+        for(unsigned int i(0); i < pDataset->size(); ++i )
+        {
+            tmp[i] = (float)( (*pDataset)[i] * m_oldMax );
+        }
+
+        // Do not move the call to nifti_image_write out of the
+        // if, because it will crash, since the temp vector will
+        // not exist anymore, and pImage->data will point to garbage.
+        pImage->data = &tmp[0];
+        nifti_image_write( pImage );
+    }
     else
     {
         // Do not move the call to nifti_image_write out of the 
@@ -923,6 +1049,12 @@ void Anatomy::saveNifti( wxString fileName )
         pImage->data = &(*pDataset)[0];
         nifti_image_write( pImage );
     }
+}
+
+void Anatomy::saveToNewFilename( const wxString &fullPath )
+{
+    m_fullPath = fullPath;
+    saveNifti( fullPath );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -946,6 +1078,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     m_pBtnCut =              new wxButton( pParent, wxID_ANY, wxT( "Cut (boxes)" ),            wxDefaultPosition, wxSize( 85,  -1 ) );
     m_pBtnMinimize =         new wxButton( pParent, wxID_ANY, wxT( "Minimize (fibers)" ),      wxDefaultPosition, wxSize( 85,  -1 ) );    
     m_pBtnNewDistanceMap =   new wxButton( pParent, wxID_ANY, wxT( "New Distance Map" ),       wxDefaultPosition, wxSize( 140, -1 ) );
+    m_pBtnEdgeDetect =       new wxButton( pParent, wxID_ANY, wxT( "Edge detect" ),            wxDefaultPosition, wxSize( 140, -1 ) );
 #endif
     
     m_pBtnNewOffsetSurface = new wxButton( pParent, wxID_ANY, wxT( "New Offset Surface" ),     wxDefaultPosition, wxSize( 140, -1 ) );
@@ -985,6 +1118,8 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pBoxMain->Add( pGridButtons, 0, wxEXPAND | wxALL | wxALIGN_CENTER, 2 );
 
     pBoxMain->Add( m_pBtnNewDistanceMap,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+    pBoxMain->Add( m_pBtnEdgeDetect,   0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
+
 #endif
     
     pBoxMain->Add( m_pBtnNewOffsetSurface, 0, wxALIGN_CENTER | wxEXPAND | wxRIGHT | wxLEFT, 24 );
@@ -1019,6 +1154,7 @@ void Anatomy::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pBtnCut->GetId(),              wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnListItemCutOut ) );
     pParent->Connect( m_pBtnMinimize->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnMinimizeDataset ) );    
     pParent->Connect( m_pBtnNewDistanceMap->GetId(),   wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewDistanceMap ) );
+    pParent->Connect( m_pBtnEdgeDetect->GetId(),       wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnEdgeDetect ) );
 #endif
     
     pParent->Connect( m_pBtnNewOffsetSurface->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnNewOffsetSurface ) );
@@ -1095,6 +1231,7 @@ void Anatomy::updatePropertiesSizer()
     m_pBtnCut->Enable(      !SceneManager::getInstance()->getSelectionTree().isEmpty() );
 
     m_pBtnNewDistanceMap->Enable( getType() <= OVERLAY );
+    m_pBtnEdgeDetect->Enable( getType() <= OVERLAY );
 #endif
 
     // TODO validate the types here, this kind of test is really bad.
@@ -1264,6 +1401,57 @@ void Anatomy::equalizationSliderChange()
         generateTexture();
     }
 }
+
+void Anatomy::edgeDetect( const Anatomy * const pAnatomy )
+{
+
+    int nbPixels = m_frames * m_rows * m_columns;
+    std::vector<float> tmpGradient( nbPixels, 0.0f );
+
+    m_floatDataset.assign( nbPixels, 0.0f );
+
+    //Gradient in x,y,z
+	float col;
+
+	for( int x = 0; x < m_columns; x++)
+	{
+		for( int y = 0; y < m_rows; y++)
+		{
+			for( int z = 0; z < m_frames; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				int xPlus1 = z * m_columns * m_rows + y *m_columns + std::min((x+1), m_columns-1);
+				int xMoins1 = z * m_columns * m_rows + y *m_columns + std::max((x-1), 0);
+				int yPlus1 = z * m_columns * m_rows + std::min((y+1), m_rows-1) *m_columns + x;
+				int yMoins1 = z * m_columns * m_rows + std::max((y-1), 0) *m_columns + x;
+				int zPlus1 = std::min((z+1), m_frames-1) * m_columns * m_rows + y *m_columns + x;
+				int zMoins1 = std::max((z-1), 0) * m_columns * m_rows + y *m_columns + x;
+
+				if(!pAnatomy->m_useEqualizedDataset)
+				{
+					col = std::pow((pAnatomy->m_floatDataset[xPlus1] - pAnatomy->m_floatDataset[xMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_floatDataset[yPlus1] - pAnatomy->m_floatDataset[yMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_floatDataset[zPlus1] - pAnatomy->m_floatDataset[zMoins1])/2.0,2);
+				}
+				else
+				{
+					col = std::pow((pAnatomy->m_equalizedDataset[xPlus1] - pAnatomy->m_equalizedDataset[xMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_equalizedDataset[yPlus1] - pAnatomy->m_equalizedDataset[yMoins1])/2.0,2);
+					col += std::pow((pAnatomy->m_equalizedDataset[zPlus1] - pAnatomy->m_equalizedDataset[zMoins1])/2.0,2);
+				}
+				
+				tmpGradient[i] = sqrt(col);
+			}
+		}
+	}
+
+	m_floatDataset = tmpGradient;
+	equalizeHistogram(); //For scaling purposes
+	m_floatDataset = m_equalizedDataset;
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -1859,11 +2047,6 @@ Anatomy::~Anatomy()
     const GLuint* tex = &m_GLuint;
     glDeleteTextures( 1, tex );
     Logger::getInstance()->printIfGLError( wxT( "Anatomy::~Anatomy - glDeleteTextures") );
-
-    if( m_pRoi )
-    {
-        m_pRoi->m_sourceAnatomy = NULL;
-    }
 
     Logger::getInstance()->print( wxT( "Anatomy destructor done." ), LOGLEVEL_DEBUG );
 }

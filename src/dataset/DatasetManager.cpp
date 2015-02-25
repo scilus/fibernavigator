@@ -6,7 +6,8 @@
 #include "ODFs.h"
 #include "Tensors.h"
 #include "Maximas.h"
-
+#include "RestingStateNetwork.h"
+#include "RTFMRIHelper.h"
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
 #include "../gui/SelectionTree.h"
@@ -34,7 +35,8 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
-    m_forceLoadingAsMaximas( false )
+    m_forceLoadingAsMaximas( false ),
+	m_forceLoadingAsRestingState( false )
 {
 }
 
@@ -312,7 +314,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                  (0 == pHeader->dim[4] 
                   || ( 15 == pHeader->dim[4] && !m_forceLoadingAsMaximas )
                   || 28 == pHeader->dim[4] 
-                  || 45 == pHeader->dim[4] 
+				  || ( 45 == pHeader->dim[4] && !m_forceLoadingAsRestingState )
                   || 66 == pHeader->dim[4] 
                   || 91 == pHeader->dim[4] 
                   || 120 == pHeader->dim[4] 
@@ -339,6 +341,17 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
             else
             {
                 result = loadMaximas( filename, pHeader, pBody );
+            }
+        }
+		else if( m_forceLoadingAsRestingState )
+        {
+            if ( m_anatomies.empty() )
+            {
+                Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
+            }
+            else
+            {
+                result = loadRestingState( filename, pHeader, pBody );
             }
         }
         else
@@ -448,6 +461,8 @@ DatasetIndex DatasetManager::insert( Anatomy * pAnatomy )
     m_datasets[index]  = pAnatomy;
     m_anatomies[index] = pAnatomy;
     m_reverseDatasets[pAnatomy] = index;
+    
+    pAnatomy->setDatasetIndex( index );
 
     return index;
 }
@@ -461,6 +476,8 @@ DatasetIndex DatasetManager::insert( CIsoSurface * pCIsoSurface )
     m_datasets[index]  = pCIsoSurface;
     m_reverseDatasets[pCIsoSurface] = index;
     // Verify if a new map is needed for this type
+    
+    pCIsoSurface->setDatasetIndex( index );
 
     return index;
 }
@@ -474,6 +491,8 @@ DatasetIndex DatasetManager::insert( Fibers * pFibers )
     m_datasets[index]  = pFibers;
     m_fibers[index]    = pFibers;
     m_reverseDatasets[pFibers] = index;
+    
+    pFibers->setDatasetIndex( index );
 
     return index;
 }
@@ -487,6 +506,8 @@ DatasetIndex DatasetManager::insert( FibersGroup * pFibersGroup )
     m_datasets[index]    = pFibersGroup;
     m_fibersGroup[index] = pFibersGroup;
     m_reverseDatasets[pFibersGroup] = index;
+    
+    pFibersGroup->setDatasetIndex( index );
 
     return index;
 }
@@ -500,6 +521,8 @@ DatasetIndex DatasetManager::insert( Mesh * pMesh )
     m_datasets[index]  = pMesh;
     m_meshes[index]    = pMesh;
     m_reverseDatasets[pMesh] = index;
+    
+    pMesh->setDatasetIndex( index );
 
     return index;
 }
@@ -513,6 +536,8 @@ DatasetIndex DatasetManager::insert( ODFs * pOdfs )
     m_datasets[index]  = pOdfs;
     m_odfs[index]      = pOdfs;
     m_reverseDatasets[pOdfs] = index;
+    
+    pOdfs->setDatasetIndex( index );
 
     return index;
 }
@@ -526,6 +551,8 @@ DatasetIndex DatasetManager::insert( Maximas * pMaximas )
     m_datasets[index]  = pMaximas;
     m_maximas[index]      = pMaximas;
     m_reverseDatasets[pMaximas] = index;
+    
+    pMaximas->setDatasetIndex( index );
 
     return index;
 }
@@ -539,6 +566,8 @@ DatasetIndex DatasetManager::insert( Tensors * pTensors )
     m_datasets[index]  = (DatasetInfo *)pTensors;
     m_tensors[index]   = pTensors;
     m_reverseDatasets[pTensors] = index;
+    
+    pTensors->setDatasetIndex( index );
 
     return index;
 }
@@ -577,6 +606,43 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 
 //////////////////////////////////////////////////////////////////////////
 
+// Loads a resting-state profile. Extension supported: .nii and .nii.gz
+DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
+{
+    Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
+	Anatomy *pAnatomy = new Anatomy( filename, RGB ); //OVERLAY
+	m_pRestingStateNetwork = new RestingStateNetwork();
+	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
+    if( m_pRestingStateNetwork->load( pHeader, pBody ) )
+    {
+        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+        pAnatomy->setThreshold( THRESHOLD );
+        pAnatomy->setAlpha( ALPHA );
+        pAnatomy->setShow( SHOW );
+        pAnatomy->setShowFS( SHOW_FS );
+        pAnatomy->setUseTex( USE_TEX );
+		//wxString givenName = wxT("Network");
+		//pAnatomy->setName( givenName );
+		pAnatomy->setFloatDataset( m_pRestingStateNetwork->data );
+
+        DatasetIndex index = insert( pAnatomy );
+		m_pRestingStateNetwork->setNetworkInfo( index );
+
+        SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+        
+        for( SelectionTree::SelectionObjectVector::iterator objsIt = objs.begin(); objsIt != objs.end(); ++objsIt )
+        {
+            (*objsIt)->update();
+        }
+		
+        return index;
+    }
+	
+    delete pAnatomy;
+    return BAD_INDEX;
+}
+//////////////////////////////////////////////////////////////////////////
+
 // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
 DatasetIndex DatasetManager::loadFibers( const wxString &filename )
 {
@@ -584,14 +650,14 @@ DatasetIndex DatasetManager::loadFibers( const wxString &filename )
 
     if( l_fibers->load( filename ) )
     {
-        SceneManager::getInstance()->getSelectionTree().addFiberDataset( l_fibers->getName(), l_fibers->getLineCount() );
-
         l_fibers->setThreshold( THRESHOLD );
         l_fibers->setShow     ( SHOW );
         l_fibers->setShowFS   ( SHOW_FS );
         l_fibers->setUseTex   ( USE_TEX );
 
         DatasetIndex index = insert( l_fibers );
+        
+        SceneManager::getInstance()->getSelectionTree().addFiberDataset( index, l_fibers->getLineCount() );
 
         l_fibers->updateLinesShown();
 
@@ -609,8 +675,6 @@ DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RT
     Fibers* l_fibers = new Fibers();
 
     l_fibers->convertFromRTT( RTT );
-   
-    SceneManager::getInstance()->getSelectionTree().addFiberDataset( l_fibers->getName(), l_fibers->getLineCount() );
 
     l_fibers->setThreshold( THRESHOLD );
     l_fibers->setShow     ( SHOW );
@@ -619,12 +683,33 @@ DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RT
 
     DatasetIndex index = insert( l_fibers );
 
+    SceneManager::getInstance()->getSelectionTree().addFiberDataset( index, l_fibers->getLineCount() );
+    
     l_fibers->updateLinesShown();
 
     SceneManager::getInstance()->setSelBoxChanged( true );
 
-	return index;
+    return index;
 }
+
+DatasetIndex DatasetManager::addFibers( Fibers* fibers )
+{
+    fibers->setThreshold( THRESHOLD );
+    fibers->setShow     ( SHOW );
+    fibers->setShowFS   ( SHOW_FS );
+    fibers->setUseTex   ( USE_TEX );
+
+    DatasetIndex index = insert( fibers );
+
+    SceneManager::getInstance()->getSelectionTree().addFiberDataset( index, fibers->getLineCount() );
+    
+    fibers->updateLinesShown();
+
+    SceneManager::getInstance()->setSelBoxChanged( true );
+
+    return index;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 

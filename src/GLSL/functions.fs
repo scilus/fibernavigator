@@ -86,7 +86,7 @@ vec3 colorMap1 ( in float value )
 	else // iq == 5
 		return vec3(1., 0., q);
 }
-/*
+
 vec3 colorMap2( in float value )
 {
 	vec4 color8  = vec4(255./255., 255./255., 204./255., 1.);
@@ -208,20 +208,18 @@ vec3 colorMap6( in float value )
 
 	return vec3(colorRed, colorGreen, colorBlue);
 }
-*/
+
 void colorMap( inout vec3 col, in float value )
 {
 
 	if ( useColorMap == 1 )
 		col = colorMap1( value );
-		/*
 	else if ( useColorMap == 2 )
 		col = colorMap2( value );
 	else if ( useColorMap == 3 )
 		col = colorMap3( value );
 	else if ( useColorMap == 4 )
 		col = colorMap4( value );
-		*/
 	else
 	    col = defaultColorMap( value );
 }
@@ -231,12 +229,6 @@ void lookupTex(inout vec4 col, in int type, in sampler3D tex, in float threshold
 	vec3 col1 = vec3(0.0);
 
 	col1 = clamp( texture3D(tex, v).rgb, 0.0, 1.0);
-	
-	if( type == 4)
-    {
-        col.rgb = col.rgb + col1.rgb;
-        return;
-    }
 
 	if ( ( col1.r + col1.g + col1.b ) / 3.0  - threshold <= 0.0) return;
 

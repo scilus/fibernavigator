@@ -87,9 +87,6 @@ void MyTreeCtrl::OnChar( wxKeyEvent& evt )
             else
                 pSelObj->moveDown();
             break;
-        case WXK_HOME:
-            pSelObj->lockToCrosshair();
-            break;
         default:
             evt.Skip();
             return;

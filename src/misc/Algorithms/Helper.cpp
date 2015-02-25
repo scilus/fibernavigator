@@ -20,6 +20,109 @@
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
+wxString Helper::getColorationModeString( const FibersColorationMode &colMode )
+{
+    wxString modeStr;
+    
+    switch(colMode)
+    {
+        case NORMAL_COLOR:
+            modeStr = wxT("normal");
+            break;
+        case CURVATURE_COLOR:
+            modeStr = wxT("curvature");
+            break;
+        case TORSION_COLOR:
+            modeStr = wxT("torsion");
+            break;
+        case DISTANCE_COLOR:
+            modeStr = wxT("distance");
+            break;
+        case MINDISTANCE_COLOR:
+            modeStr = wxT("mindistance");
+            break;
+        case CUSTOM_COLOR:
+            modeStr = wxT("custom");
+            break;
+        case CONSTANT_COLOR:
+            modeStr = wxT("constant");
+            break;
+    }
+    
+    return modeStr;
+}
+
+FibersColorationMode Helper::getColorationModeFromString( const wxString &modeStr )
+{
+    FibersColorationMode curMode;
+    
+    if( modeStr == wxT("normal") )
+        curMode = NORMAL_COLOR;
+    else if( modeStr == wxT("curvature") )
+        curMode = CURVATURE_COLOR;
+    else if( modeStr == wxT("torsion") )
+        curMode = TORSION_COLOR;
+    else if( modeStr == wxT("distance") )
+        curMode = DISTANCE_COLOR;
+    else if( modeStr == wxT("mindistance") )
+        curMode = MINDISTANCE_COLOR;
+    else if( modeStr == wxT("custom") )
+        curMode = CUSTOM_COLOR;
+    else if( modeStr == wxT("constant") )
+        curMode = CONSTANT_COLOR;
+    
+    return curMode;
+}
+
+wxString Helper::getThresholdingTypeString( const ThresholdingOperationType &opType )
+{
+    wxString opStr;
+    
+    switch(opType)
+    {
+        case THRESHOLD_EQUAL:
+            opStr = wxT("equal");
+            break;
+        case THRESHOLD_SMALLER:
+            opStr = wxT("smaller");
+            break;
+        case THRESHOLD_SMALLER_EQUAL:
+            opStr = wxT("smaller_equal");
+            break;
+        case THRESHOLD_GREATER:
+            opStr = wxT("greater");
+            break;
+        case THRESHOLD_GREATER_EQUAL:
+            opStr = wxT("greater_equal");
+            break;
+        case THRESHOLD_INVALID:
+            opStr = wxT("invalid");      // Should never happen.
+            break;
+    }
+    
+    return opStr;
+}
+
+ThresholdingOperationType Helper::getThresholdingTypeFromString( const wxString &opStr )
+{
+    ThresholdingOperationType curType;
+    
+    if( opStr == wxT("equal") )
+        curType = THRESHOLD_EQUAL;
+    else if( opStr == wxT("smaller") )
+        curType = THRESHOLD_SMALLER;
+    else if( opStr == wxT("smaller_equal") )
+        curType = THRESHOLD_SMALLER_EQUAL;
+    else if( opStr == wxT("greater") )
+        curType = THRESHOLD_GREATER;
+    else if( opStr == wxT("greater_equal") )
+        curType = THRESHOLD_GREATER_EQUAL;
+    else if( opStr == wxT("invalid") )
+        curType = THRESHOLD_INVALID;
+    
+    return curType;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Simple function to convert a HSL color system to a RGB color system.
 //

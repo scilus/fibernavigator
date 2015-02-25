@@ -10,6 +10,7 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/ShaderHelper.h"
 #include "../misc/lic/FgeOffscreen.h"
@@ -43,7 +44,7 @@ MainCanvas::MainCanvas( int i_view, wxWindow *i_pParent, wxWindowID i_id,
         wxDefaultPosition, wxDefaultSize, 0, i_name) // gl_attrib, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name ),
 #else
 const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name, int* i_gl_attrib, wxGLCanvas* shared )
-: wxGLCanvas( i_pParent, shared, i_id, i_pos, i_size, i_style | wxFULL_REPAINT_ON_RESIZE, i_name, i_gl_attrib ),
+: wxGLCanvas( i_pParent, i_id, i_gl_attrib, i_pos, i_size, i_style | wxFULL_REPAINT_ON_RESIZE, i_name ),
 #endif
     m_isDragging( false ),
     m_isrDragging( false ),
@@ -422,6 +423,7 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
             ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
             SceneManager::getInstance()->setSelBoxChanged( true );
             RTTrackingHelper::getInstance()->setRTTDirty( true );
+			RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
         }
     }
     m_lastPos = evt.GetPosition();
@@ -655,11 +657,7 @@ void MainCanvas::render()
     glGetError();
     wxPaintDC dc( this );
 
-#ifndef __WXMAC__
     SetCurrent(*SceneManager::getInstance()->getScene()->getMainGLContext());
-#else
-    SetCurrent();
-#endif
 
     int w, h;
     GetClientSize( &w, &h );
@@ -704,7 +702,7 @@ void MainCanvas::render()
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
                 // FIXME: Screenshot crashes the GUI
-                int size = 2048;
+                int size = 4096;
 
                 FgeOffscreen fbo( size, size, true );
                 if( SceneManager::getInstance()->getClearToBlack() )
@@ -784,7 +782,7 @@ void MainCanvas::render()
                     //TODO, may be useful later
                     //renderDrawerDisplay();
                 }
-
+				//Real-time Fiber Tractography
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {	
 					m_pRealTimeFibers->seed();
@@ -796,6 +794,17 @@ void MainCanvas::render()
                     else
                         m_pRealTimeFibers->renderRTTFibers(true);
                 }
+				//Real-time fMRI correlation
+				if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )
+                {	
+					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
+                }
+				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
+				{
+					bool move = DatasetManager::getInstance()->m_pRestingStateNetwork->isBoxMoving();
+					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(move);
+					DatasetManager::getInstance()->m_pRestingStateNetwork->setBoxMoving(false);
+				}
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
@@ -1193,21 +1202,7 @@ void MainCanvas::drawOnAnatomy()
 
     if( DRAWMODE_PEN == MyApp::frame->getDrawMode() )
     {
-		float x = xClick * DatasetManager::getInstance()->getVoxelX() ;
-		float y = yClick * DatasetManager::getInstance()->getVoxelY() ;
-		float z = zClick * DatasetManager::getInstance()->getVoxelZ() ;
-
         l_currentAnatomy->writeVoxel(xClick, yClick, zClick, layer, MyApp::frame->getDrawSize(), MyApp::frame->canDrawRound(), MyApp::frame->canDraw3D(), MyApp::frame->getDrawColor() );
-		//vector<Vector> pointsF; // Points to be rendered Forward
-		//vector<Vector> colorF; //Color (local directions)Forward
-		//vector<Vector> pointsB; // Points to be rendered Backward
-		//vector<Vector> colorB; //Color (local directions) Backward
-		//m_pRealTimeFibers->performHARDIRTT(Vector(x,y,z),1,pointsF,colorF);
-		//m_pRealTimeFibers->performHARDIRTT(Vector(x,y,z),-1,pointsB,colorB);
-		//m_pRealTimeFibers->insert(pointsF, pointsB, colorF, colorB);
-		//m_pRealTimeFibers->renderRTTFibers(false);
-		//RTTrackingHelper::getInstance()->setRTTDirty( true );
-
     }
     else if( DRAWMODE_ERASER == MyApp::frame->getDrawMode() )
     {
@@ -1475,7 +1470,7 @@ void MainCanvas::segment()
     }
 
     //Create a new anatomy for the tumor
-    int indx = DatasetManager::getInstance()->createAnatomy( resultData, 0 );
+	int indx = DatasetManager::getInstance()->createAnatomy( resultData, HEAD_BYTE );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
     pNewAnatomy->setShowFS(false);
     // TODO: Change hard coded value and use enum instead

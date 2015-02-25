@@ -19,6 +19,7 @@ class SelectionEllipsoid : public SelectionObject
 public:
     // Constructor / Destructor
     SelectionEllipsoid( Vector i_center, Vector i_size );
+    SelectionEllipsoid( const wxXmlNode selObjNode );
     virtual ~SelectionEllipsoid();
 
     // Function from SelectionObject (virtual pure)
@@ -26,6 +27,8 @@ public:
 
     // Function from SelectionObject (virtual)
     void objectUpdate();
+    
+    wxString getTypeTag() const;
 
 private:
     // Function from SelectionObject (virtual pure)

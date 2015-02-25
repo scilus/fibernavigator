@@ -21,8 +21,11 @@
 #include "../gui/MainFrame.h"
 #include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/Algorithms/ConvexHullIncremental.h"
+#include "../misc/Algorithms/Helper.h"
+// TODO selection remove.
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
+#include "../misc/XmlHelper.h"
 
 #include <wx/textctrl.h>
 #include <wx/tglbtn.h>
@@ -41,70 +44,141 @@ using std::vector;
 #define DEF_POS   wxDefaultPosition
 #define DEF_SIZE  wxDefaultSize
 
-SelectionObject::SelectionObject( Vector i_center, Vector i_size )
-:   m_pLabelAnatomy   ( NULL ),
-    m_pCBSelectDataSet( NULL ),
-    m_displayCrossSections ( CS_NOTHING   ),
-    m_displayDispersionCone( DC_NOTHING   )
+// Protected. Should only be used to create an empty object when loading a scene.
+// Should only be called by children object.
+SelectionObject::SelectionObject()
 {
-    wxColour  l_color( 240, 30, 30 );
-    hitResult l_hr = { false, 0.0f, 0, NULL };
+    doBasicInit();
+}
 
-    m_center                = i_center;
-    m_color                 = l_color;
-    m_gfxDirty              = false;
-    m_handleRadius          = 3.0f;
-    m_hitResult             = l_hr;
-    m_isActive              = true;
-    m_objectType            = DEFAULT_TYPE;
-    m_isLockedToCrosshair   = false;
-    m_isFirstLevel          = false;
-    m_isNOT                 = false;
-    m_isosurface            = NULL;
-    m_isSelected            = false;
-    m_isVisible             = true;
+void SelectionObject::doBasicInit()
+{
+    hitResult hr = { false, 0.0f, 0, NULL };
+    m_hitResult = hr;
+    
+    m_name = wxT("object");
+    m_objectType = DEFAULT_TYPE;   // TODO selection to remove
+    m_center = Vector( 0.0f, 0.0f, 0.0f );
+    m_size = Vector( 0.0f, 0.0f, 0.0f );
+    m_isActive = true;
+    m_isNOT = false;
+    m_isSelected = false;
+    m_isVisible = true;
+    m_stepSize = 9;
+    m_color = wxColour( 0, 0, 0 );
+    m_treeId = NULL;
+    m_pLabelAnatomy = NULL;
+    m_pCBSelectDataSet = NULL;
+    m_displayCrossSections = CS_NOTHING;
+    m_displayDispersionCone = DC_NOTHING;
+    
     m_maxCrossSectionIndex  = 0;
     m_minCrossSectionIndex  = 0;
-    m_name                  = wxT( "object" );
-    m_size                  = i_size;
-    m_sourceAnatomy         = NULL;
-    m_stepSize              = 9;
-    m_threshold             = 0.0f;
-    m_treeId                = NULL;
+    
     m_statsNeedUpdating     = true;
     m_statsAreBeingComputed = false;
     m_meanFiberIsBeingDisplayed = false;
     m_boxMoved              = false;
     m_boxResized            = false;
     m_mustUpdateConvexHull  = true;
-
+    
     //Distance coloring
     m_DistColoring          = false;
+
+}
+
+SelectionObject::SelectionObject( Vector center, Vector size )
+{
+    doBasicInit();
+    
+    m_center = center;
+    m_size = size;
+}
+
+SelectionObject::SelectionObject( const wxXmlNode selObjNode )
+{   
+    doBasicInit();
+    
+    wxXmlNode *pChildNode = selObjNode.GetChildren();
+    
+    while( pChildNode != NULL )
+    {
+        wxString nodeName = pChildNode->GetName();
+        wxString propVal;
+        
+        if( nodeName == wxT("state") )
+        {
+            pChildNode->GetAttribute( wxT("name"), &m_name );
+            pChildNode->GetAttribute( wxT("active"), &propVal );
+            m_isActive = parseXmlBoolString( propVal );
+            pChildNode->GetAttribute( wxT("visible"), &propVal );
+            m_isVisible = parseXmlBoolString( propVal );
+            pChildNode->GetAttribute( wxT("isNOT"), &propVal );
+            m_isNOT = parseXmlBoolString( propVal );
+        }
+        else if( nodeName == wxT("center") )
+        {
+            double x, y, z;
+            pChildNode->GetAttribute( wxT("posX"), &propVal );
+            propVal.ToDouble( &x );
+            pChildNode->GetAttribute( wxT("posY"), &propVal );
+            propVal.ToDouble( &y );
+            pChildNode->GetAttribute( wxT("posZ"), &propVal );
+            propVal.ToDouble( &z );
+            m_center.x = x;
+            m_center.y = y;
+            m_center.z = z;
+        }
+        else if( nodeName == wxT("size") )
+        {
+            double x, y, z;
+            pChildNode->GetAttribute( wxT("sizeX"), &propVal );
+            propVal.ToDouble( &x );
+            pChildNode->GetAttribute( wxT("sizeY"), &propVal );
+            propVal.ToDouble( &y );
+            pChildNode->GetAttribute( wxT("sizeZ"), &propVal );
+            propVal.ToDouble( &z );
+            m_size.x = x;
+            m_size.y = y;
+            m_size.z = z;
+        }
+        else if( nodeName == wxT("color") )
+        {
+            pChildNode->GetAttribute( wxT("colorHTML"), &propVal );
+            m_color.Set( propVal );
+
+            long alpha;
+            pChildNode->GetAttribute( wxT("colorAlpha"), &propVal );
+            propVal.ToLong( &alpha );
+
+            // Need to repeat it, there is no Alpha setter in wxWidgets.
+            m_color.Set( m_color.Red(), m_color.Green(), m_color.Blue(), alpha );
+        }
+        else if( nodeName == wxT("distance_coloring_state") )
+        {
+            pChildNode->GetAttribute( wxT("used"), &propVal );
+            m_DistColoring = parseXmlBoolString( propVal );
+        }
+        else if( nodeName == wxT("mean_fiber_options") )
+        {
+            pChildNode->GetAttribute( wxT("colorHTML"), &propVal );
+            m_meanFiberColor.Set( propVal );
+            
+            double opacity;
+            pChildNode->GetAttribute( wxT("opacity"), &propVal );
+            propVal.ToDouble( &opacity );
+            m_meanFiberOpacity = opacity;
+            
+            pChildNode->GetAttribute( wxT("colorationMode"), &propVal );
+            m_meanFiberColorationMode = Helper::getColorationModeFromString( propVal );
+        }
+        
+        pChildNode = pChildNode->GetNext();
+    }
 }
 
 SelectionObject::~SelectionObject( )
 {
-}
-
-// TODO check this and all relations to crosshair
-void SelectionObject::lockToCrosshair()
-{
-    if( m_isLockedToCrosshair )
-    {
-        m_isLockedToCrosshair          = false;
-        SceneManager::getInstance()->setBoxLock( false );
-    }
-    else
-    {
-        m_isLockedToCrosshair             = true;
-        SceneManager::getInstance()->setBoxLock( true );
-        SceneManager::getInstance()->setBoxAtCrosshair( this );
-        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
-        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
-        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
-        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
-        MyApp::frame->refreshAllGLWidgets();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -347,14 +421,6 @@ void SelectionObject::select()
 ///////////////////////////////////////////////////////////////////////////
 void SelectionObject::update()
 {
-    if( m_isLockedToCrosshair )
-    {
-        SceneManager::getInstance()->updateView( (int)m_center.x , (int)m_center.y , (int)m_center.z, true );
-        MyApp::frame->m_pXSlider->SetValue( (int)m_center.x );
-        MyApp::frame->m_pYSlider->SetValue( (int)m_center.y );
-        MyApp::frame->m_pZSlider->SetValue( (int)m_center.z );
-    }
-
     updateStatusBar();
     SceneManager::getInstance()->setSelBoxChanged( true );
     MyApp::frame->refreshAllGLWidgets();
@@ -444,16 +510,6 @@ int SelectionObject::getIcon()
         return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////
-// Sets an object to master or not.
-//
-// i_isMaster       : Indicates if we want to set this object as a master or not.
-///////////////////////////////////////////////////////////////////////////
-void SelectionObject::setIsFirstLevel( bool i_isFirstLevel )
-{
-    m_isFirstLevel = i_isFirstLevel;
-}
-
 bool SelectionObject::toggleIsNOT()
 {
     setIsNOT( !getIsNOT() ); 
@@ -464,19 +520,6 @@ void SelectionObject::setIsNOT( bool i_isNOT )
 {
     m_isNOT = i_isNOT;
     SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );
-    SceneManager::getInstance()->setSelBoxChanged( true );
-}
-
-///////////////////////////////////////////////////////////////////////////
-// Sets the threshold of the object.
-//
-// i_threshold      : The new threshold value.
-///////////////////////////////////////////////////////////////////////////
-// TODO selection anat threshold
-void SelectionObject::setThreshold( float i_threshold )
-{
-    m_threshold = i_threshold;
-    m_gfxDirty  = true;
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
 
@@ -910,7 +953,7 @@ vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
 {
     vector< bool > filteredFiber = pFibers->getFilteredFibers();
     
-    SelectionState &curState = getState( pFibers->getName() );
+    SelectionState &curState = getState( pFibers->getDatasetIndex() );
     
     vector< bool > branchToUse;
     SelectionTree &selTree( SceneManager::getInstance()->getSelectionTree() );
@@ -927,7 +970,7 @@ vector< int > SelectionObject::getSelectedFibersIndexes( Fibers *pFibers )
         if( pParentObj != NULL )
         {
             // OPTIM: this could be optimized
-            SelectionState &parentState = pParentObj->getState( pFibers->getName() );
+            SelectionState &parentState = pParentObj->getState( pFibers->getDatasetIndex() );
             branchToUse.assign( curState.m_inBranch.size(), false );
             
             bool parentIsNot( pParentObj->getIsNOT() );
@@ -1600,27 +1643,17 @@ void SelectionObject::draw()
 
     GLfloat l_color[] = { 0.5f, 0.5f, 0.5f, 0.5f };
 
-    // TODO not now do we really need a different color?
-    if( m_isFirstLevel )
+    if ( ! m_isNOT )
     {
         l_color[0] = 0.0f; // Red
         l_color[1] = 1.0f; // Green
-        l_color[2] = 1.0f; // Blue
+        l_color[2] = 0.0f; // Blue
     }
-    else 
+    else
     {
-        if ( ! m_isNOT )
-        {
-            l_color[0] = 0.0f; // Red
-            l_color[1] = 1.0f; // Green
-            l_color[2] = 0.0f; // Blue
-        }
-        else
-        {
-            l_color[0] = 1.0f; // Red
-            l_color[1] = 0.0f; // Green
-            l_color[2] = 0.0f; // Blue
-        }
+        l_color[0] = 1.0f; // Red
+        l_color[1] = 0.0f; // Green
+        l_color[2] = 0.0f; // Blue
     }
 
     if( m_isSelected )
@@ -1631,22 +1664,6 @@ void SelectionObject::draw()
     // Because each type of selection object is unique, this function will
     // draw the selection object according to its specifications.
     drawObject( l_color );
-}
-
-void SelectionObject::drawIsoSurface()
-{
-    if( ! m_isActive || ! m_isVisible ) 
-        return;
-
-    if( m_gfxDirty )
-    {
-        m_isosurface->setThreshold( m_threshold );
-        m_isosurface->GenerateWithThreshold();
-        m_gfxDirty = false;
-    }
-
-    glColor3ub( m_color.Red(), m_color.Green(), m_color.Blue() );
-    m_isosurface->draw();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1885,7 +1902,52 @@ SelectionObject::SelectionState& SelectionObject::getState( const FiberIdType &f
     return m_selectionStates[ fiberId ];
 }
 
-// TODO selection tree saving
+bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode, const wxString &rootPath )
+{
+    wxString floatPrecision = wxT( ".8" );
+    
+    pCurNode->AddAttribute( new wxXmlAttribute( wxT( "type" ), getTypeTag() ) );
+    
+    wxXmlNode *pState = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "state" ) );
+    pCurNode->AddChild( pState );
+    
+    pState->AddAttribute( new wxXmlAttribute( wxT( "name" ), m_name) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "active" ), m_isActive? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "visible" ), m_isVisible? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "isNOT" ), m_isNOT? wxT( "yes" ) : wxT( "no" ) ) );
+    
+    
+    wxXmlNode *pCenter = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "center" ) );
+    pCenter->AddAttribute( new wxXmlAttribute( wxT( "posX" ), wxStrFormat( m_center.x, floatPrecision ) ) );
+    pCenter->AddAttribute( new wxXmlAttribute( wxT( "posY" ), wxStrFormat( m_center.y, floatPrecision ) ) );
+    pCenter->AddAttribute( new wxXmlAttribute( wxT( "posZ" ), wxStrFormat( m_center.z, floatPrecision ) ) );
+    pCurNode->AddChild( pCenter );
+    
+    wxXmlNode *pSize = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "size" ) );
+    pSize->AddAttribute( new wxXmlAttribute( wxT( "sizeX" ), wxStrFormat( m_size.x, floatPrecision ) ) );
+    pSize->AddAttribute( new wxXmlAttribute( wxT( "sizeY" ), wxStrFormat( m_size.y, floatPrecision ) ) );
+    pSize->AddAttribute( new wxXmlAttribute( wxT( "sizeZ" ), wxStrFormat( m_size.z, floatPrecision ) ) );
+    pCurNode->AddChild( pSize );
+    
+    // Color is currently only used by VOI, but let's save it anyway. We want to support it later on.
+    wxXmlNode *pColor = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "color" ) );
+    pColor->AddAttribute( new wxXmlAttribute( wxT( "colorHTML" ), m_color.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    pColor->AddAttribute( new wxXmlAttribute( wxT( "colorAlpha" ), wxStrFormat( m_color.Alpha() ) ) );
+    pCurNode->AddChild( pColor );
+    
+    wxXmlNode *pDistanceColoring = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "distance_coloring_state" ) );
+    pDistanceColoring->AddAttribute( new wxXmlAttribute( wxT( "used" ), m_DistColoring ? wxT( "yes") : wxT( "no" ) ) );
+    pCurNode->AddChild( pDistanceColoring );
+
+    wxXmlNode *pMeanFiberOptions = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "mean_fiber_options" ) );
+    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorHTML" ), m_meanFiberColor.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "opacity" ), wxStrFormat( m_meanFiberOpacity, floatPrecision ) ) );
+    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorationMode" ), Helper::getColorationModeString( m_meanFiberColorationMode ) ) );
+    pCurNode->AddChild( pMeanFiberOptions );
+
+    return true;
+}
+
 wxString SelectionObject::getTypeTag() const
 {
     return wxT( "base" );
@@ -2195,12 +2257,15 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadNormalColoring->SetValue( true );
 
 #if !_USE_LIGHT_GUI
-    pBtnNewColorVolume->Enable( getIsFirstLevel() );
-    pBtnNewDensityVolume->Enable( getIsFirstLevel() );
+    bool isFirstLevel = SceneManager::getInstance()->getSelectionTree().isFirstLevel( this );
+    pBtnNewColorVolume->Enable( isFirstLevel );
+    pBtnNewDensityVolume->Enable( isFirstLevel );
+    // TODO selection remove object type
     pBtnSetAsDistanceAnchor->Enable( m_objectType == VOI_TYPE );
 #endif
     
-    pToggleAndNot->Enable( !getIsFirstLevel() );
+    // TODO selection
+    //pToggleAndNot->Enable( !getIsFirstLevel() );
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );
 

@@ -121,7 +121,6 @@ void AnatomyHelper::renderNav( int pView )
         }
     }
 
-    glDisable( GL_TEXTURE_3D );
     Logger::getInstance()->printIfGLError( wxT( "AnatomyHelper::renderNav - glDisable") );
     ShaderHelper::getInstance()->getAnatomyShader()->release();
     glPopAttrib();

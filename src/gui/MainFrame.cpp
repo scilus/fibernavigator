@@ -12,6 +12,7 @@
 #include "SelectionTree.h"
 #include "ToolBar.h"
 #include "TrackingWindow.h"
+#include "FMRIWindow.h"
 #include "../main.h"
 #include "../Logger.h"
 #include "../dataset/Anatomy.h"
@@ -22,10 +23,12 @@
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
+#include "../version/VersionString.h"
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
@@ -40,6 +43,9 @@
 
 #include <algorithm>
 using std::for_each;
+#include <iostream>
+#include <sstream>
+using std::ostringstream;
 
 #include <cmath>
 
@@ -190,8 +196,7 @@ MainFrame::MainFrame( const wxString     &title,
     m_drawRound( true ),
     m_draw3d( false ),
     m_canUseColorPicker( false ),
-    m_drawColor(255, 255, 255),
-    m_drawColorIcon(16, 16, true)
+    m_drawColor(255, 255, 255)
 {
     wxImage::AddHandler(new wxPNGHandler);
 
@@ -201,13 +206,17 @@ MainFrame::MainFrame( const wxString     &title,
     m_pTimer->Start( 100 );
 
     m_pMenuBar = new MenuBar();
-    m_pToolBar = new ToolBar(this);
-    m_pToolBar->Realize();
     m_pMenuBar->initMenuBar(this);
-    m_pToolBar->initToolBar(this);
-
     this->SetMenuBar(m_pMenuBar);
-    this->SetToolBar(m_pToolBar);
+    
+    // Need to use this structure because of a bad Toolbar behavior using the old
+    // derived Toolbar class on OSX. The toolbar wouldn't show.
+    wxToolBar *pInternalToolbar = CreateToolBar();
+    m_pToolBar = new ToolBar(pInternalToolbar);
+    m_pToolBar->connectToolsEvents(this);
+    pInternalToolbar->Realize();
+    this->SetToolBar(pInternalToolbar);
+    
     updateMenus();
     int widths[] = { 250, 250, -1 };
     CreateStatusBar( 2 );
@@ -265,12 +274,12 @@ void MainFrame::initLayout()
     m_pGL1->SetMaxSize( wxSize( CANVAS_COR_WIDTH, CANVAS_COR_HEIGHT ) );
     m_pGL2->SetMaxSize( wxSize( CANVAS_SAG_WIDTH, CANVAS_SAG_HEIGHT ) );
 
-#ifndef __WXMAC__
+//#ifndef __WXMAC__
     SceneManager::getInstance()->getScene()->setMainGLContext( new wxGLContext( m_pMainGL ) );
     glGetError(); // Removes the error code so we don't have an error message the first time we check it
-#else
-    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
-#endif
+//#else
+//    SceneManager::getInstance()->getScene()->setMainGLContext( m_pMainGL->GetContext() );
+//#endif
 
     //////////////////////////////////////////////////////////////////////////
     // 3 Nav Panels initialization
@@ -335,9 +344,14 @@ void MainFrame::initLayout()
     m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindowHardi->EnableScrolling( true, true );
 
+	m_pFMRIWindow = new FMRIWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT )); // Contains realtime fmri properties
+    m_pFMRIWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pFMRIWindow->EnableScrolling( true, true );
+
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
-    m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
+    m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
+	m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 
@@ -350,6 +364,28 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
+const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
+const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
+
+int compareInputFile( const wxString &first, const wxString &second )
+{
+    int idxFirst, idxSecond;
+
+    for( int i= 0; i < NB_EXTENSIONS; ++i )
+    {
+        if( first.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
+        {
+            idxFirst = i;
+        }
+
+        if( second.Matches( wxString( EXTENSIONS[i].c_str(), wxConvUTF8 ) ) )
+        {
+            idxSecond = i;
+        }
+    }
+
+    return idxFirst - idxSecond;
+}
 
 void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
@@ -358,7 +394,7 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
     wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxOPEN | wxFD_MULTIPLE );
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxFD_OPEN | wxFD_MULTIPLE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
     if( dialog.ShowModal() == wxID_OK )
@@ -366,6 +402,9 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
         m_lastPath = dialog.GetDirectory();
         dialog.GetPaths( l_fileNames );
     }
+
+    // Order list of files so fibers files will be at the end of the list.
+    l_fileNames.Sort( compareInputFile );
 
     unsigned int nbErrors = for_each( l_fileNames.begin(), l_fileNames.end(), Loader( this, m_pListCtrl ) ).getNbErrors();
     if ( nbErrors )
@@ -388,7 +427,7 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*" );
     wxString defaultDir       = wxEmptyString;
     wxString defaultFileName  = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxOPEN | wxFD_MULTIPLE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxFD_OPEN | wxFD_MULTIPLE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
     if( dialog.ShowModal() == wxID_OK )
@@ -408,6 +447,40 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
         return;
     }
     
+    refreshAllGLWidgets();
+}
+
+void MainFrame::onLoadAsRestingState( wxCommandEvent& WXUNUSED(event) )
+{
+    wxArrayString fileNames;
+    wxString caption          = wxT( "Choose a resting-state file" );
+    wxString wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*" );
+    wxString defaultDir       = wxEmptyString;
+    wxString defaultFileName  = wxEmptyString;
+    wxFileDialog dialog( this, caption, defaultDir, defaultFileName, wildcard, wxFD_OPEN | wxFD_MULTIPLE );
+    dialog.SetFilterIndex( 0 );
+    dialog.SetDirectory( m_lastPath );
+    if( dialog.ShowModal() == wxID_OK )
+    {
+        m_lastPath = dialog.GetDirectory();
+        dialog.GetPaths( fileNames );
+    }
+
+    unsigned int nbErrors = for_each( fileNames.begin(), fileNames.end(), Loader( this, m_pListCtrl, false, true ) ).getNbErrors();
+
+    if ( nbErrors )
+    {
+        wxString errorMsg = wxString::Format( ( nbErrors > 1 ? wxT( "Last error: %s\nFor a complete list of errors, please review the log" ) : wxT( "%s" ) ), Logger::getInstance()->getLastError().c_str() );
+
+        wxMessageBox( errorMsg, wxT( "Error while loading" ), wxOK | wxICON_ERROR, NULL );
+        GetStatusBar()->SetStatusText( wxT( "ERROR" ), 1 );
+        GetStatusBar()->SetStatusText( Logger::getInstance()->getLastError(), 2 );
+        return;
+    }
+
+    m_pFMRIWindow->SetSelectButton();
+    m_pFMRIWindow->SetStartButton();
+    RTTrackingHelper::getInstance()->setEnableTractoRSN();
     refreshAllGLWidgets();
 }
 
@@ -458,6 +531,13 @@ void MainFrame::updateSliders()
     m_pGL2->changeOrthoSize();
 }
 
+void MainFrame::clearCachedSceneInfo()
+{
+    m_pCurrentSceneObject = NULL;
+    m_pCurrentSizer = NULL;
+    m_currentListIndex = -1;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 void MainFrame::onNewAnatomyByte( wxCommandEvent& WXUNUSED(event) )
@@ -478,7 +558,7 @@ void MainFrame::onSave( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard        = wxT( "Scene files (*.scn)|*.scn|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
@@ -516,7 +596,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+    wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( m_lastPath );
 
@@ -578,14 +658,14 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
 
             if( dialog.ShowModal() == wxID_OK )
             {
                 m_lastPath = dialog.GetDirectory();
-                l_anatomy->saveNifti( dialog.GetPath() );
+                l_anatomy->saveToNewFilename( dialog.GetPath() );
             }
         }
         else if( ((DatasetInfo*)m_pCurrentSceneObject)->getType() == MAXIMAS )
@@ -596,7 +676,7 @@ void MainFrame::onSaveDataset( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "Nifti (*.nii)|*.nii*|All files|*.*" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
 
@@ -647,7 +727,7 @@ void MainFrame::onSaveSurface( wxCommandEvent& WXUNUSED(event) )
             wxString wildcard        = wxT( "surface files (*.vtk)|*.vtk" );
             wxString defaultDir      = wxEmptyString;
             wxString defaultFilename = wxEmptyString;
-            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxSAVE );
+            wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
             dialog.SetFilterIndex( 0 );
             dialog.SetDirectory( m_lastPath );
             if( dialog.ShowModal() == wxID_OK )
@@ -815,18 +895,8 @@ void MainFrame::onSwitchDrawer( wxCommandEvent& event )
 void MainFrame::updateDrawerToolbar()
 {
     SceneManager::getInstance()->setRulerActive( false );
-
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
-
-    m_pToolBar->EnableTool( m_pToolBar->m_toggleDrawRound->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_toggleDraw3d->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectPen->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectEraser->GetId(), m_isDrawerToolActive );
-    m_pToolBar->EnableTool( m_pToolBar->m_selectColorPicker->GetId(), m_isDrawerToolActive );
+    
+    m_pToolBar->updateDrawerToolBar( m_isDrawerToolActive );
     
     // Check if the current anatomy supports RGB
     Anatomy *pTempAnat = (Anatomy*) m_pCurrentSceneObject;
@@ -894,6 +964,8 @@ void MainFrame::onToggleDraw3d( wxCommandEvent& event )
 void MainFrame::onSelectColorPicker( wxCommandEvent& event )
 {
     wxColourData l_colorData;
+    
+    // TODO Set initial color
 
     for( int i = 0; i < 10; ++i )
     {
@@ -920,12 +992,7 @@ void MainFrame::onSelectColorPicker( wxCommandEvent& event )
     {
         wxColourData l_retData = dialog.GetColourData();
         m_drawColor = l_retData.GetColour();
-        wxRect fullImage(0, 0, 16, 16); //this is valid as long as toolbar items use 16x16 icons
-        m_drawColorIcon.SetRGB( fullImage, 
-                                m_drawColor.Red(), 
-                                m_drawColor.Green(), 
-                                m_drawColor.Blue() );
-        m_pToolBar->SetToolNormalBitmap(m_pToolBar->m_selectColorPicker->GetId(), wxBitmap( m_drawColorIcon ) );
+        m_pToolBar->setColorPickerColor( m_drawColor );
     }
     else
     {
@@ -1103,12 +1170,42 @@ void MainFrame::createDistanceMap()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy );
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy, true );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
 
     pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Distance Map)"));
+
+    m_pListCtrl->InsertItem( index );
+    refreshAllGLWidgets();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void MainFrame::edgeDetect()
+{
+    if( !DatasetManager::getInstance()->isAnatomyLoaded() )
+        return;
+
+    long l_item = getCurrentListIndex();
+    if( l_item == -1 )
+        return;
+
+    DatasetInfo* l_info = DatasetManager::getInstance()->getDataset( m_pListCtrl->GetItem( l_item ) );
+    if( l_info->getType() > OVERLAY )
+        return;
+
+    Anatomy* l_anatomy = (Anatomy*)l_info;
+
+    Logger::getInstance()->print( wxT( "Edge detection ..." ), LOGLEVEL_MESSAGE );
+
+    int index = DatasetManager::getInstance()->createAnatomy( l_anatomy, false );
+    Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
+
+    Logger::getInstance()->print( wxT( "Edge detection done" ), LOGLEVEL_MESSAGE );
+
+    pNewAnatomy->setName( l_anatomy->getName().BeforeFirst('.') + wxT(" (Edges)"));
 
     m_pListCtrl->InsertItem( index );
     refreshAllGLWidgets();
@@ -1134,7 +1231,7 @@ void MainFrame::createDistanceMapAndIso()
 
     Logger::getInstance()->print( wxT( "Generating distance map..." ), LOGLEVEL_MESSAGE );
 
-    Anatomy* l_tmpAnatomy = new Anatomy( l_anatomy );
+    Anatomy* l_tmpAnatomy = new Anatomy( l_anatomy, true );
 
     Logger::getInstance()->print( wxT( "Distance map done" ), LOGLEVEL_MESSAGE );
     Logger::getInstance()->print( wxT( "Generating iso surface..." ), LOGLEVEL_MESSAGE );
@@ -1320,7 +1417,6 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     
     if( selTree.isEmpty() || pCurObj == NULL )
     {
-        pSelObj->setIsFirstLevel( true );
         int itemId = selTree.addChildrenObject( -1, pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
@@ -1329,13 +1425,13 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     }
     else
     {
-        pSelObj->setIsFirstLevel( false );
-
         int childId = selTree.addChildrenObject( selTree.getId( pCurObj ),  pSelObj );
         
         CustomTreeItem *pTreeItem = new CustomTreeItem( childId );
         newSelectionObjectId = m_pTreeWidget->AppendItem( pCurObj->getTreeId(), pSelObj->getName(), 0, -1, pTreeItem );
     }
+    
+    pSelObj->setTreeId( newSelectionObjectId );
     
     m_pTreeWidget->EnsureVisible( newSelectionObjectId );
     m_pTreeWidget->SetItemImage( newSelectionObjectId, pSelObj->getIcon() );
@@ -1344,8 +1440,81 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
     m_pTreeWidget->SelectItem(newSelectionObjectId, true);
     
-    pSelObj->setTreeId( newSelectionObjectId );    
     SceneManager::getInstance()->setSelBoxChanged( true );
+}
+
+bool MainFrame::buildSelectionViewFromSelectionTree( SelectionTree *pSelTree )
+{
+    if( pSelTree->isEmpty() )
+    {
+        return true;
+    }
+    
+    // Add selection objects to the list.
+    wxTreeItemId newSelectionObjectId;
+    
+    SelectionTree::SelectionObjectVector rootObjs = pSelTree->getDirectChildrenObjects( 0 );
+    for( SelectionTree::SelectionObjectVector::iterator objIt(rootObjs.begin()); objIt != rootObjs.end(); ++objIt )
+    {
+        int itemId = pSelTree->getId( *objIt );
+        CustomTreeItem *pTreeItem = new CustomTreeItem( itemId );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( m_tSelectionObjectsId, (*objIt)->getName(), 0, -1, pTreeItem );
+        
+        m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+        m_pTreeWidget->SetItemImage( newSelectionObjectId, (*objIt)->getIcon() );
+        
+        // Choose item color depending on state.
+        if( (*objIt)->getIsNOT() )
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxRED );
+        }
+        else
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+        }
+        
+        (*objIt)->setTreeId( newSelectionObjectId );    
+        
+        buildChildrenList( pSelTree, *objIt );
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return true;
+}
+
+bool MainFrame::buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj )
+{
+    // Add selection objects to the list.
+    wxTreeItemId newSelectionObjectId;
+    
+    int curSelObjTreeId = pSelTree->getId( pCurSelObj );
+    SelectionTree::SelectionObjectVector childObjs = pSelTree->getDirectChildrenObjects( curSelObjTreeId );
+    for( SelectionTree::SelectionObjectVector::iterator objIt(childObjs.begin()); objIt != childObjs.end(); ++objIt )
+    {
+        int childItemId = pSelTree->getId( *objIt );
+        CustomTreeItem *pTreeItem = new CustomTreeItem( childItemId );
+        newSelectionObjectId = m_pTreeWidget->AppendItem( pCurSelObj->getTreeId(), (*objIt)->getName(), 0, -1, pTreeItem );
+        
+        m_pTreeWidget->EnsureVisible( newSelectionObjectId );
+        m_pTreeWidget->SetItemImage( newSelectionObjectId, (*objIt)->getIcon() );
+        
+        // Choose item color depending on state.
+        if( (*objIt)->getIsNOT() )
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxRED );
+        }
+        else
+        {
+            m_pTreeWidget->SetItemBackgroundColour( newSelectionObjectId, *wxGREEN );
+        }
+        
+        (*objIt)->setTreeId( newSelectionObjectId );
+        
+        buildChildrenList( pSelTree, *objIt );
+    }
+    
+    SceneManager::getInstance()->setSelBoxChanged( true );
+    return true;
 }
 
 
@@ -1493,17 +1662,7 @@ void MainFrame::onSelectNormalPointer( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( false );
     m_isDrawerToolActive = false;
 
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Disable();
-    }
-    
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->updateDrawerToolBar( false );
     refreshAllGLWidgets();
 }
 
@@ -1512,17 +1671,7 @@ void MainFrame::onSelectRuler( wxCommandEvent& WXUNUSED(event) )
     SceneManager::getInstance()->setRulerActive( true );
     m_isDrawerToolActive = false;
 
-    // Need to check to avoid crash when using the light weight version.
-    if( m_pToolBar->m_txtRuler != NULL )
-    {
-        m_pToolBar->m_txtRuler->Enable();
-    }
-    
-    m_pToolBar->EnableTool(m_pToolBar->m_selectColorPicker->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDrawRound->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_toggleDraw3d->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectPen->GetId(), false);
-    m_pToolBar->EnableTool(m_pToolBar->m_selectEraser->GetId(), false);
+    m_pToolBar->updateDrawerToolBar( false );
     refreshAllGLWidgets();
 }
 
@@ -1675,15 +1824,20 @@ void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 /**/
 void MainFrame::onAbout( wxCommandEvent& WXUNUSED(event) )
 {
-    wxString rev = _T( "ea8312dd52" );
-    rev = rev.AfterFirst('$');
-    rev = rev.BeforeLast('$');
-    wxString date = _T( "2013-04-15" );
-    date = date.AfterFirst( '$' );
-    date = date.BeforeLast( '$' );
-    (void)wxMessageBox( _T("Fiber Navigator\nAuthors:http://code.google.com/p/fibernavigator/people/list \n\n" )
-                        + rev + _T( "\n" ) + date, _T( "About Fiber Navigator" ) );
+    std::string fullSha1( VERSION_GIT_SHA1 );
+    std::string buildDate( VERSION_BUILD_DATE );
+    std::string buildTime( VERSION_BUILD_TIME );
     
+    ostringstream oss;
+    oss << "Fibernavigator: a tool for interactive MRI images and streamlines exploration." << std::endl << std::endl;
+    oss << "For documentation and release information, please visit our website: " << "http://scilus.github.io/fibernavigator/" << std::endl << std::endl;
+    oss << "Current contributors: https://github.com/scilus/fibernavigator/wiki/Current-contributors" << std::endl;
+    oss << "Past contributors: https://github.com/scilus/fibernavigator/wiki/Past-contributors" << std::endl << std::endl;
+    oss << "Built on Git revision: " << fullSha1.substr(0, 10) << std::endl;
+    oss << "Build date: " << buildDate << ", " << buildTime << std::endl;
+    
+    wxString wxMes( oss.str().c_str(), wxConvUTF8 );
+    (void)wxMessageBox(wxMes, _T( "About the Fibernavigator" ) );
 }
 
 void MainFrame::onShortcuts( wxCommandEvent& WXUNUSED(event) )
@@ -1722,7 +1876,7 @@ void MainFrame::onScreenshot( wxCommandEvent& WXUNUSED(event) )
     wxString l_wildcard        = wxT( "PPM files (*.ppm)|*.ppm|*.*|*.*" );
     wxString l_defaultDir      = wxEmptyString;
     wxString l_defaultFilename = wxEmptyString;
-    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxSAVE );
+    wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFilename, l_wildcard, wxFD_SAVE );
     dialog.SetFilterIndex( 0 );
     dialog.SetDirectory( SceneManager::getInstance()->getScreenshotPath() );
     if( dialog.ShowModal() == wxID_OK )
@@ -1818,8 +1972,55 @@ void MainFrame::refreshViews()
 
 void MainFrame::updateStatusBar()
 {
-    GetStatusBar()->SetStatusText( wxString::Format( 
-        wxT("Position: %d  %d  %d" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue() ), 0 );
+    float value( 0 );
+    long index = getCurrentListIndex();
+    if( index != -1)
+    {
+        DatasetIndex idx = m_pListCtrl->GetItem( index );
+        DatasetInfo* pDataset = DatasetManager::getInstance()->getDataset( idx );
+        Anatomy* pAnat = dynamic_cast<Anatomy*>( pDataset );
+		
+        if( pAnat != NULL && pAnat->getType() != RGB )
+        {
+            //Picked position
+            int rows = pAnat->getRows();
+            int columns = pAnat->getColumns();
+            int ind = ( m_pXSlider->GetValue() + m_pYSlider->GetValue() * columns + m_pZSlider->GetValue() * columns * rows );
+			
+            //Float dataset
+            if( !pAnat->usingEqualizedDataset() )
+            {
+                float maxValue( 1.0f );
+                switch( pAnat->getType() )
+                {
+                    case HEAD_BYTE:
+                    {
+                        maxValue = 255.0;
+                        break;
+                    }
+                    case HEAD_SHORT:
+                    {
+                        maxValue = pAnat->getNewMax();
+                        break;
+                    }
+                    case OVERLAY:
+                    {
+                        maxValue = pAnat->getOldMax();
+                        break;
+                    }
+                }
+                //Denormalize
+                value = (* ( pAnat->getFloatDataset() ) )[ind] * maxValue;
+            }
+            //Equalized dataset
+            else
+            {
+                value = (* ( pAnat->getEqualizedDataset() ) )[ind];
+            }
+        }
+    }
+	
+    GetStatusBar()->SetStatusText( wxString::Format(wxT("Pos: %d  %d  %d Value %.2f" ), m_pXSlider->GetValue(), m_pYSlider->GetValue(),m_pZSlider->GetValue(), value ), 0 );
     Logger::getInstance()->printIfGLError( wxT( "MainFrame::updateStatusBar" ) );
 }
 
@@ -2095,9 +2296,6 @@ void MainFrame::onTreeChange()
     SceneManager::getInstance()->setSelBoxChanged( true );
     refreshAllGLWidgets();
 }
-
-// TODO selection ICI still needed? Les types still requis?
-
 
 void MainFrame::onRotateZ( wxCommandEvent& event )
 {

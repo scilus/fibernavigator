@@ -4,9 +4,10 @@
  */
 
 #include "RTTFibers.h"
-#include "../main.h"
+
 #include "DatasetManager.h"
 #include "RTTrackingHelper.h"
+#include "RTFMRIHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
@@ -23,20 +24,24 @@ using std::sort;
 
 #include <vector>
 using std::vector;
+#include "../main.h"
 
 //////////////////////////////////////////
 //Constructor
 //////////////////////////////////////////
 RTTFibers::RTTFibers()
-:   m_FAThreshold( 0.10f ),
+:   m_trackActionStep(std::numeric_limits<unsigned int>::max()),
+    m_timerStep( 0 ),
+    m_FAThreshold( 0.20f ),
     m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
     m_vinvout( 0.2f ),
-    m_minFiberLength( 10 ),
+    m_minFiberLength( 90 ),
     m_maxFiberLength( 200 ),
+	m_alpha( 1.0f ),
     m_isHARDI( false ),
 	m_trackActionStep(std::numeric_limits<unsigned int>::max()),
 	m_timerStep( 0 ),
@@ -141,7 +146,7 @@ void RTTFibers::seed()
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	//Evenly distanced seeds
-    if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap())
+	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
@@ -252,6 +257,60 @@ void RTTFibers::seed()
 			}
 		}
 	}
+	//fMRI seeding
+	else if(RTTrackingHelper::getInstance()->isSeedFromfMRI())
+	{
+		RTTrackingHelper::getInstance()->m_pSliderAxisSeedNb->SetValue( m_nbSeed );
+		RTTrackingHelper::getInstance()->m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), m_nbSeed) );
+        RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), m_nbSeed*m_nbSeed*m_nbSeed*m_pSeedFromfMRI.size()) );
+
+		for( size_t k = 0; k < m_pSeedFromfMRI.size(); k++)
+		{
+			float xstep =  xVoxel / float( m_nbSeed - 1.0f );
+			float ystep =  yVoxel / float( m_nbSeed - 1.0f );
+			float zstep =  zVoxel / float( m_nbSeed - 1.0f );
+
+			float xx = m_pSeedFromfMRI[k].first.x * DatasetManager::getInstance()->getVoxelX();
+			float yy = m_pSeedFromfMRI[k].first.y * DatasetManager::getInstance()->getVoxelY();
+			float zz = m_pSeedFromfMRI[k].first.z * DatasetManager::getInstance()->getVoxelZ();
+
+			for( float x = xx - xVoxel; x < xx + xVoxel + xstep/2.0f; x+= xstep )
+			{
+				for( float y = yy - yVoxel; y < yy + yVoxel + ystep/2.0f; y+= ystep )
+				{
+					for( float z = zz - zVoxel; z < zz + zVoxel + zstep/2.0f; z+= zstep )
+					{
+
+						vector<Vector> pointsF; // Points to be rendered Forward
+						vector<Vector> colorF; //Color (local directions)Forward
+						vector<Vector> pointsB; // Points to be rendered Backward
+						vector<Vector> colorB; //Color (local directions) Backward
+                        
+						if(m_isHARDI)
+						{
+							//Track both sides
+							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+							performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+						}
+						else
+						{
+							//Track both sides
+							performDTIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
+							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+						}
+                        
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						{
+							m_fibersRTT.push_back( pointsF ); 
+							m_colorsRTT.push_back( colorF );
+							m_fibersRTT.push_back( pointsB ); 
+							m_colorsRTT.push_back( colorB );
+						}
+					}
+				}
+			}
+		}
+	}
     //Mesh ShellSeeding
     else 
     {
@@ -310,8 +369,18 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 
     if( m_fibersRTT.size() > 0 )
     {
+        glPushAttrib( GL_ALL_ATTRIB_BITS );
+		if(m_alpha != 1.0f)
+		{
+			glEnable( GL_BLEND );
+			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			glDepthMask( GL_FALSE );
+		}
+        //for fmri
+        std::vector<Vector> positions; 
 	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
 	    { 
+
 		    //POINTS
 		    if( SceneManager::getInstance()->isPointMode() )
 		    {
@@ -319,8 +388,9 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    if( m_fibersRTT[j].size() > 0 )
 			    {
 					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size(), m_trackActionStep); i++ )
-				    {  
-					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
+				    {
+                        
+					    glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
 					    glBegin( GL_POINTS );
 						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
 					    glEnd();
@@ -331,7 +401,7 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
 					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size(), m_trackActionStep); i++ )
 				    {  
-					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
+					    glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
 					    glBegin( GL_POINTS );
 						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
 					    glEnd();
@@ -346,11 +416,25 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
 				    {
-					    glColor3f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z) );
-					    glBegin( GL_LINES );
-						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-						    glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
-					    glEnd();
+                        if(i > m_fibersRTT[j].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                        {
+                            glPointSize(10.0f);
+                            glColor3f( 1.0f,0.0f,0.0f );
+					        glBegin( GL_POINTS );
+						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+					        glEnd();
+                            positions.push_back(Vector(m_fibersRTT[j][i].x,m_fibersRTT[j][i].y,m_fibersRTT[j][i].z));
+                        }
+                        else
+                        {
+                            glPointSize(1.0f);
+                            glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
+					        glBegin( GL_LINES );
+						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
+						        glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
+					        glEnd();
+                        }
+					    
 				    }
 			    }
 			    //Backward
@@ -358,15 +442,36 @@ void RTTFibers::renderRTTFibers(bool isPlaying)
 			    {
                     for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
 				    {
-					    glColor3f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z) );
-					    glBegin( GL_LINES );
-						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-						    glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
-					    glEnd();
+                        if(i > m_fibersRTT[j+1].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                        {
+                            glPointSize(10.0f);
+                            glColor3f( 1.0f, 0.0f, 0.0f );
+					        glBegin( GL_POINTS );
+						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+					        glEnd();
+                            positions.push_back(Vector(m_fibersRTT[j+1][i].x,m_fibersRTT[j+1][i].y,m_fibersRTT[j+1][i].z));
+                        }
+                        else
+                        {
+                            glPointSize(1.0f);
+					        glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
+					        glBegin( GL_LINES );
+						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
+						        glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
+					        glEnd();
+                        }
 				    }
 			    }
+				
 		    }   
 	    }
+        glDisable(GL_BLEND);
+		glPopAttrib();
+        if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+        {
+            DatasetManager::getInstance()->m_pRestingStateNetwork->setSeedFromTracto(positions);
+            RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+        }
 	}   
 }
 
