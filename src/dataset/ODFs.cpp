@@ -306,11 +306,7 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
     // We need to reload the buffer in video memory.
     loadBuffer();
 
-<<<<<<< HEAD
-	// We need to reset the scaling factor
-=======
 	//We need to reset the scaling factor
->>>>>>> master
 	setScalingFactor( 3.0f );
 
     return true;

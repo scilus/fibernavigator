@@ -61,8 +61,7 @@ public:
 	void setSeedFromfMRI( const std::vector<std::pair<Vector,float> > &seedFromfMRI )	  { m_pSeedFromfMRI = seedFromfMRI; }
 
 	void setExcludeInfo( Anatomy* info )                              { m_pExcludeInfo = info; }
-	bool checkExclude(unsigned int sticksNumber);
-	void setSeedMapInfo( Anatomy* info );							  
+	bool checkExclude(unsigned int sticksNumber);						  
 
 
     float getFAThreshold()                       { return m_FAThreshold; }

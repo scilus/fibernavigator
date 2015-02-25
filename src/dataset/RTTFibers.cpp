@@ -43,8 +43,6 @@ RTTFibers::RTTFibers()
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
     m_isHARDI( false ),
-	m_trackActionStep(std::numeric_limits<unsigned int>::max()),
-	m_timerStep( 0 ),
 	m_stop( false )
 {
 }
