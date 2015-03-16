@@ -5,13 +5,12 @@ The Fibernavigator is a tool designed for a fast and versatile visualization of 
 
 **Welcome new users**
 
-If you are new here and are coming after seeing the presentation in Rome, you can find 
-the version containing Real-time fMRI and all the latest tools in the Releases_ page.
+You can find a pre-build executable (windows) and all the latest tools in the Releases_ page.
 
-For other users, please note that the Fibernavigator now has a Real-time fMRI connectivity mode and
-new anatomy coloring modes. The branch containing this code is rtfmri-dmri,
+Please note that the Fibernavigator now has a Real-time fMRI connectivity mode and
+new anatomy coloring modes. The branch containing this code is either Master or Tracto-driven,
 and is based on wxWidgets 3.0. The branch opacity-rendering has implementation of Tax et al. 2014 ISMRM abstract 
-for the interactive rendering of orientation-dependent tractography.
+for the interactive rendering of orientation-dependent tractography. Be sure to visit the Releases_ page.
 
 Tutorials
 ---------
