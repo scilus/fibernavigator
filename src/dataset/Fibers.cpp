@@ -3769,7 +3769,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 	pBoxRowlina->Add( m_pTxtlina,   0, wxALIGN_LEFT | wxALL, 1);
 
     //Linear func b
-    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -10,         1-M_PI*m_pSliderFibersLina->GetValue()/2.0f,       0, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -100,         1-M_PI*(m_pSliderFibersLina->GetValue()/10.0f)/2.0f,       0, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("-10.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRowlinb = new wxBoxSizer( wxHORIZONTAL );
@@ -4359,13 +4359,13 @@ void Fibers::updateAlpha()
     m_yAngle = std::sin(phi)*std::sin(theta);
     m_zAngle = std::cos(theta);
 
-    m_lina = m_pSliderFibersLina->GetValue();
-    m_linb = m_pSliderFibersLinb->GetValue();
+    m_lina = m_pSliderFibersLina->GetValue()/10.0f;
+    m_linb = m_pSliderFibersLinb->GetValue()/10.0f;
 
     m_cl = m_pSliderFiberscl->GetValue()/100.0f;
 
     //Linear b change
-    m_pSliderFibersLinb->SetMin(1-M_PI*m_pSliderFibersLina->GetValue()/2.0f);
+    m_pSliderFibersLinb->SetMin(1-M_PI*(m_pSliderFibersLina->GetValue()/10.0f)/2.0f);
 
     //Boxes
     m_pTxtAlphaBox->SetValue(wxString::Format( wxT( "%.1f"), m_pSliderFibersAlpha->GetValue()/10.0f));
