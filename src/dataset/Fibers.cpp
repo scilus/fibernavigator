@@ -111,8 +111,8 @@ Fibers::Fibers()
  	m_xAngle( 0.0f ),
  	m_yAngle( 0.0f ),
     m_zAngle( 1.0f ),
-    m_lina(20.0f),
-    m_linb(-10.0f),
+    m_lina(1.5f),
+    m_linb(-0.9f),
     m_cl(0.0f),
 	m_axisView( true ),
 	m_ModeOpac( true ),
@@ -3761,16 +3761,16 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 	pBoxRow->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
 
     //Linear func a
-    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         200,         20.0f/M_PI,       1000, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("20.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         15,         20.0f/M_PI,       500, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("1.5"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRowlina = new wxBoxSizer( wxHORIZONTAL );
     pBoxRowlina->Add( m_pSliderFibersLina, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
 	pBoxRowlina->Add( m_pTxtlina,   0, wxALIGN_LEFT | wxALL, 1);
 
     //Linear func b
-    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -100,         1-M_PI*(m_pSliderFibersLina->GetValue()/10.0f)/2.0f,       0, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("-10.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -9,         10.0f-M_PI*(m_pSliderFibersLina->GetValue())/2.0f,       0, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("-0.9"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
     wxBoxSizer *pBoxRowlinb = new wxBoxSizer( wxHORIZONTAL );
     pBoxRowlinb->Add( m_pSliderFibersLinb, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
@@ -3820,7 +3820,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pRadConstant             = new wxRadioButton( pParent, wxID_ANY, wxT( "Constant" ) );
     m_pToggleAxisView             = new wxToggleButton( pParent, wxID_ANY, wxT( "View Axis" ) );
 	m_pToggleModeOpac			   = new wxToggleButton( pParent, wxID_ANY, wxT( "Opacity Mode" ) );
-    m_pToggleRenderFunc		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Alpha function" ) );
+    m_pToggleRenderFunc		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Power function" ) );
     m_pToggleLocalGlobal		   = new wxToggleButton( pParent, wxID_ANY, wxT( "Local rendering" ) );
     m_pToggleEndpts                 = new wxToggleButton( pParent, wxID_ANY, wxT( "End points OFF" ) );
     m_pToggleEndpts->Enable(false);
@@ -3844,7 +3844,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Tube radius" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pTubeRadius, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "c" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( pBoxRow, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "a" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
@@ -3859,7 +3859,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Phi" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( pBoxRow2, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Cl" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "T_cl" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( pBoxcl, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
@@ -3898,7 +3898,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     	// HERE
 	wxBoxSizer *pBoxAlpha = new wxBoxSizer( wxVERTICAL );
-    pBoxAlpha->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Rendering axis:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxAlpha->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Opacity axis:" ) ), 0, wxALIGN_LEFT | wxALL, 1 );
 
     wxBoxSizer *pBoxViewRadios = new wxBoxSizer( wxVERTICAL );
 	pBoxViewRadios->Add( m_pToggleAxisView,       0, wxALIGN_LEFT | wxALL, 1 );
@@ -4365,7 +4365,7 @@ void Fibers::updateAlpha()
     m_cl = m_pSliderFiberscl->GetValue()/100.0f;
 
     //Linear b change
-    m_pSliderFibersLinb->SetMin(1-M_PI*(m_pSliderFibersLina->GetValue()/10.0f)/2.0f);
+    m_pSliderFibersLinb->SetMin(10.0f-M_PI*(m_pSliderFibersLina->GetValue())/2.0f);
 
     //Boxes
     m_pTxtAlphaBox->SetValue(wxString::Format( wxT( "%.1f"), m_pSliderFibersAlpha->GetValue()/10.0f));
@@ -4400,7 +4400,7 @@ void Fibers::setRenderFunc(bool value)
 	if(value)
         m_pToggleRenderFunc->SetLabel( wxT("Linear function") );
 	else
-		m_pToggleRenderFunc->SetLabel( wxT("Alpha function") );
+		m_pToggleRenderFunc->SetLabel( wxT("Power function") );
 }
 
 void Fibers::setLocalGlobal(bool value)
