@@ -96,7 +96,7 @@ void main()
 		     if ( type0 > 0 ) lookupTex( color, type0, tex0, threshold0, v, alpha0 );
 		}
 
-		color = color + (ambient * color / 2.0) + (diffuse * color) + (specular * color / 2.0);
+		color = color; /*+ (ambient * color / 2.0) + (diffuse * color) + (specular * color / 2.0);*/
 	}
 	else if (isGlyph && !useTex)
 	{
