@@ -1810,6 +1810,12 @@ void MainFrame::onSetCMap5( wxCommandEvent& WXUNUSED(event) )
     refreshAllGLWidgets();
 }
 
+void MainFrame::onSetCMap6( wxCommandEvent& WXUNUSED(event) )
+{
+    SceneManager::getInstance()->setColorMap( 6 );
+    refreshAllGLWidgets();
+}
+
 void MainFrame::onSetCMapNo( wxCommandEvent& WXUNUSED(event) )
 {
     SceneManager::getInstance()->setColorMap( -1 );

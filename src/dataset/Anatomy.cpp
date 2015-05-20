@@ -1904,7 +1904,10 @@ void Anatomy::equalizeHistogram()
         if( isCdfMinFound )
         {
             float result = static_cast<double>( currentCdf - cdfMin ) / ( size - nbPixelsEliminated - cdfMin );
-            equalizedHistogram[i] = result;
+			if(result !=0)
+				equalizedHistogram[i] = result;
+			else
+				equalizedHistogram[i] = 1.0f / ( GRAY_SCALE - 1 );
         }
     }
 

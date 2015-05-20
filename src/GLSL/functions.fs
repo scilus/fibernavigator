@@ -103,7 +103,7 @@ vec3 colorMap2( in float value )
 	int sel = int(floor(colorValue));
 
 	if ( sel >= 8 )
-		return color0.rgb;
+		return color8.rgb;
 	else if ( sel < 0 )
 		return color0.rgb;
 	else
@@ -160,7 +160,7 @@ vec3 colorMap5( in float value )
 	int sel = int(floor(colorValue));
 
 	if ( sel >= 8 )
-		return color0.rgb;
+		return color8.rgb;
 	else if ( sel < 0 )
 		return color0.rgb;
 	else
@@ -220,6 +220,10 @@ void colorMap( inout vec3 col, in float value )
 		col = colorMap3( value );
 	else if ( useColorMap == 4 )
 		col = colorMap4( value );
+    else if ( useColorMap == 5 )
+		col = colorMap5( value );
+    else if ( useColorMap == 6 )
+		col = colorMap6( value );
 	else
 	    col = defaultColorMap( value );
 }

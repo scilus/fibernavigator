@@ -165,6 +165,7 @@ private:
     void onSetCMap3                         ( wxCommandEvent& evt );
     void onSetCMap4                         ( wxCommandEvent& evt );
     void onSetCMap5                         ( wxCommandEvent& evt );
+	void onSetCMap6                         ( wxCommandEvent& evt );
     void onSetCMapNo                        ( wxCommandEvent& evt );
     void onToggleNormal                     ( wxCommandEvent& evt );
     void onToggleDrawVectors                ( wxCommandEvent& evt );
