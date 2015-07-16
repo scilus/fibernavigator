@@ -49,6 +49,10 @@ void main()
 			cooloor.rgb  = colorMap3( newVal );
 		else if ( useColorMap == 4 )
 			cooloor.rgb  = colorMap4( newVal );
+        else if ( useColorMap == 5 )
+			cooloor.rgb  = colorMap5( newVal );
+        else if ( useColorMap == 6 )
+			cooloor.rgb  = colorMap6( newVal );
 		else
 			cooloor.rgb = defaultColorMap( newVal );
 	}

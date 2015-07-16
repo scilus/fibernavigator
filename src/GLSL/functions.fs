@@ -103,7 +103,7 @@ vec3 colorMap2( in float value )
 	int sel = int(floor(colorValue));
 
 	if ( sel >= 8 )
-		return color0.rgb;
+		return color8.rgb;
 	else if ( sel < 0 )
 		return color0.rgb;
 	else
@@ -160,7 +160,7 @@ vec3 colorMap5( in float value )
 	int sel = int(floor(colorValue));
 
 	if ( sel >= 8 )
-		return color0.rgb;
+		return color8.rgb;
 	else if ( sel < 0 )
 		return color0.rgb;
 	else
@@ -189,24 +189,63 @@ vec3 colorMap5( in float value )
 
 vec3 colorMap6( in float value )
 {
-	float basecolor = 0.0;
-	float frequency = 5.0;
-	float sqrt3 = sqrt(3.);
-	float onedtwodsqrt3 = 1. / 2. / sqrt3;
-	float onepsqrt3 = 1. + sqrt3;
-	float onemsqrt3 = 1. - sqrt3;
-	float wvalue = sqrt(3./2.) * value * (1.-value); // = omega(value)
-	float twotz = 2. * sqrt3 * value; // = 2. * z(value)
-	float sinTerm = sin(frequency*value+basecolor);
-	float cosTerm = cos(frequency*value+basecolor);
-	float wtsinTerm = wvalue * sinTerm;
-	float wtcosTerm = wvalue * cosTerm;
+vec4 color8  = vec4(255./255., 255./255., 204./255., 1.);
+	vec4 color7  = vec4(255./255., 237./255., 160./255., 1.);
+	vec4 color6  = vec4(254./255., 217./255., 118./255., 1.);
+	vec4 color5  = vec4(254./255., 178./255.,  76./255., 1.);
+	vec4 color4  = vec4(253./255., 141./255.,  60./255., 1.);
+	vec4 color3  = vec4(252./255.,  78./255.,  42./255., 1.);
+	vec4 color2  = vec4(227./255.,  26./255.,  28./255., 1.);
+	vec4 color1  = vec4(189./255.,   0./255.,  38./255., 1.);
+	vec4 color0  = vec4(128./255.,   0./255.,  38./255., 1.);
+    vec4 color0u  = vec4(110./255.,   0./255.,  58./255., 1.);
+    vec4 color1u  = vec4(90./255.,   0./255.,  88./255., 1.);
+    vec4 color2u  = vec4(70./255.,   0./255.,  128./255., 1.);
+    vec4 color3u  = vec4(40./255.,   0./255.,  100./255., 1.);
+    vec4 color4u  = vec4(20./255.,   0./255.,  50./255., 1.);
+    vec4 color5u = vec4(0./255.,   0./255.,  0./255., 1.);
 
-	float colorRed   = (onedtwodsqrt3*(onepsqrt3*wtsinTerm + onemsqrt3*wtcosTerm + twotz));
-	float colorGreen = (onedtwodsqrt3*(onemsqrt3*wtsinTerm + onepsqrt3*wtcosTerm + twotz));
-	float colorBlue  = (onedtwodsqrt3*(-2.*(wtsinTerm + wtcosTerm) + twotz));
+	float colorValue = value * 14.;
+	int sel = int(floor(colorValue));
 
-	return vec3(colorRed, colorGreen, colorBlue);
+	if ( sel >= 14 )
+		return color8.rgb;
+	else if ( sel < 0 )
+		return color5u.rgb;
+	else
+	{
+		colorValue -= float(sel);
+
+		if (sel < 1)
+			return ( color4u*colorValue + color5u*(1.-colorValue)).rgb;
+		else if (sel < 2)
+			return ( color3u*colorValue + color4u*(1.-colorValue)).rgb;
+		else if (sel < 3)
+			return ( color2u*colorValue + color3u*(1.-colorValue)).rgb;
+		else if (sel < 4)
+			return ( color1u*colorValue + color2u*(1.-colorValue)).rgb;
+		else if (sel < 5)
+			return ( color0u*colorValue + color1u*(1.-colorValue)).rgb;
+		else if (sel < 6)
+			return ( color0*colorValue + color0u*(1.-colorValue)).rgb;
+		else if (sel < 7)
+			return ( color1*colorValue + color0*(1.-colorValue)).rgb;
+		else if (sel < 8)
+			return ( color2*colorValue + color1*(1.-colorValue)).rgb;
+        else if (sel < 9)
+		    return ( color3*colorValue + color2*(1.-colorValue)).rgb;
+        else if (sel < 10)
+		    return ( color4*colorValue + color3*(1.-colorValue)).rgb;
+        else if (sel < 11)
+		    return ( color5*colorValue + color4*(1.-colorValue)).rgb;
+        else if (sel < 12)
+		    return ( color6*colorValue + color5*(1.-colorValue)).rgb;
+        else if (sel < 13)
+		    return ( color7*colorValue + color6*(1.-colorValue)).rgb;
+        else if (sel < 14)
+		    return ( color8*colorValue + color7*(1.-colorValue)).rgb;
+		else return color5u.rgb;
+	}
 }
 
 void colorMap( inout vec3 col, in float value )
@@ -220,6 +259,10 @@ void colorMap( inout vec3 col, in float value )
 		col = colorMap3( value );
 	else if ( useColorMap == 4 )
 		col = colorMap4( value );
+    else if ( useColorMap == 5 )
+		col = colorMap5( value );
+    else if ( useColorMap == 6 )
+		col = colorMap6( value );
 	else
 	    col = defaultColorMap( value );
 }
