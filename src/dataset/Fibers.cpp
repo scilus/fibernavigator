@@ -3741,62 +3741,36 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
                                             FIBERS_SUBSAMPLING_RANGE_START,
                                             FIBERS_SUBSAMPLING_RANGE_MIN,
                                             FIBERS_SUBSAMPLING_RANGE_MAX ,
-                                            DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtSamplingBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    
+                                            wxDefaultPosition, wxSize(80, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtSamplingBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pTubeRadius = new wxSlider(  pParent, wxID_ANY, m_tubeRadius, 1, 10, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     
     // OPACITY
     //ALPHA
-    m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtAlphaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("3.0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    wxBoxSizer *pBoxRow = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow->Add( m_pSliderFibersAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxRow->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       100, wxDefaultPosition, wxSize(80, -1),         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtAlphaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("3.0"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
     //Linear func a
-    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         15,         20.0f/M_PI,       500, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("1.5"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    wxBoxSizer *pBoxRowlina = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRowlina->Add( m_pSliderFibersLina, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxRowlina->Add( m_pTxtlina,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pSliderFibersLina     = new wxSlider( pParent, wxID_ANY,         15,         20.0f/M_PI,       500, wxDefaultPosition, wxSize(80, -1),         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlina = new wxTextCtrl( pParent, wxID_ANY, wxT("1.5"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
     //Linear func b
-    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -9,         10.0f-M_PI*(m_pSliderFibersLina->GetValue())/2.0f,       0, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("-0.9"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    wxBoxSizer *pBoxRowlinb = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRowlinb->Add( m_pSliderFibersLinb, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxRowlinb->Add( m_pTxtlinb,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pSliderFibersLinb     = new wxSlider( pParent, wxID_ANY,         -9,         10.0f-M_PI*(m_pSliderFibersLina->GetValue())/2.0f,       0, wxDefaultPosition, wxSize(80, -1),         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtlinb = new wxTextCtrl( pParent, wxID_ANY, wxT("-0.9"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
     //THETA
-    m_pSliderFibersTheta  = new wxSlider( pParent, wxID_ANY,         90,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtThetaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("90"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow1->Add( m_pSliderFibersTheta, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxRow1->Add( m_pTxtThetaBox,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pSliderFibersTheta  = new wxSlider( pParent, wxID_ANY,         90,         0,       180, wxDefaultPosition, wxSize(80, -1),         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtThetaBox = new wxTextCtrl( pParent, wxID_ANY, wxT("90"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
     //PHI
-    m_pSliderFibersPhi  = new wxSlider( pParent, wxID_ANY,         0,         -180,       180, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtPhiBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    wxBoxSizer *pBoxRow2 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxRow2->Add( m_pSliderFibersPhi, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxRow2->Add( m_pTxtPhiBox,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pSliderFibersPhi  = new wxSlider( pParent, wxID_ANY,         0,         -180,       180, wxDefaultPosition, wxSize(80, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtPhiBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
     //Cl
-    m_pSliderFiberscl  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pTxtclBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0.00"), DEF_POS, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
-
-    wxBoxSizer *pBoxcl = new wxBoxSizer( wxHORIZONTAL );
-    pBoxcl->Add( m_pSliderFiberscl, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxcl->Add( m_pTxtclBox,   0, wxALIGN_LEFT | wxALL, 1);
+    m_pSliderFiberscl  = new wxSlider( pParent, wxID_ANY,         0,         0,       100, wxDefaultPosition, wxSize(80, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pTxtclBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
@@ -3833,43 +3807,63 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders1->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Max Length" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders1->Add( m_pSliderFibersFilterMax, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
+    pGridSliders1->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders1->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+    pGridSliders1->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Tube radius" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders1->Add( m_pTubeRadius, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
     pBoxMain->Add( pGridSliders1, 0, wxEXPAND | wxALL, 2 );
 
     wxBoxSizer *pBoxSampling = new wxBoxSizer( wxHORIZONTAL );
-    pBoxSampling->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Subsampling" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pBoxSampling->Add( m_pSliderFibersSampling, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-	pBoxSampling->Add( m_pTxtSamplingBox,   0, wxALIGN_LEFT | wxALL, 1);
+    pBoxSampling->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Subsampling" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxSampling->Add( m_pSliderFibersSampling, 0, wxALIGN_CENTER | wxALL, 1);
+	pBoxSampling->Add( m_pTxtSamplingBox,   0, wxALIGN_CENTER | wxALL, 1);
     
-    pBoxMain->Add(pBoxSampling, 0, wxEXPAND | wxALL, 2 );
+    pBoxMain->Add(pBoxSampling, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-    wxFlexGridSizer *pGridSliders = new wxFlexGridSizer( 2 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Tube radius" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pTubeRadius, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "c" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( pBoxRow, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "a" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( pBoxRowlina, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "b" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( pBoxRowlinb, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Theta" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( pBoxRow1, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Phi" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( pBoxRow2, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pGridSliders->Add( new wxStaticText( pParent, wxID_ANY, wxT( "T_cl" ) ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( pBoxcl, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
-
-    pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
+    wxBoxSizer *pBoxcalpha = new wxBoxSizer( wxHORIZONTAL );
+    pBoxcalpha->Add( new wxStaticText( pParent, wxID_ANY, wxT( "c" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxcalpha->Add( m_pSliderFibersAlpha, 0, wxALIGN_CENTER | wxALL, 1);
+    pBoxcalpha->Add( m_pTxtAlphaBox,   0, wxALIGN_CENTER | wxALL, 1);
     
+    pBoxMain->Add(pBoxcalpha, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    wxBoxSizer *pBoxRowlina = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowlina->Add( new wxStaticText( pParent, wxID_ANY, wxT( "a" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxRowlina->Add( m_pSliderFibersLina, 0, wxALIGN_CENTER | wxALL, 1);
+    pBoxRowlina->Add( m_pTxtlina,   0, wxALIGN_CENTER | wxALL, 1);
+    
+    pBoxMain->Add(pBoxRowlina, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    wxBoxSizer *pBoxRowlinb = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowlinb->Add( new wxStaticText( pParent, wxID_ANY, wxT( "b" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxRowlinb->Add( m_pSliderFibersLinb, 0, wxALIGN_CENTER | wxALL, 1);
+    pBoxRowlinb->Add( m_pTxtlinb,   0, wxALIGN_CENTER | wxALL, 1);
+    
+    pBoxMain->Add(pBoxRowlinb, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow1->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Theta" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxRow1->Add( m_pSliderFibersTheta, 0, wxALIGN_CENTER | wxALL, 1);
+    pBoxRow1->Add( m_pTxtThetaBox,   0, wxALIGN_CENTER | wxALL, 1);
+    
+    pBoxMain->Add(pBoxRow1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    wxBoxSizer *pBoxRow2 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow2->Add( new wxStaticText( pParent, wxID_ANY, wxT( "Phi" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxRow2->Add( m_pSliderFibersPhi, 0, wxALIGN_CENTER | wxALL, 1);
+    pBoxRow2->Add( m_pTxtPhiBox,   0, wxALIGN_CENTER | wxALL, 1);
+    
+    pBoxMain->Add(pBoxRow2, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    wxBoxSizer *pBoxcl = new wxBoxSizer( wxHORIZONTAL );
+    pBoxcl->Add( new wxStaticText( pParent, wxID_ANY, wxT( "T_cl" ), wxDefaultPosition, wxSize(80, -1), wxALIGN_LEFT ), 0, wxALIGN_LEFT | wxALL, 1 );
+    pBoxcl->Add( m_pSliderFiberscl, 0, wxALIGN_CENTER | wxALL, 1);
+    pBoxcl->Add( m_pTxtclBox,   0, wxALIGN_CENTER | wxALL, 1);
+    
+    pBoxMain->Add(pBoxcl, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
 
     //////////////////////////////////////////////////////////////////////////
 
