@@ -87,7 +87,8 @@ ODFs::ODFs( const wxString &filename )
 #endif
 
     // Generating hemispheres
-    generateSpherePoints( m_scalingFactor / 5);
+    generateSpherePoints( m_scalingFactor / 5 );
+
 }
 
 ODFs::~ODFs()
@@ -306,7 +307,7 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
     // We need to reload the buffer in video memory.
     loadBuffer();
 
-	// We need to reset the scaling factor
+	//We need to reset the scaling factor
 	setScalingFactor( 3.0f );
 
     return true;

@@ -42,7 +42,8 @@ RTTFibers::RTTFibers()
     m_minFiberLength( 90 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
-    m_isHARDI( false )
+    m_isHARDI( false ),
+    m_stop( false )
 {
 }
 
@@ -173,6 +174,7 @@ void RTTFibers::seed()
 						vector<Vector> colorF; //Color (local directions)Forward
 						vector<Vector> pointsB; // Points to be rendered Backward
 						vector<Vector> colorB; //Color (local directions) Backward
+						m_stop = false;
                         
                         if(m_isHARDI)
                         {
@@ -187,7 +189,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
@@ -226,6 +228,7 @@ void RTTFibers::seed()
 						vector<Vector> colorF; //Color (local directions)Forward
 						vector<Vector> pointsB; // Points to be rendered Backward
 						vector<Vector> colorB; //Color (local directions) Backward
+						m_stop = false;
                         
                         if(m_isHARDI)
                         {
@@ -240,7 +243,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
@@ -318,39 +321,37 @@ void RTTFibers::seed()
 
             for ( size_t k = 0; k < positions.size(); ++k )
             {
-                vector<Vector> points; // Points to be rendered
-                vector<Vector> color; //Color (local directions)
-                
+                vector<Vector> pointsF; // Points to be rendered Forward
+				vector<Vector> colorF; //Color (local directions)Forward
+				vector<Vector> pointsB; // Points to be rendered Backward
+				vector<Vector> colorB; //Color (local directions) Backward
+				m_stop = false;
+                        
                 if(m_isHARDI)
                 {
-                    //Track both sides
-                    performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, points, color); //First pass
-                    m_fibersRTT.push_back( points );
-                    m_colorsRTT.push_back( color );
-                    points.clear();
-                    color.clear();
-            
-                    performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, points, color); //Second pass
-                    m_fibersRTT.push_back( points ); 
-                    m_colorsRTT.push_back( color );
+					//Track both sides
+					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, pointsF, colorF); //First pass
+					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                 else
                 {
-                    //Track both sides
-                    performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, points, color); //First pass
-                    m_fibersRTT.push_back( points );
-                    m_colorsRTT.push_back( color );
-                    points.clear();
-                    color.clear();
-            
-                    performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, points, color); //Second pass
-                    m_fibersRTT.push_back( points ); 
-                    m_colorsRTT.push_back( color );
-               }
+					//Track both sides
+					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, pointsF, colorF); //First pass
+					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
+                }
+                        
+				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+				{
+					m_fibersRTT.push_back( pointsF ); 
+					m_colorsRTT.push_back( colorF );
+					m_fibersRTT.push_back( pointsB ); 
+					m_colorsRTT.push_back( colorB );
+				}
             }
         }
 	}
     renderRTTFibers(false);
+	
 	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
 
@@ -954,13 +955,30 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
 		
 	return draftedPeak;
 }
+
+bool RTTFibers::checkExclude( unsigned int sticksNumber)
+{
+	bool res = true;
+	if(m_pExcludeInfo != NULL)
+	{
+		if(m_pExcludeInfo->at(sticksNumber) != 0)
+		{
+			res = false;
+			m_stop = true;
+		}
+	}
+
+	return res;	
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Returns true if no anatomy is loaded for thresholding or if above the threshold
 ///////////////////////////////////////////////////////////////////////////
 bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 {
     bool isOk = false;
-	if(m_pMaskInfo->at(sticksNumber) > m_FAThreshold)
+	
+	if(m_pMaskInfo->at(sticksNumber) > m_FAThreshold && checkExclude(sticksNumber))
     {
        isOk = true;
     }
@@ -1004,7 +1022,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     sticksNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
     std::vector<float> sticks;
 
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() && withinMapThreshold(sticksNumber))
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() && withinMapThreshold(sticksNumber) && !m_stop)
     {
         sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber)); 
 
@@ -1027,7 +1045,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         //Corresponding stick number
         sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty())
+        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() )
         {
 
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
@@ -1052,7 +1070,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             ///////////////////////////
             //Tracking along the fiber
             //////////////////////////
-            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber))
+            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber) && !m_stop)
             {
                 //Insert point to be rendered
                 points.push_back( currPosition );
