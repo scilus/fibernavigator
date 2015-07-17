@@ -2010,6 +2010,19 @@ void PropertiesWindow::OnCrossingFibersThicknessChange( wxCommandEvent& WXUNUSED
     }
 }
 
+void PropertiesWindow::OnTubeRadius( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnCrossingFibersThicknessChange" ), LOGLEVEL_DEBUG );
+
+    if( m_pMainFrame->m_pCurrentSceneObject != NULL && m_pMainFrame->m_currentListIndex != -1 )
+    {
+        if( ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->getType() == FIBERS )
+        {
+            ((Fibers*)m_pMainFrame->m_pCurrentSceneObject)->updateTubeRadius();
+        }
+    }
+}
+
 bool PropertiesWindow::SelectColor( wxColour &col )
 {
     wxColourData colorData;
@@ -2044,4 +2057,99 @@ bool PropertiesWindow::SelectColor( wxColour &col )
     }
 
     return false;
+}
+
+void PropertiesWindow::OnAxisChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnAxisChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+			pFibers->setAxisView(pFibers->getViewRadValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnAxisChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnModeOpacChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnModeOpacChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+			pFibers->setModeOpac(pFibers->getModeOpacValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnModeOpacChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnRenderFuncChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRenderFuncChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+			pFibers->setRenderFunc(pFibers->getRenderFuncValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnRenderFuncChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnLocalGlobalChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnLocalGlobalChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->setLocalGlobal(pFibers->getLocalGlobalValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnLocalGlobalChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+}
+
+void PropertiesWindow::OnEndPtsChange( wxCommandEvent& WXUNUSED(event) )
+{
+	Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnEndptsChange" ), LOGLEVEL_DEBUG );
+    
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->setUsingEndpts(pFibers->getEndPtsValue());
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnEndptsChange - Current index is -1" ), LOGLEVEL_ERROR );
+    }
 }

@@ -63,7 +63,6 @@ public:
 	void setExcludeInfo( Anatomy* info )                              { m_pExcludeInfo = info; }
 	bool checkExclude(unsigned int sticksNumber);						  
 
-
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
     float getStep()                              { return m_step; }

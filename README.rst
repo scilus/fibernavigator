@@ -12,6 +12,7 @@ new anatomy coloring modes. The branch containing this code is either **Master**
 and is based on wxWidgets 3.0. The branch **opacity-rendering** has implementation of Tax et al. 2014 ISMRM abstract 
 for the interactive rendering of orientation-dependent tractography. Be sure to visit https://github.com/chamberm/fibernavigator/releases.
 
+
 Tutorials
 ---------
 
@@ -30,7 +31,7 @@ Highlights:
 - Fast and efficient visualization of the results of deterministic and probabilistic tractograms.
 - Interactive selection of fibers.
 - Real-time fiber tractography. (Chamberland et al. 2014, Frontiers in Neuroinformatics)
-- Tractography-driven resting-state fMRI (Chamberland et al. 2015, Proceeding of OHBM)
+- Tractography-driven resting-state fMRI (Chamberland et al. 2015, Proceeding of OHBM, Honolulu)
 - Orientation-dependent opacity rendering (Tax et al. 2014, ISMRM)
 - Display of MRI, functional MRI and EEG/MEG source localization results.
 
@@ -69,3 +70,4 @@ Acknowledgements
 If you use the Fibernavigator, please make sure that you quote the following reference in any publications:
 
 *Chamberland M., Whittinstall K., Fortin D., Mathieu D., and Descoteaux M., "Real-time multi-peak tractography for instantaneous connectivity display." Frontiers in Neuroinformatics, 8 (59): 1-15, 2014.*
+

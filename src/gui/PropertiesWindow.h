@@ -88,6 +88,13 @@ public:
     void OnColorWithConstantColor           ( wxCommandEvent& event );
     void OnSelectConstantColor              ( wxCommandEvent& event );
     void ColorFibers();
+    void OnFibersAlpha                      ( wxCommandEvent& event );
+
+    void OnAxisChange                       ( wxCommandEvent& event );
+	void OnModeOpacChange				    ( wxCommandEvent& event );
+    void OnRenderFuncChange                 ( wxCommandEvent& event );
+    void OnLocalGlobalChange                ( wxCommandEvent& event );
+    void OnEndPtsChange                     ( wxCommandEvent& event );
 
     void OnNormalMeanFiberColoring          ( wxCommandEvent& event );
     void OnCustomMeanFiberColoring          ( wxCommandEvent& event );
@@ -158,6 +165,7 @@ public:
 
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );
+    void OnTubeRadius                       ( wxCommandEvent& event );
     
     bool SelectColor                        ( wxColour &col );
 

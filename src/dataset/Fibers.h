@@ -98,6 +98,13 @@ public:
     void    updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     std::vector< bool >  getFilteredFibers();
 
+    void    updateAlpha();
+    void    setAxisView(bool value);
+    void    setModeOpac(bool value);
+    void    setRenderFunc(bool value);
+    void    setLocalGlobal(bool value);
+    void    setUsingEndpts(bool value);
+
     void    flipAxis( AxisType i_axe );
     
     int     getFibersCount() const { return m_countLines; }
@@ -145,11 +152,17 @@ public:
 
     void    toggleCrossingFibers() { m_useIntersectedFibers = !m_useIntersectedFibers; }
     void    updateCrossingFibersThickness();
+    void    updateTubeRadius();
 
 	void    convertFromRTT( std::vector<std::vector<Vector> >* RTT );
 
     // Inherited from DatasetInfo
     bool    toggleShow();
+    bool    getViewRadValue() { return m_pToggleAxisView->GetValue(); }
+	bool    getModeOpacValue() { return m_pToggleModeOpac->GetValue(); }
+    bool    getRenderFuncValue() { return m_pToggleRenderFunc->GetValue(); }
+    bool    getLocalGlobalValue() { return m_pToggleLocalGlobal->GetValue(); }
+    bool    getEndPtsValue() { return m_pToggleEndpts->GetValue(); }
 
 private:
     Fibers( const Fibers & );
@@ -187,6 +200,8 @@ private:
     void            setShader();
     void            releaseShader();
 
+    void            computeGLobalProperties();
+
 private:
     // Variables
     bool                  m_isSpecialFiberDisplay;
@@ -207,6 +222,7 @@ private:
     std::vector< bool >   m_selected;
     std::vector< bool >   m_filtered;
     std::vector< float >  m_length;
+    int                   m_subsampledLines;
     float                 m_maxLength;
     float                 m_minLength;
     std::vector< float  > m_localizedAlpha;
@@ -214,6 +230,9 @@ private:
     bool                  m_fibersInverted;
     bool                  m_useFakeTubes;
     bool                  m_useTransparency;
+    std::vector< float >  m_tractDirection;
+    std::vector< float >  m_dispFactors;
+    std::vector< float >  m_endPointsVector;
 
     bool                  m_isColorationUpdated;
     FibersColorationMode  m_fiberColorationMode;
@@ -221,11 +240,24 @@ private:
     Octree                *m_pOctree;
 
     bool            m_cfDrawDirty;
+    float           m_exponent;
+	float           m_xAngle;
+	float           m_yAngle;
+	float           m_zAngle;
+    float           m_lina;
+    float           m_linb;
+    float           m_cl;
+	bool            m_axisView;
+	bool			m_ModeOpac;
+    bool            m_isAlphaFunc;
+    bool            m_isLocalRendering;
+    bool            m_usingEndpts;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
     bool            m_useIntersectedFibers;
     float           m_thickness;
+    float           m_tubeRadius;
     float           m_xDrawn;
     float           m_yDrawn;
     float           m_zDrawn;
@@ -239,6 +271,22 @@ private:
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
     wxSlider       *m_pSliderInterFibersThickness;
+    wxSlider       *m_pTubeRadius;
+
+    wxSlider       *m_pSliderFibersAlpha;
+    wxSlider       *m_pSliderFibersLina;
+    wxSlider       *m_pSliderFibersLinb;
+    wxSlider       *m_pSliderFibersPhi;
+    wxSlider       *m_pSliderFibersTheta;
+    wxSlider       *m_pSliderFiberscl;
+    wxTextCtrl     *m_pTxtSamplingBox;
+    wxTextCtrl     *m_pTxtAlphaBox;
+    wxTextCtrl     *m_pTxtThetaBox;
+    wxTextCtrl     *m_pTxtPhiBox;
+    wxTextCtrl     *m_pTxtlina;
+    wxTextCtrl     *m_pTxtlinb;
+    wxTextCtrl     *m_pTxtclBox;
+
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxButton       *m_pSelectConstantFibersColor;
@@ -249,6 +297,11 @@ private:
     wxRadioButton  *m_pRadCurvature;
     wxRadioButton  *m_pRadTorsion;
     wxRadioButton  *m_pRadConstant;
+    wxToggleButton  *m_pToggleAxisView;
+	wxToggleButton  *m_pToggleModeOpac;
+    wxToggleButton  *m_pToggleRenderFunc;
+    wxToggleButton  *m_pToggleLocalGlobal;
+    wxToggleButton  *m_pToggleEndpts;
 };
 
 #endif /* FIBERS_H_ */

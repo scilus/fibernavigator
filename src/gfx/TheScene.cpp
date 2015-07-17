@@ -268,6 +268,7 @@ void TheScene::renderScene()
         glTranslatef( columns * voxelX * 0.5f, rows * voxelY * 0.5f, frames * voxelZ * 0.5f );
         glRotatef( m_rotAngleZ, 0, 0, 1 );
         glTranslatef( -columns * voxelX * 0.5f, -rows * voxelY * 0.5f, -frames * voxelZ * 0.5f );
+        
     }
 
     if( m_isRotateY )
@@ -351,7 +352,10 @@ void TheScene::renderScene()
         drawSelectionObjects();
     }
     
-    drawColorMapLegend();
+    if(SceneManager::getInstance()->isColorbarDisplayed())
+    {
+        drawColorMapLegend();
+    }
 
     Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
 
@@ -736,10 +740,14 @@ void TheScene::renderODFs()
 ///////////////////////////////////////////////////////////////////////////
 void TheScene::lightsOn()
 {
+  /*  GLfloat ambientLight[]  = { 0.1f, 0.1f, 0.1f, 1.0f };
+    GLfloat diffuseLight[]  = { 0.4f, 0.4f, 0.4f, 1.0f };
+    GLfloat specularLight[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+    GLfloat specRef[]       = { 0.8f, 0.8f, 0.8f, 0.6f };*/
     GLfloat ambientLight[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
-    GLfloat diffuseLight[]  = { 0.8f, 0.8f, 0.8f, 1.0f };
-    GLfloat specularLight[] = { 0.4f, 0.4f, 0.4f, 1.0f };
-    GLfloat specRef[]       = { 0.5f, 0.5f, 0.5f, 0.5f };
+    GLfloat diffuseLight[]  = { 0.49f, 0.49f, 0.49f, 1.0f };
+    GLfloat specularLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat specRef[]       = { 0.7f, 0.7f, 0.7f, 1.0f };
     Vector3fT v1 = { { 0, 0, -1 } };
     Vector3fT l;
     Matrix4fT transform = SceneManager::getInstance()->getTransform();

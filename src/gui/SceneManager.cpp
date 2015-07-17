@@ -48,6 +48,7 @@ SceneManager::SceneManager(void)
     m_showSagittal( true ),
     m_showCrosshair( false ),
     m_showAxes( false ),
+    m_showColorbar( false ),
     m_sliceX( 0.0f ),
     m_sliceY( 0.0f ),
     m_sliceZ( 0.0f ),
