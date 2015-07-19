@@ -28,7 +28,7 @@ public:
     void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
-	std::vector<float> pickDirection(std::vector<float> initialPeaks);
+	std::vector<float> pickDirection(std::vector<float> initialPeaks, bool initWithDir);
     bool withinMapThreshold(unsigned int sticksNumber);
 
     Vector generateRandomSeed( const Vector &min, const Vector &max );
@@ -55,6 +55,7 @@ public:
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
     void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
+    void setInitSeed( Vector init )                                   { m_initVec = init; } 
 
 	void setOpacity( float alpha )                                    { m_alpha = alpha; }
 	void setSeedMapInfo( Anatomy* info );	
@@ -108,6 +109,7 @@ private:
     Anatomy     *m_pMaskInfo;
 	Anatomy     *m_pExcludeInfo;
 	Anatomy     *m_pSeedMapInfo;
+    Vector       m_initVec;
 
 	float m_alpha;
 

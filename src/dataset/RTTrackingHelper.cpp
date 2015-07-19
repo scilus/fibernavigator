@@ -9,6 +9,7 @@ RTTrackingHelper::RTTrackingHelper()
     m_isFileSelected( false ),
     m_isShellSeeds( false ),
 	m_isSeedMap( false ),
+    m_isInitSeed( false ),
     m_isRTTActive( false ),
     m_isRTTDirty( false ),
     m_isRTTReady( false ),

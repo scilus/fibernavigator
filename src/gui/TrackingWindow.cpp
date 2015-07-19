@@ -162,6 +162,21 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxRow4->Add( m_pBtnSelectMap, 0, wxALIGN_CENTER | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxRow4, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
+    
+    wxBoxSizer *pBoxFlips = new wxBoxSizer( wxHORIZONTAL );
+    pBoxFlips->Add(new wxStaticText( this, wxID_ANY, wxT( "Initialize" ), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    m_pToggleTrackX = new wxToggleButton( this, wxID_ANY, wxT( "L-R" ), wxDefaultPosition, wxSize( 30, -1 ) );
+    m_pToggleTrackY = new wxToggleButton( this, wxID_ANY, wxT( "A-P" ), wxDefaultPosition, wxSize( 30, -1 ) );
+    m_pToggleTrackZ = new wxToggleButton( this, wxID_ANY, wxT( "I-S" ), wxDefaultPosition, wxSize( 30, -1 ) );
+    Connect( m_pToggleTrackX->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnInitX ) );
+    Connect( m_pToggleTrackY->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnInitY ) );
+    Connect( m_pToggleTrackZ->GetId(),         wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnInitZ ) );
+    
+    pBoxFlips->Add( m_pToggleTrackX, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+    pBoxFlips->Add( m_pToggleTrackY, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+    pBoxFlips->Add( m_pToggleTrackZ, 0, wxALIGN_LEFT | wxALL, 1);
+    m_pTrackingSizer->Add( pBoxFlips,0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
 	m_pBtnSelectExclusion = new wxButton( this, wxID_ANY,wxT("Exclusion map not selected"), wxDefaultPosition, wxSize(230, -1) );
     Connect( m_pBtnSelectExclusion->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectExclusion) );
 
@@ -616,6 +631,32 @@ void TrackingWindow::OnSelectMask( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void TrackingWindow::OnInitX( wxCommandEvent& event )
+{
+    RTTrackingHelper::getInstance()->toggleInitSeed();
+    Vector init = Vector(1,0,0);
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setInitSeed( init );
+    
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
+}
+
+void TrackingWindow::OnInitY( wxCommandEvent& event )
+{
+    RTTrackingHelper::getInstance()->toggleInitSeed();
+    Vector init = Vector(0,1,0);
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setInitSeed( init );
+    
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
+}
+
+void TrackingWindow::OnInitZ( wxCommandEvent& event )
+{
+    RTTrackingHelper::getInstance()->toggleInitSeed();
+    Vector init = Vector(0,0,1);
+    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setInitSeed( init );
+    
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
+}
 
 void TrackingWindow::OnSelectExclusion( wxCommandEvent& WXUNUSED(event) )
 {
