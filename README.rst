@@ -1,17 +1,19 @@
 Fibernavigator
 ==============
 
-The Fibernavigator is a tool designed for a fast and versatile visualization of fibers datasets.
+The Fibernavigator is a tool designed for a fast and versatile visualization of streamline datasets.
 
 **Welcome new users**
 
 You can find a pre-build executable (windows) and all the latest tools here: https://github.com/chamberm/fibernavigator/releases.
 
-Please note that the Fibernavigator now has a Real-time fMRI connectivity mode and
-new anatomy coloring modes. The branch containing this code is either **Master** or **Tracto-driven**,
-and is based on wxWidgets 3.0. The branch **opacity-rendering** has implementation of Tax et al. 2014 ISMRM abstract 
-for the interactive rendering of orientation-dependent tractography. Be sure to visit https://github.com/chamberm/fibernavigator/releases.
+Acknowledgements
+-------------------------------------
+If you use the Fibernavigator, please make sure that you quote the following references in any publications:
 
+*Chamberland M., Whittinstall K., Fortin D., Mathieu D., and Descoteaux M., "Real-time multi-peak tractography for instantaneous connectivity display." Frontiers in Neuroinformatics, 8 (59): 1-15, 2014.*
+
+*Chamberland M., Bernier M., Fortin D., Whittinstall K., and Descoteaux M., "3D interactive tractography-informed resting-state fMRI connectivity", Frontiers in Neuroscience (Brain Imaging Methods) 9:275, 2015*
 
 Tutorials
 ---------
@@ -22,6 +24,8 @@ New **video tutorials** of the Fibernavigator are available.
 - `Mesh display and interaction`_: how to create and modify the display of meshes.
 - `Drawing tool`_: how to draw on empty or already existing anatomies.
 - `Fiber navigation`_: how to interact with fibers and select a subset of them.
+- `Opacity rendering`_: how to generate orientation-dependent opacity rendering.
+- `Tractography-driven resting-state fMRI`_: how to combine dMRI with fMRI.
 
 A list of all tutorials can be seen on the `video tutorials`_ page.
 
@@ -30,22 +34,22 @@ Highlights:
 
 - Fast and efficient visualization of the results of deterministic and probabilistic tractograms.
 - Interactive selection of fibers.
-- Real-time fiber tractography. (Chamberland et al. 2014, Frontiers in Neuroinformatics)
-- Tractography-driven resting-state fMRI (Chamberland et al. 2015, Proceeding of OHBM, Honolulu)
-- Orientation-dependent opacity rendering (Tax et al. 2014, ISMRM)
-- Display of MRI, functional MRI and EEG/MEG source localization results.
+- Real-time fiber tractography (Chamberland et al. 2014, Frontiers in Neuroinformatics).
+- Tractography-driven resting-state fMRI (Chamberland et al. 2015, Frontiers in Neuroscience).
+- Orientation-dependent opacity rendering (Tax et al. 2014, ISMRM).
+- Display of MRI & functional MRI. `Image Gallery`_
 
 How to get the application
 --------------------------
 
-- `Build instructions for Ubuntu`_ and other Linux distros are provided
+- `Build instructions for Ubuntu`_ and other Linux distributions are provided
 - Windows and OSX builds are available on the Releases_ page.
 
 Development and contact with the team
 -------------------------------------
 
 - Issues can be submitted in the `issue tracker`_.
-- Various development and use recommandations and how-tos are located on the wiki_.
+- Various development and use recommandations and how-to are located on the wiki_.
 
 
 **A note for previous users**
@@ -64,10 +68,9 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _Mesh display and interaction: http://www.youtube.com/watch?v=VONdX7iTNSI
 .. _Drawing tool: http://www.youtube.com/watch?v=4vYkQLrdYaY
 .. _Fiber navigation: http://www.youtube.com/watch?v=8c4Smi9gZOA
+.. _Tractography-driven rs-fMRI: https://www.youtube.com/watch?v=eHSyf2AjbHw
+.. _Opacity rendering: https://www.youtube.com/watch?v=IzJ537KNpR0
+.. _Image Gallery: http://chamberm.github.io/media.html
 
-Acknowledgements
--------------------------------------
-If you use the Fibernavigator, please make sure that you quote the following reference in any publications:
 
-*Chamberland M., Whittinstall K., Fortin D., Mathieu D., and Descoteaux M., "Real-time multi-peak tractography for instantaneous connectivity display." Frontiers in Neuroinformatics, 8 (59): 1-15, 2014.*
 
