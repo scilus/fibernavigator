@@ -332,7 +332,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pCancelBtn = new wxButton( pParent, wxID_ANY, wxT( "Cancel" ) );
 
 #if !_USE_LIGHT_GUI
-    m_pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+    m_pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Orientation Volume" ) );
 #endif
 
     m_pBtnOpacity      = new wxButton( pParent, wxID_ANY, wxT( "Opacity" ) );

@@ -1839,17 +1839,17 @@ void PropertiesWindow::OnCreateFibersColorTexture( wxCommandEvent& WXUNUSED(even
         }
     }
     
-    // Normalize all values.
-    int largestCount(*std::max_element( voxHitCount.begin(), voxHitCount.end() ) );
-    
-    if( largestCount > 0 )
-    {
-        for( vector<float>::iterator voxIt(pDataset->begin()); voxIt != pDataset->end();
-             ++voxIt )
-        {
-            (*voxIt) /= largestCount;
-        }
-    }
+    //// Normalize all values.
+    //int largestCount(*std::max_element( voxHitCount.begin(), voxHitCount.end() ) );
+    //
+    //if( largestCount > 0 )
+    //{
+    //    for( vector<float>::iterator voxIt(pDataset->begin()); voxIt != pDataset->end();
+    //         ++voxIt )
+    //    {
+    //        (*voxIt) /= largestCount;
+    //    }
+    //}
 
     pNewAnatomy->setName( wxT( " (fiber_colors)" ) );
     
