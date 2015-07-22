@@ -68,7 +68,7 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _Mesh display and interaction: http://www.youtube.com/watch?v=VONdX7iTNSI
 .. _Drawing tool: http://www.youtube.com/watch?v=4vYkQLrdYaY
 .. _Fiber navigation: http://www.youtube.com/watch?v=8c4Smi9gZOA
-.. _Tractography-driven rs-fMRI: https://www.youtube.com/watch?v=eHSyf2AjbHw
+.. _Tractography-driven resting-state fMRI: https://www.youtube.com/watch?v=eHSyf2AjbHw
 .. _Opacity rendering: https://www.youtube.com/watch?v=IzJ537KNpR0
 .. _Image Gallery: http://chamberm.github.io/media.html
 
