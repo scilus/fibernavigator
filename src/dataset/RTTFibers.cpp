@@ -1061,7 +1061,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     sticksNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
     std::vector<float> sticks;
 
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() && withinMapThreshold(sticksNumber) && !m_stop)
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 && withinMapThreshold(sticksNumber) && !m_stop)
     {
         bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
         sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir); 
@@ -1085,7 +1085,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         //Corresponding stick number
         sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() )
+        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 )
         {
 
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
@@ -1131,7 +1131,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 //Corresponding tensor number
                 sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty()) //Out of anatomy
+                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] == 0) //Out of anatomy
                 {
                     break;
                 }
