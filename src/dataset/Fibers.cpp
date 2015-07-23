@@ -2130,7 +2130,7 @@ Anatomy* Fibers::generateFiberVolume()
     float* pColorData( NULL );
     if( SceneManager::getInstance()->isUsingVBO() )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
 
         #ifdef __WXMAC__
             // TODO check this
@@ -2140,7 +2140,7 @@ Anatomy* Fibers::generateFiberVolume()
     }
     else
     {
-        pColorData  = &m_colorArray[0];
+        pColorData  = &m_normalArray[0];
     }
 
     if( m_localizedAlpha.size() != ( unsigned int )getPointCount() )
@@ -2150,7 +2150,7 @@ Anatomy* Fibers::generateFiberVolume()
 
     DatasetIndex index = DatasetManager::getInstance()->createAnatomy( RGB );
     Anatomy *pTmpAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( index );
-    pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Density Volume" ) );
+    pTmpAnatomy->setName( m_name.BeforeFirst( '.' ) + wxT(" Fiber-Orientation Volume" ) );
 
     MyApp::frame->m_pListCtrl->InsertItem( index );
 
@@ -2170,9 +2170,9 @@ Anatomy* Fibers::generateFiberVolume()
         int z     = std::min( frames  - 1, std::max( 0, (int)( m_pointArray[i * 3 + 2] / voxelZ ) ) ) ;
         int index = x + y * columns + z * rows * columns;
 
-        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     += pColorData[i * 3]     * m_localizedAlpha[i];
-        ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] += pColorData[i * 3 + 1] * m_localizedAlpha[i];
-        ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] += pColorData[i * 3 + 2] * m_localizedAlpha[i];
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3]     = pColorData[i * 3]     ;
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 1] = pColorData[i * 3 + 1] ;
+        ( *pTmpAnatomy->getFloatDataset() )[index * 3 + 2] = pColorData[i * 3 + 2] ;
     }
 
     if( SceneManager::getInstance()->isUsingVBO() )
@@ -3004,7 +3004,7 @@ void Fibers::draw()
 
         if( m_showFS )
         {
-            glColorPointer( 3, GL_FLOAT, 0, &m_colorArray[0] );  // Global colors.
+            glColorPointer( 3, GL_FLOAT, 0, &m_normalArray[0] );  // Global colors.
         }
         else
         {
@@ -3020,7 +3020,7 @@ void Fibers::draw()
 
         if( m_showFS )
         {
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
             glColorPointer( 3, GL_FLOAT, 0, 0 );
         }
         else
@@ -3773,7 +3773,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pTxtclBox = new wxTextCtrl( pParent, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(60, -1), wxTE_CENTRE | wxTE_READONLY );
 
 #if !_USE_LIGHT_GUI
-    wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
+    wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Orientation Volume" ) );
 #endif
 
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
@@ -4270,7 +4270,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 		{
 			back = RTT->at(i).size();
 			front = RTT->at(i+1).size();
-			unsigned int nbpoints = back + front;
+			unsigned int nbpoints = back + front - 1;
 
 			if( nbpoints > 0 )
 			{
@@ -4286,7 +4286,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 				}
 
 				//front
-				for( unsigned int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
+				for( unsigned int j = back, k = 1; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
 				{
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
@@ -4340,7 +4340,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
         }
     }
 
-    createColorArray( false );
+    createColorArray( true );
     m_type = FIBERS;
     m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
 

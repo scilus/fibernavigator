@@ -46,7 +46,9 @@ public:
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnShellSeeding                        ( wxCommandEvent& event );
     void OnSelectMask                          ( wxCommandEvent& event );
-
+    void OnInitX                               ( wxCommandEvent& event ); 
+    void OnInitY                               ( wxCommandEvent& event ); 
+    void OnInitZ                               ( wxCommandEvent& event ); 
 	void OnSelectExclusion					   ( wxCommandEvent& event );
 
     void OnInterpolate                         ( wxCommandEvent& event );
@@ -89,6 +91,9 @@ private:
 	wxButton			*m_pBtnSelectSeed;
 	wxToggleButton		*m_pToggleSeedMap;
     wxButton            *m_pBtnSelectMap;
+    wxToggleButton      *m_pToggleTrackX;
+    wxToggleButton      *m_pToggleTrackY;
+    wxToggleButton      *m_pToggleTrackZ;
 	wxButton			*m_pBtnSelectExclusion;
     wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;

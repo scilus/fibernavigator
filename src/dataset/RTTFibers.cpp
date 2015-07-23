@@ -43,7 +43,8 @@ RTTFibers::RTTFibers()
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
     m_isHARDI( false ),
-	m_stop( false )
+	m_stop( false ),
+    m_pExcludeInfo( NULL )
 {
 }
 
@@ -918,40 +919,78 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
 // Draft a direction to start the tracking process using a probabilistic random
 // [0 --- |v1| --- |v2| --- |v3|]
 ///////////////////////////////////////////////////////////////////////////
-std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks)
+std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, bool initWithDir)
 {
-	std::vector<float> draftedPeak;
-	float norms[3];
-	float sum = 0.0f;
-
-	for(unsigned int i=0; i < initialPeaks.size()/3; i++)
+    std::vector<float> draftedPeak;
+    if(!initWithDir)
     {
-        Vector v1(initialPeaks[i*3],initialPeaks[i*3+1], initialPeaks[i*3+2]);
-		norms[i] = v1.getLength();
-		sum += norms[i];
-	}
-    
-	float random = ( (float) rand() ) / (float) RAND_MAX;
-    float weight = ( random * sum );
+	    
+	    float norms[3];
+	    float sum = 0.0f;
 
-	if(weight < norms[0])
-	{
-		draftedPeak.push_back(initialPeaks[0]);
-		draftedPeak.push_back(initialPeaks[1]);
-		draftedPeak.push_back(initialPeaks[2]);
-	}
-	else if(weight < norms[0] + norms[1])
-	{
-		draftedPeak.push_back(initialPeaks[3]);
-		draftedPeak.push_back(initialPeaks[4]);
-		draftedPeak.push_back(initialPeaks[5]);
-	}
-	else
-	{
-		draftedPeak.push_back(initialPeaks[6]);
-		draftedPeak.push_back(initialPeaks[7]);
-		draftedPeak.push_back(initialPeaks[8]);
-	}
+	    for(unsigned int i=0; i < initialPeaks.size()/3; i++)
+        {
+            Vector v1(initialPeaks[i*3],initialPeaks[i*3+1], initialPeaks[i*3+2]);
+		    norms[i] = v1.getLength();
+		    sum += norms[i];
+	    }
+    
+	    float random = ( (float) rand() ) / (float) RAND_MAX;
+        float weight = ( random * sum );
+
+	    if(weight < norms[0])
+	    {
+		    draftedPeak.push_back(initialPeaks[0]);
+		    draftedPeak.push_back(initialPeaks[1]);
+		    draftedPeak.push_back(initialPeaks[2]);
+	    }
+	    else if(weight < norms[0] + norms[1])
+	    {
+		    draftedPeak.push_back(initialPeaks[3]);
+		    draftedPeak.push_back(initialPeaks[4]);
+		    draftedPeak.push_back(initialPeaks[5]);
+	    }
+	    else
+	    {
+		    draftedPeak.push_back(initialPeaks[6]);
+		    draftedPeak.push_back(initialPeaks[7]);
+		    draftedPeak.push_back(initialPeaks[8]);
+	    }
+    }
+    else
+    {
+        Vector vOut(0,0,0);
+        float angleMin = 360.0f;
+        float angle = 0.0f;
+        float puncture = m_vinvout;
+	     
+
+        for(unsigned int i=0; i < initialPeaks.size()/3; i++)
+        {
+            Vector v1(initialPeaks[i*3],initialPeaks[i*3+1], initialPeaks[i*3+2]);
+            v1.normalize();
+        
+            if( m_initVec.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+            {
+                v1 *= -1;
+            }
+
+            //Angle value
+            float dot = m_initVec.Dot(v1);
+            float acos = std::acos( dot );
+            angle = 180 * acos / M_PI;
+        
+            //Direction most probable
+            if( angle < angleMin )
+            {
+                angleMin = angle;
+                vOut = v1;
+            }     
+        }
+        draftedPeak.push_back(vOut.x);
+        draftedPeak.push_back(vOut.y);
+        draftedPeak.push_back(vOut.z);
+    }
 		
 	return draftedPeak;
 }
@@ -1022,9 +1061,10 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     sticksNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
     std::vector<float> sticks;
 
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() && withinMapThreshold(sticksNumber) && !m_stop)
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 && withinMapThreshold(sticksNumber) && !m_stop)
     {
-        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber)); 
+        bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
+        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir); 
 
         currDirection.x = flippedAxes[0] * sticks[0];
         currDirection.y = flippedAxes[1] * sticks[1];
@@ -1045,7 +1085,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         //Corresponding stick number
         sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && !m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty() )
+        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 )
         {
 
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
@@ -1091,7 +1131,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 //Corresponding tensor number
                 sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
 
-                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber).empty()) //Out of anatomy
+                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] == 0) //Out of anatomy
                 {
                     break;
                 }

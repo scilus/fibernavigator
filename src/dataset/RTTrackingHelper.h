@@ -20,6 +20,7 @@ public:
     bool isFileSelected() const { return m_isFileSelected; }
     bool isShellSeeds() const  { return m_isShellSeeds; }
 	bool isSeedMap() const { return m_isSeedMap; }
+    bool isInitSeed() const { return m_isInitSeed; }
     bool isRTTReady() const     { return m_isRTTReady; }
     bool isRTTDirty() const     { return m_isRTTDirty; }
     bool isRTTActive() const    { return m_isRTTActive; }
@@ -37,6 +38,7 @@ public:
     bool toggleInterpolateTensors() { return m_interpolateTensors = !m_interpolateTensors; }
     bool toggleShellSeeds()        { return m_isShellSeeds = !m_isShellSeeds; }
 	bool toggleSeedMap()           { return m_isSeedMap = !m_isSeedMap; }
+    bool toggleInitSeed()           { return m_isInitSeed = !m_isInitSeed; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
     
     bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
@@ -70,6 +72,7 @@ private:
     bool m_isFileSelected;
     bool m_isShellSeeds;
 	bool m_isSeedMap;
+    bool m_isInitSeed;
     bool m_isRTTActive;
     bool m_isRTTDirty;
     bool m_isRTTReady;
