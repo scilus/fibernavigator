@@ -4270,7 +4270,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 		{
 			back = RTT->at(i).size();
 			front = RTT->at(i+1).size();
-			unsigned int nbpoints = back + front;
+			unsigned int nbpoints = back + front - 1;
 
 			if( nbpoints > 0 )
 			{
@@ -4286,7 +4286,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 				}
 
 				//front
-				for( unsigned int j = back, k = 0; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
+				for( unsigned int j = back, k = 1; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
 				{
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
@@ -4340,7 +4340,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
         }
     }
 
-    createColorArray( false );
+    createColorArray( true );
     m_type = FIBERS;
     m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
 
