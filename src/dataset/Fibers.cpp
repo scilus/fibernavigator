@@ -4270,13 +4270,28 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 		{
 			back = RTT->at(i).size();
 			front = RTT->at(i+1).size();
-			unsigned int nbpoints = back + front - 1;
+            unsigned int nbpoints;
 
-			if( nbpoints > 0 )
+            if( front == 0 )
+            {
+                nbpoints = back;
+            }
+            else if( back == 0 )
+            {
+                nbpoints = front;
+            }
+            else
+            {
+			    nbpoints = back + front - 1;
+            }
+
+            vector< float > curLine;
+			curLine.resize( nbpoints * 3 );
+            int skipFirst = 0;
+
+			if( back > 0 )
 			{
-				vector< float > curLine;
-				curLine.resize( nbpoints * 3 );
-
+                skipFirst = 1;
 				//back
 				for( int j = back - 1; j >= 0; j-- )
 				{
@@ -4284,18 +4299,22 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 					curLine[j * 3 + 1] = RTT->at(i)[back - 1 - j].y;
 					curLine[j * 3 + 2] = RTT->at(i)[back - 1 - j].z;
 				}
+            }
 
+            if( front > 0 )
+            {
 				//front
-				for( unsigned int j = back, k = 1; j < nbpoints, k < RTT->at(i+1).size(); j++, k++ )
+				for( unsigned int j = back, k = 0+skipFirst; j < nbpoints, k < front; j++, k++ )
 				{
 					curLine[j * 3]  = RTT->at(i+1)[k].x;
 					curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
 					curLine[j * 3 + 2] = RTT->at(i+1)[k].z;
 				}
+				
+            }
 
-				m_countPoints += curLine.size() / 3;
-				lines.push_back( curLine );
-			}
+            m_countPoints += curLine.size() / 3;
+			lines.push_back( curLine );
 		}
     }
 
