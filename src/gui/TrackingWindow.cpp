@@ -501,7 +501,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
             
             SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();
             
-            Vector boxSize(2/step,2/step,2/step);
+            Vector boxSize(4,4,4);
             pNewSelObj->setSize(boxSize);
         }
         if(m_pTextFA->IsEnabled())
