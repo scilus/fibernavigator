@@ -40,12 +40,14 @@ public:
     void OnClearBox                            ( wxTreeEvent&    event );
     void OnSliderFAMoved                       ( wxCommandEvent& event );
     void OnSliderAngleMoved                    ( wxCommandEvent& event );
+    void OnSliderGMStepMoved                   ( wxCommandEvent& event );
     void OnSliderStepMoved                     ( wxCommandEvent& event );
     void OnSelectFileDTI                       ( wxCommandEvent& event );
     void OnSelectFileHARDI                     ( wxCommandEvent& event );
     void OnRandomSeeding                       ( wxCommandEvent& event );
     void OnShellSeeding                        ( wxCommandEvent& event );
     void OnSelectMask                          ( wxCommandEvent& event );
+    void OnSelectGM                            ( wxCommandEvent& event );
     void OnInitX                               ( wxCommandEvent& event ); 
     void OnInitY                               ( wxCommandEvent& event ); 
     void OnInitZ                               ( wxCommandEvent& event ); 
@@ -85,12 +87,16 @@ private:
     wxSlider            *m_pSliderPuncture;
     wxStaticText        *m_pTextPuncture;
     wxTextCtrl          *m_pTxtPunctureBox;
+    wxSlider            *m_pSliderGMStep;
+    wxStaticText        *m_pTextGMStep;
+    wxTextCtrl          *m_pTxtGMStepBox;
     wxButton            *m_pBtnSelectFile;
 	wxButton			*m_pBtnSelectShell;
 	wxToggleButton		*m_pToggleShell;
 	wxButton			*m_pBtnSelectSeed;
 	wxToggleButton		*m_pToggleSeedMap;
     wxButton            *m_pBtnSelectMap;
+    wxButton            *m_pBtnSelectGM;
     wxToggleButton      *m_pToggleTrackX;
     wxToggleButton      *m_pToggleTrackY;
     wxToggleButton      *m_pToggleTrackZ;
@@ -115,6 +121,9 @@ private:
     wxBitmapButton      *m_pBtnStop;
     wxImage             m_bmpPause;
     wxImage             m_bmpPlay;
+
+    bool m_isGMSelected;
+    bool m_isWMSelected;
     
 
 
