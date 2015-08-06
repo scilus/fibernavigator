@@ -35,16 +35,20 @@ RTTFibers::RTTFibers()
     m_FAThreshold( 0.20f ),
     m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
+    m_GMstep( 15 ),
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
     m_vinvout( 0.2f ),
-    m_minFiberLength( 90 ),
+    m_minFiberLength( 60 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
     m_isHARDI( false ),
+    m_countGMstep( 0 ),
 	m_stop( false ),
-    m_pExcludeInfo( NULL )
+    m_pExcludeInfo( NULL ),
+    m_pSeedMapInfo( NULL ),
+    m_pGMInfo( NULL )
 {
 }
 
@@ -618,7 +622,12 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = m_vinvout;
-    float fa = m_pMaskInfo->at(s_number);
+    float wm = m_pMaskInfo->at(s_number);
+    float gm = 0;
+    if(m_pGMInfo != NULL)
+    {
+        gm = m_pGMInfo->at(s_number);
+    }
 	vin.normalize();
 
     for(unsigned int i=0; i < sticks.size()/3; i++)
@@ -644,8 +653,12 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
         }     
     }
 
-    Vector res = fa * vOut + (1.0 - fa) * ( (1.0 - puncture ) * vin + puncture * vOut); 
-    res.normalize();
+    Vector res = 0.5f * wm * vOut + (0.5f * wm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    
+    if(gm != 0)
+    {
+        res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    }
 
     return res;
 }
@@ -1016,10 +1029,23 @@ bool RTTFibers::checkExclude( unsigned int sticksNumber)
 bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 {
     bool isOk = false;
-	
-	if(m_pMaskInfo->at(sticksNumber) > m_FAThreshold && checkExclude(sticksNumber))
+    float gmVal = 0;
+	if(m_pGMInfo != NULL)
     {
-       isOk = true;
+        gmVal = m_pGMInfo->at(sticksNumber);
+	    if(gmVal > 0)
+        {
+            m_countGMstep++;
+        }
+        else
+        {
+            m_countGMstep = 0;
+        }   
+    }
+
+	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep < m_GMstep)
+    {
+        isOk = true;
     }
 
     return isOk;
@@ -1060,6 +1086,8 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     //Corresponding stick number
     sticksNumber = currVoxelz * columns * rows + currVoxely *columns + currVoxelx;
     std::vector<float> sticks;
+
+    m_countGMstep = 0;
 
     if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 && withinMapThreshold(sticksNumber) && !m_stop)
     {

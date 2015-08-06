@@ -47,6 +47,7 @@ public:
     void setPuncture( float puncture )								  { m_puncture = puncture; }
     void setVinVout( float vinvout )								  { m_vinvout = vinvout; }
     void setStep( float step )										  { m_step = step; }
+    void setGMStep( float step )                                      { m_GMstep = step; }
     void setIsHardi( bool method )								      { m_isHARDI = method; }
     void setNbSeed ( float nbSeed )									  { m_nbSeed = nbSeed; }
     void setMinFiberLength( float minLength )						  { m_minFiberLength = minLength; }
@@ -55,6 +56,7 @@ public:
     void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
     void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
+    void setGMInfo( Anatomy* info )                                   { m_pGMInfo = info; }
     void setInitSeed( Vector init )                                   { m_initVec = init; } 
 
 	void setOpacity( float alpha )                                    { m_alpha = alpha; }
@@ -96,6 +98,7 @@ private:
     float       m_FAThreshold;
     float       m_angleThreshold;
     float       m_step;
+    int         m_GMstep;
     float       m_nbSeed;
     float       m_nbMeshPt;
     float       m_puncture;
@@ -103,12 +106,14 @@ private:
     float       m_minFiberLength;
     float       m_maxFiberLength;
     bool        m_isHARDI;
+    float       m_countGMstep;
     Tensors     *m_pTensorsInfo;
     Maximas     *m_pMaximasInfo;
 	DatasetInfo *m_pShellInfo;
     Anatomy     *m_pMaskInfo;
 	Anatomy     *m_pExcludeInfo;
 	Anatomy     *m_pSeedMapInfo;
+    Anatomy     *m_pGMInfo;
     Vector       m_initVec;
 
 	float m_alpha;
