@@ -246,9 +246,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pTextGMStep = new wxStaticText( this, wxID_ANY, wxT("GM steps"), wxPoint(0,180), wxSize(70, -1), wxALIGN_CENTER );
     m_pSliderGMStep = new MySlider( this, wxID_ANY, 0, 0, 300, wxPoint(60,180), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderGMStep->SetValue( 10 );
+    m_pSliderGMStep->SetValue( 15 );
     Connect( m_pSliderGMStep->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderGMStepMoved) );
-    m_pTxtGMStepBox = new wxTextCtrl( this, wxID_ANY, wxT("10"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtGMStepBox = new wxTextCtrl( this, wxID_ANY, wxT("15"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 	wxBoxSizer *pBoxRowGMstep = new wxBoxSizer( wxHORIZONTAL );
     pBoxRowGMstep->Add( m_pTextGMStep, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );

@@ -35,7 +35,7 @@ RTTFibers::RTTFibers()
     m_FAThreshold( 0.20f ),
     m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
-    m_GMstep( 10 ),
+    m_GMstep( 15 ),
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
@@ -1029,7 +1029,7 @@ bool RTTFibers::checkExclude( unsigned int sticksNumber)
 bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 {
     bool isOk = false;
-    float gmVal = 200;
+    float gmVal = 0;
 	if(m_pGMInfo != NULL)
     {
         gmVal = m_pGMInfo->at(sticksNumber);
@@ -1043,7 +1043,7 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
         }   
     }
 
-	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold && gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep < m_GMstep)
+	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep < m_GMstep)
     {
         isOk = true;
     }
