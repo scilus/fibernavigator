@@ -354,6 +354,32 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxRowAnim->Add( m_pBtnStop, 0,  wxALIGN_CENTER, 1 );
 	m_pTrackingSizer->Add( pBoxRowAnim, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
+    /*-----------------------MAGNET SECTION-----------------------------------*/
+
+    wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(150, -1), wxTE_CENTER | wxTE_READONLY );
+    magnetZone->SetBackgroundColour( *wxLIGHT_GREY );
+    wxFont magnet_font = magnetZone->GetFont();
+    magnet_font.SetPointSize( 10 );
+    magnet_font.SetWeight( wxFONTWEIGHT_BOLD );
+    magnetZone->SetFont( magnet_font );
+
+	wxBoxSizer *pBoxMagnetZone = new wxBoxSizer( wxVERTICAL );
+    pBoxMagnetZone->Add( new wxStaticLine( this, wxID_ANY, wxPoint(0,430), wxSize(230,-1),wxHORIZONTAL,wxT("Separator")), 0, wxALIGN_RIGHT | wxALL, 1 );
+	pBoxMagnetZone->Add( magnetZone,   0, wxALIGN_CENTER | wxALL, 1);
+	m_pTrackingSizer->Add( pBoxMagnetZone, 0, wxFIXED_MINSIZE | wxALL, 2 );
+
+    wxImage bmpMagnet( MyApp::iconsPath + wxT( "magnet.png" ), wxBITMAP_TYPE_PNG );
+    m_pBtnPlaceMagnet = new wxBitmapButton( this, wxID_ANY, bmpMagnet, wxDefaultPosition, wxSize( 30, -1 ) );
+    Connect( m_pBtnPlaceMagnet->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+
+    m_pToggleMagnetMode = new wxToggleButton( this, wxID_ANY,wxT("Start magnet"), wxDefaultPosition, wxSize(20, -1) );
+    Connect( m_pToggleMagnetMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnToggleMagnetMode) );
+
+    wxBoxSizer *pBoxMagnet1 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxMagnet1->Add( m_pBtnPlaceMagnet, 1, wxEXPAND | wxALL, 1 );
+    pBoxMagnet1->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );
+	m_pTrackingSizer->Add( pBoxMagnet1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
 }
 
 void TrackingWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -836,4 +862,18 @@ void TrackingWindow::OnEnableRSN( wxCommandEvent& WXUNUSED(event) )
 		RTFMRIHelper::getInstance()->setTractoDrivenRSN(true);
 	else
 		RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
+}
+
+void TrackingWindow::OnPlaceMagnet( wxCommandEvent& WXUNUSED(event) )
+{
+    m_pMainFrame->createNewSelectionObject( ELLIPSOID_TYPE, true );
+            
+    SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();       
+    m_pMainFrame->m_pTreeWidget->SetItemImage( pNewSelObj->getTreeId(), pNewSelObj->getIcon() );
+}
+
+void TrackingWindow::OnToggleMagnetMode( wxCommandEvent& WXUNUSED(event) )
+{
+    RTTrackingHelper::getInstance()->toggleMagnet();
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }

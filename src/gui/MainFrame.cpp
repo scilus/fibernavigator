@@ -1387,7 +1387,7 @@ void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 //
 // selObjType         : The type of the new selection object we wat to create.
 ///////////////////////////////////////////////////////////////////////////
-void MainFrame::createNewSelectionObject( ObjectType selObjType )
+void MainFrame::createNewSelectionObject( ObjectType selObjType, bool isMagnet )
 {
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
@@ -1403,16 +1403,23 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
                   l_sizeV / voxelZ );
     
     SelectionObject *pSelObj;
-    switch( selObjType )
+    if( isMagnet )
     {
-        case ELLIPSOID_TYPE:
-            pSelObj = new SelectionEllipsoid( l_center, l_size );
-            break;
-        case BOX_TYPE:
-            pSelObj = new SelectionBox( l_center, l_size );
-            break;
-        default:
-            return;
+        pSelObj = new SelectionEllipsoid( l_center, l_size, isMagnet);
+    }
+    else
+    {
+        switch( selObjType )
+        {
+            case ELLIPSOID_TYPE:
+                pSelObj = new SelectionEllipsoid( l_center, l_size);
+                break;
+            case BOX_TYPE:
+                pSelObj = new SelectionBox( l_center, l_size );
+                break;
+            default:
+                return;
+        }
     }
     
     // Check what is selected in the tree to know where to put this new selection object.

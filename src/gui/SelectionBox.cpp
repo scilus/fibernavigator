@@ -169,7 +169,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
     hitResult hr = { false, 0.0f, 0, NULL };
 
     // TODO selection remove objectType
-    if( m_isVisible && m_isActive && m_objectType == BOX_TYPE ) 
+    if( m_isVisible && m_objectType == BOX_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();
         float voxelY = DatasetManager::getInstance()->getVoxelY();

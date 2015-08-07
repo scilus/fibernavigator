@@ -780,7 +780,7 @@ vector< bool > SelectionTree::getSelectedFibersInBranch( const Fibers *const pFi
         // TODO determine what we do
     }
     
-    if( pSelObj == NULL || !pSelObj->getIsActive() )
+    if( pSelObj == NULL )
     {
         // TODO determine what to do.
     }

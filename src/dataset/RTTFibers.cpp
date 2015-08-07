@@ -616,7 +616,7 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     return vprop;
 }
 
-Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number ) 
+Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number, Vector pos ) 
 {
     Vector vOut(0,0,0);
     float angleMin = 360.0f;
@@ -660,7 +660,29 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
         res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
     }
 
+    //MAGNET
+    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    if(isMagnetOn)
+    {
+        res = magneticField(vin, sticks, s_number, pos ); 
+    }
+    
+        
     return res;
+}
+
+Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos ) 
+{
+    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    Vector field = vin;
+    for( unsigned int b = 0; b < selObjs.size(); b++ )
+	{
+        if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
+        {
+            field = Vector(selObjs[ b ]->getCenter().x - pos.x, selObjs[ b ]->getCenter().y - pos.y, selObjs[ b ]->getCenter().z - pos.z);
+        }
+    }
+    return field;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -1119,7 +1141,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
 
             //Advection next direction
-            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
+            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
 
             //Direction of seeding
             nextDirection *= bwdfwd;
@@ -1167,7 +1189,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
 
                 //Advection next direction
-                nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
+                nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
 
                 //Direction of seeding (backward of forward)
                 nextDirection *= bwdfwd;

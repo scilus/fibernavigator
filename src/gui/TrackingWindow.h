@@ -66,6 +66,8 @@ public:
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
+    void OnPlaceMagnet                         ( wxCommandEvent& event );
+    void OnToggleMagnetMode                    ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
@@ -121,6 +123,8 @@ private:
     wxBitmapButton      *m_pBtnStop;
     wxImage             m_bmpPause;
     wxImage             m_bmpPlay;
+    wxBitmapButton      *m_pBtnPlaceMagnet;
+    wxToggleButton      *m_pToggleMagnetMode;
 
     bool m_isGMSelected;
     bool m_isWMSelected;

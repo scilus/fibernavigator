@@ -21,6 +21,7 @@ public:
     bool isShellSeeds() const  { return m_isShellSeeds; }
 	bool isSeedMap() const { return m_isSeedMap; }
     bool isInitSeed() const { return m_isInitSeed; }
+    bool isMagnetOn() const { return m_isMagnetOn; }
     bool isRTTReady() const     { return m_isRTTReady; }
     bool isRTTDirty() const     { return m_isRTTDirty; }
     bool isRTTActive() const    { return m_isRTTActive; }
@@ -40,6 +41,7 @@ public:
 	bool toggleSeedMap()           { return m_isSeedMap = !m_isSeedMap; }
     bool toggleInitSeed()           { return m_isInitSeed = !m_isInitSeed; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
+    bool toggleMagnet()             { return m_isMagnetOn = !m_isMagnetOn; }
     
     bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
     bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
@@ -76,6 +78,7 @@ private:
     bool m_isRTTActive;
     bool m_isRTTDirty;
     bool m_isRTTReady;
+    bool m_isMagnetOn;
     bool m_isTrackActionPlaying;
     bool m_isPaused;
 	bool m_isSeedFromfMRI;

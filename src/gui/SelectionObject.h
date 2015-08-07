@@ -141,6 +141,9 @@ public :
     void       setIsVisible( bool i_isVisible )       { m_isVisible = i_isVisible;             };
     bool       getIsVisible()                         { return m_isVisible;                    };
 
+    void       setIsMagnet( bool i_isMagnet )       { m_isMagnet = i_isMagnet;             };
+    
+
     void       setConvexHullColor( wxColour i_color ) { m_convexHullColor = i_color;            }; 
     wxColour   getConvexHullColor()                   { return m_convexHullColor;               };
 
@@ -208,6 +211,7 @@ protected :
     bool            m_isNOT;
     bool            m_isSelected;
     bool            m_isVisible;
+    bool            m_isMagnet;
     int             m_stepSize;
 
     wxColour        m_color;         // Used for coloring the isosurface.

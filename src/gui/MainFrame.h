@@ -202,7 +202,7 @@ private:
     void updateMenus();
     void onTimerEvent                       ( wxTimerEvent&   evt );
     void setTimerSpeed();
-    void createNewSelectionObject( ObjectType i_newSelectionObjectType );
+    void createNewSelectionObject( ObjectType i_newSelectionObjectType, bool isMagnet = false );
     bool buildChildrenList( SelectionTree *pSelTree, SelectionObject *pCurSelObj );
 
     void onSelectDrawer                     ( wxCommandEvent& evt );
