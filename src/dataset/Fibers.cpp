@@ -1695,12 +1695,12 @@ void Fibers::updateFibersColors()
 
         if( SceneManager::getInstance()->isUsingVBO() )
         {
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
             pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
         }
         else
         {
-            pColorData  = &m_colorArray[0];
+            pColorData  = &m_normalArray[0];
         }
 
         if( m_fiberColorationMode == CURVATURE_COLOR )
@@ -2574,20 +2574,23 @@ void Fibers::resetColorArray()
 {
     Logger::getInstance()->print( wxT( "Reset color arrays" ), LOGLEVEL_MESSAGE );
     float *pColorData( NULL );
-    float *pColorData2( &m_colorArray[0] );
+    float *pColorData2( &m_normalArray[0] );
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
         pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
-        pColorData  = &m_colorArray[0];
+        pColorData  = &m_normalArray[0];
     }
 
-    int pc = 0;
-    float r, g, b, x1, x2, y1, y2, z1, z2, lastX, lastY, lastZ;
+    int   pc = 0;
+
+    float x1, x2, y1, y2, z1, z2 = 0.0f;
+    float r, g, b, rr, gg, bb    = 0.0f;
+    float lastX, lastY, lastZ          = 0.0f;
 
     for( int i = 0; i < getLineCount(); ++i )
     {
@@ -2621,18 +2624,42 @@ void Fibers::resetColorArray()
         g *= 1.0 / norm;
         b *= 1.0 / norm;
 
-        lastX = m_pointArray[pc] + ( m_pointArray[pc] - m_pointArray[pc + 3] );
+        lastX = m_pointArray[pc]     + ( m_pointArray[pc]     - m_pointArray[pc + 3] );
         lastY = m_pointArray[pc + 1] + ( m_pointArray[pc + 1] - m_pointArray[pc + 4] );
         lastZ = m_pointArray[pc + 2] + ( m_pointArray[pc + 2] - m_pointArray[pc + 5] );
 
         for( int j = 0; j < getPointsPerLine( i ); ++j )
         {
-            pColorData[pc] = r;
-            pColorData[pc + 1] = g;
-            pColorData[pc + 2] = b;
-            pColorData2[pc] = r;
-            pColorData2[pc + 1] = g;
-            pColorData2[pc + 2] = b;
+            rr = lastX - m_pointArray[pc];
+            gg = lastY - m_pointArray[pc + 1];
+            bb = lastZ - m_pointArray[pc + 2];
+            lastX = m_pointArray[pc];
+            lastY = m_pointArray[pc + 1];
+            lastZ = m_pointArray[pc + 2];
+
+            if( rr < 0.0 )
+            {
+                rr *= -1.0;
+            }
+
+            if( gg < 0.0 )
+            {
+                gg *= -1.0;
+            }
+
+            if( bb < 0.0 )
+            {
+                bb *= -1.0;
+            }
+
+            float norm = sqrt( rr * rr + gg * gg + bb * bb );
+            rr *= 1.0 / norm;
+            gg *= 1.0 / norm;
+            bb *= 1.0 / norm;
+            pColorData[pc]     = rr;
+            pColorData[pc + 1] = gg;
+            pColorData[pc + 2] = bb;
+
             pc += 3;
         }
     }
@@ -2653,12 +2680,12 @@ void Fibers::setFiberColor( const int fiberIdx, const wxColour &col )
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[2] );
         pColorData = ( float * ) glMapBuffer( GL_ARRAY_BUFFER, GL_READ_WRITE );
     }
     else
     {
-        pColorData  = &m_colorArray[0];
+        pColorData  = &m_normalArray[0];
     }
 
     int curPointStart( getStartIndexForLine( fiberIdx ) * 3);
