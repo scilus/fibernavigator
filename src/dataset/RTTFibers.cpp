@@ -630,27 +630,36 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     }
 	vin.normalize();
 
-    for(unsigned int i=0; i < sticks.size()/3; i++)
+    //MAGNET
+    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    if(isMagnetOn)
     {
-        Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
-        v1.normalize();
-        
-        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+        vOut = magneticField(vin, sticks, s_number, pos ); 
+    }
+    else
+    {
+        for(unsigned int i=0; i < sticks.size()/3; i++)
         {
-            v1 *= -1;
-        }
+            Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+            v1.normalize();
+        
+            if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+            {
+                v1 *= -1;
+            }
 
-        //Angle value
-        float dot = vin.Dot(v1);
-        float acos = std::acos( dot );
-        angle = 180 * acos / M_PI;
+            //Angle value
+            float dot = vin.Dot(v1);
+            float acos = std::acos( dot );
+            angle = 180 * acos / M_PI;
         
-        //Direction most probable
-        if( angle < angleMin )
-        {
-            angleMin = angle;
-            vOut = v1;
-        }     
+            //Direction most probable
+            if( angle < angleMin )
+            {
+                angleMin = angle;
+                vOut = v1;
+            }     
+        }
     }
 
     Vector res = 0.5f * wm * vOut + (0.5f * wm) * ( (1.0 - puncture ) * vin + puncture * vOut);
@@ -659,30 +668,49 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     {
         res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
     }
-
-    //MAGNET
-    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
-    if(isMagnetOn)
-    {
-        res = magneticField(vin, sticks, s_number, pos ); 
-    }
-    
-        
+   
     return res;
 }
 
 Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos ) 
 {
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
-    Vector field = vin;
+    Vector final = vin;
     for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
         if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
         {
-            field = Vector(selObjs[ b ]->getCenter().x - pos.x, selObjs[ b ]->getCenter().y - pos.y, selObjs[ b ]->getCenter().z - pos.z);
+            Vector field = Vector(selObjs[ b ]->getCenter().x - pos.x, selObjs[ b ]->getCenter().y - pos.y, selObjs[ b ]->getCenter().z - pos.z);
+            field.normalize();
+            
+            //Compare sticks with vector field, pick min
+            float angleMin = 360.0f;
+            float angle = 0.0f;
+            for(unsigned int i=0; i < sticks.size()/3; i++)
+            {
+                Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+                v1.normalize();
+        
+                if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                {
+                    v1 *= -1;
+                }
+
+                //Angle value
+                float dot = field.Dot(v1);
+                float acos = std::acos( dot );
+                angle = 180 * acos / M_PI;
+        
+                //Direction most probable
+                if( angle < angleMin )
+                {
+                    angleMin = angle;
+                    final = v1;
+                }     
+            }
         }
     }
-    return field;
+    return final;
 }
 
 /////////////////////////////////////////////////////////////////////
