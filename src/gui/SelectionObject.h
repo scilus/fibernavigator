@@ -142,6 +142,7 @@ public :
     bool       getIsVisible()                         { return m_isVisible;                    };
 
     void       setIsMagnet( bool i_isMagnet )       { m_isMagnet = i_isMagnet;             };
+    void       setStrength( float str )             { m_Q = str;             };
     
 
     void       setConvexHullColor( wxColour i_color ) { m_convexHullColor = i_color;            }; 
@@ -213,6 +214,7 @@ protected :
     bool            m_isVisible;
     bool            m_isMagnet;
     int             m_stepSize;
+    float m_Q;
 
     wxColour        m_color;         // Used for coloring the isosurface.
     
@@ -371,6 +373,7 @@ private:
     wxButton        *m_pbtnDisplayDispersionTube;
     wxStaticText    *m_pLabelAnatomy;
     wxChoice        *m_pCBSelectDataSet;
+    
 
 public:
     wxTextCtrl      *m_pTxtBoxX;
@@ -379,6 +382,8 @@ public:
     wxTextCtrl      *m_pTxtSizeX;
     wxTextCtrl      *m_pTxtSizeY;
     wxTextCtrl      *m_pTxtSizeZ;
+    wxSlider        *m_pSliderQ;
+    wxTextCtrl      *m_pBoxQ;
     
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.
     static const int    MEAN_FIBER_NB_POINTS=50;         // This value represent the number of points we want the mean fiber to have.

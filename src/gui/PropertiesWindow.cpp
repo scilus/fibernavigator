@@ -1984,6 +1984,20 @@ void PropertiesWindow::OnRecalcMainDir( wxCommandEvent& WXUNUSED(event) )
     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->extractMaximas();
 }
 
+void PropertiesWindow::OnSliderQMoved( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSliderQMoved" ), LOGLEVEL_DEBUG );
+
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        float str = pSelObj->m_pSliderQ->GetValue();
+        pSelObj->setStrength(str);
+        pSelObj->m_pBoxQ->SetValue( wxString::Format( wxT( "%.2f"), str ) );
+        RTTrackingHelper::getInstance()->setRTTDirty( true );
+    }
+}
+
 void PropertiesWindow::OnToggleCrossingFibers( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleCrossingFibers" ), LOGLEVEL_DEBUG );
