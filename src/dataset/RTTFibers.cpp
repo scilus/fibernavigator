@@ -954,7 +954,7 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
 // Draft a direction to start the tracking process using a probabilistic random
 // [0 --- |v1| --- |v2| --- |v3|]
 ///////////////////////////////////////////////////////////////////////////
-std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, bool initWithDir)
+std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, bool initWithDir, Vector currPos)
 {
     std::vector<float> draftedPeak;
     if(!initWithDir)
@@ -1025,6 +1025,16 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
         draftedPeak.push_back(vOut.x);
         draftedPeak.push_back(vOut.y);
         draftedPeak.push_back(vOut.z);
+    }
+
+    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    if(isMagnetOn)
+    {
+        Vector def(0,0,0);
+        Vector res = magneticField(def, initialPeaks, 0, currPos); 
+        draftedPeak[0] = res.x;
+        draftedPeak[1] = res.y;
+        draftedPeak[2] = res.z;
     }
 		
 	return draftedPeak;
@@ -1114,7 +1124,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 && withinMapThreshold(sticksNumber) && !m_stop)
     {
         bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
-        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir); 
+        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
 
         currDirection.x = flippedAxes[0] * sticks[0];
         currDirection.y = flippedAxes[1] * sticks[1];

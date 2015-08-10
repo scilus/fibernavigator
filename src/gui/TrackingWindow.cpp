@@ -876,4 +876,13 @@ void TrackingWindow::OnToggleMagnetMode( wxCommandEvent& WXUNUSED(event) )
 {
     RTTrackingHelper::getInstance()->toggleMagnet();
     RTTrackingHelper::getInstance()->setRTTDirty( true );
+ 
+	if( !RTTrackingHelper::getInstance()->isMagnetOn() )
+    {
+        m_pToggleMagnetMode->SetLabel(wxT( "Start magnet"));
+    }
+    else
+    {
+        m_pToggleMagnetMode->SetLabel(wxT( "Stop magnet"));
+    }
 }

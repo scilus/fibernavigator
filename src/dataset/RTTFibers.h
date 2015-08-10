@@ -28,7 +28,7 @@ public:
     void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
-	std::vector<float> pickDirection(std::vector<float> initialPeaks, bool initWithDir);
+	std::vector<float> pickDirection(std::vector<float> initialPeaks, bool initWithDir, Vector currPos);
     bool withinMapThreshold(unsigned int sticksNumber);
 
     Vector generateRandomSeed( const Vector &min, const Vector &max );
