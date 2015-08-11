@@ -183,9 +183,10 @@ void RTTFibers::seed()
                         
                         if(m_isHARDI)
                         {
+                            Vector rand = generateRandomSeed(minCorner,maxCorner);
 						    //Track both sides
-							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+						    performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
@@ -237,9 +238,10 @@ void RTTFibers::seed()
                         
                         if(m_isHARDI)
                         {
+                            Vector rand = generateRandomSeed(minCorner,maxCorner);
 						    //Track both sides
-							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+						    performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
@@ -291,9 +293,11 @@ void RTTFibers::seed()
                         
 						if(m_isHARDI)
 						{
+                            Vector rand = generateRandomSeed(minCorner,maxCorner);
+
 							//Track both sides
-							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-							performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+							performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
 						}
 						else
 						{
