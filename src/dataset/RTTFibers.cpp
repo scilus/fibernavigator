@@ -39,7 +39,7 @@ RTTFibers::RTTFibers()
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
-    m_vinvout( 0.2f ),
+    m_vinvout( 0.6f ),
     m_minFiberLength( 60 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
@@ -624,7 +624,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float puncture = m_vinvout;
     float wm = m_pMaskInfo->at(s_number);
     float gm = 0;
-    if(m_pGMInfo != NULL)
+    if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
         gm = m_pGMInfo->at(s_number);
     }
@@ -662,12 +662,17 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
         }
     }
 
-    Vector res = 0.5f * wm * vOut + (0.5f * wm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    //White Matter version of Chamberland et al. 2014 Frontiers in Neuroinformatics 
+    //Vector res = 0.5f * wm * vOut + (0.5f * wm) * ( (1.0 - puncture ) * vin + puncture * vOut);
     
-    if(gm != 0)
-    {
-        res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
-    }
+    //Previous Chamberland et al. 2014 Frontiers in Neuroinformatics
+    //if(gm != 0)
+    //{
+    //    res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    //}
+
+    //Weight between in and out directions. Magnet will also be weighted by distance.
+    Vector res = (1.0 - puncture ) * vin + puncture * vOut;
    
     return res;
 }
@@ -1090,7 +1095,7 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 {
     bool isOk = false;
     float gmVal = 0;
-	if(m_pGMInfo != NULL)
+	if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
         gmVal = m_pGMInfo->at(sticksNumber);
 	    if(gmVal > 0)
@@ -1103,7 +1108,7 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
         }   
     }
 
-	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep < m_GMstep)
+	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep)
     {
         isOk = true;
     }

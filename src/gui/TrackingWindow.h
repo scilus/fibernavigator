@@ -63,6 +63,7 @@ public:
 	void OnSelectSeedMap                       ( wxCommandEvent& event );
 	void OnSliderOpacityMoved				   ( wxCommandEvent& event );
     void OnEnableRSN                           ( wxCommandEvent& event );
+    void OnToggleGM                            ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
@@ -99,6 +100,7 @@ private:
 	wxToggleButton		*m_pToggleSeedMap;
     wxButton            *m_pBtnSelectMap;
     wxButton            *m_pBtnSelectGM;
+    wxToggleButton      *m_pToggleGMmap;
     wxToggleButton      *m_pToggleTrackX;
     wxToggleButton      *m_pToggleTrackY;
     wxToggleButton      *m_pToggleTrackZ;
@@ -125,12 +127,7 @@ private:
     wxImage             m_bmpPlay;
     wxBitmapButton      *m_pBtnPlaceMagnet;
     wxToggleButton      *m_pToggleMagnetMode;
-
-    bool m_isGMSelected;
-    bool m_isWMSelected;
     
-
-
 private:
     wxSizer *m_pTrackingSizer;
     TrackingWindow( wxWindow *pParent, wxWindowID id, const wxPoint &pos, const wxSize &size );

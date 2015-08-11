@@ -28,6 +28,7 @@ public:
     bool isTensorsInterpolated() const  { return m_interpolateTensors; }
 	bool isSeedFromfMRI() const { return m_isSeedFromfMRI; }
     bool isTractoDrivenRSN() const { return m_isTractoDrivenRSN; }
+    bool isGMAllowed() const { return m_isGMallowed; }
 
     void setFileSelected( bool selected )     { m_isFileSelected = selected; }
     void setShellSeeds( bool shell )          { m_isShellSeeds = shell; }
@@ -37,8 +38,9 @@ public:
 	void setSeedFromfMRI( bool seedFromfMRI ) { m_isSeedFromfMRI = seedFromfMRI; }
 
     bool toggleInterpolateTensors() { return m_interpolateTensors = !m_interpolateTensors; }
-    bool toggleShellSeeds()        { return m_isShellSeeds = !m_isShellSeeds; }
-	bool toggleSeedMap()           { return m_isSeedMap = !m_isSeedMap; }
+    bool toggleShellSeeds()         { return m_isShellSeeds = !m_isShellSeeds; }
+	bool toggleSeedMap()            { return m_isSeedMap = !m_isSeedMap; }
+    bool toggleGMmap()              { return m_isGMallowed = !m_isGMallowed; }
     bool toggleInitSeed()           { return m_isInitSeed = !m_isInitSeed; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
     bool toggleMagnet()             { return m_isMagnetOn = !m_isMagnetOn; }
@@ -50,6 +52,8 @@ public:
     void setTrackActionPause(bool paused) {m_isPaused = paused;}
 	void setShellSeed(bool enabled) {m_isShellSeeds = enabled;}
 	void setSeedMap(bool enabled) {m_isSeedMap = enabled;}
+    void setGMmap(bool enabled) {m_isGMallowed = enabled;}
+
 	int generateId() {return (++m_id);}
     bool toogleTractoDrivenRSN()          { return m_isTractoDrivenRSN = !m_isTractoDrivenRSN; }
     void setEnableTractoRSN(){ m_pBtnToggleEnableRSN->Enable ( true ); } 
@@ -83,6 +87,7 @@ private:
     bool m_isPaused;
 	bool m_isSeedFromfMRI;
     bool m_isTractoDrivenRSN;
+    bool m_isGMallowed;
 	int m_id;
 
 
