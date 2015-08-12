@@ -125,7 +125,9 @@ private:
     wxBitmapButton      *m_pBtnStop;
     wxImage             m_bmpPause;
     wxImage             m_bmpPlay;
-    wxBitmapButton      *m_pBtnPlaceMagnet;
+    wxBitmapButton      *m_pBtnPlaceMagnetR;
+    wxBitmapButton      *m_pBtnPlaceMagnetG;
+    wxBitmapButton      *m_pBtnPlaceMagnetB;
     wxToggleButton      *m_pToggleMagnetMode;
     
 private:

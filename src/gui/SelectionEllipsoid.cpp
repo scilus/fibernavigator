@@ -35,7 +35,7 @@ SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size, bool isM
     m_objectType = ELLIPSOID_TYPE;
     
     
-    m_size = Vector(2,2,2);
+    m_size = Vector(10,10,10);
     m_isActive = false;
     m_isVisible = true;
     m_isMagnet = true;

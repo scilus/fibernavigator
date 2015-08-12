@@ -1991,7 +1991,7 @@ void PropertiesWindow::OnSliderQMoved( wxCommandEvent& WXUNUSED(event) )
     SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
     if( pSelObj != NULL )
     {
-        float str = pSelObj->m_pSliderQ->GetValue();
+        float str = pSelObj->m_pSliderQ->GetValue() / 100.0f;
         pSelObj->setStrength(str);
         pSelObj->m_pBoxQ->SetValue( wxString::Format( wxT( "%.2f"), str ) );
         RTTrackingHelper::getInstance()->setRTTDirty( true );

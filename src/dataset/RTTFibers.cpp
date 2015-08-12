@@ -623,11 +623,13 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
 Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number, Vector pos ) 
 {
     Vector vOut(0,0,0);
+    Vector vMagnet(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = m_vinvout;
     float wm = m_pMaskInfo->at(s_number);
     float gm = 0;
+    float F = 0;
     if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
         gm = m_pGMInfo->at(s_number);
@@ -637,32 +639,34 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     //MAGNET
     bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
-    {
-        vOut = magneticField(vin, sticks, s_number, pos ); 
+    {  
+        vMagnet = magneticField(vin, sticks, s_number, pos, vOut, F);
     }
     else
     {
         for(unsigned int i=0; i < sticks.size()/3; i++)
         {
             Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
-            v1.normalize();
-        
-            if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+            
+            if(v1.normalizeAndReturn() != 0)
             {
-                v1 *= -1;
-            }
+                if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                {
+                    v1 *= -1;
+                }
 
-            //Angle value
-            float dot = vin.Dot(v1);
-            float acos = std::acos( dot );
-            angle = 180 * acos / M_PI;
+                //Angle value
+                float dot = vin.Dot(v1);
+                float acos = std::acos( dot );
+                angle = 180 * acos / M_PI;
         
-            //Direction most probable
-            if( angle < angleMin )
-            {
-                angleMin = angle;
-                vOut = v1;
-            }     
+                //Direction most probable
+                if( angle < angleMin )
+                {
+                    angleMin = angle;
+                    vOut = v1;
+                } 
+            }
         }
     }
 
@@ -676,49 +680,115 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     //}
 
     //Weight between in and out directions. Magnet will also be weighted by distance.
-    Vector res = (1.0 - puncture ) * vin + puncture * vOut;
+    Vector res = (1-F)*((1.0 - puncture ) * vin + puncture * vOut) + F * vMagnet;
    
     return res;
 }
 
-Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos ) 
+Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F) 
 {
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
     Vector final = vin;
     for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
-        if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
+        if( selObjs[ b ]->isMagnet() )
         {
             Vector field = Vector(selObjs[ b ]->getCenter().x - pos.x, selObjs[ b ]->getCenter().y - pos.y, selObjs[ b ]->getCenter().z - pos.z);
-            field.normalize();
+            float D = field.normalizeAndReturn();
+            Vector fieldUnchanged(field);
             
-            //Compare sticks with vector field, pick min
-            float angleMin = 360.0f;
-            float angle = 0.0f;
-            for(unsigned int i=0; i < sticks.size()/3; i++)
-            {
-                Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
-                v1.normalize();
-        
-                if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
-                {
-                    v1 *= -1;
-                }
 
-                //Angle value
-                float dot = field.Dot(v1);
-                float acos = std::acos( dot );
-                angle = 180 * acos / M_PI;
-        
-                //Direction most probable
-                if( angle < angleMin )
-                {
-                    angleMin = angle;
-                    final = v1;
-                }     
+            //TEST BOX
+            Vector minCorner;
+            Vector maxCorner;
+            float xVoxel = DatasetManager::getInstance()->getVoxelX();
+            float yVoxel = DatasetManager::getInstance()->getVoxelY();
+            float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+            minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
+			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
+			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
+			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
+			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
+			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
+
+            float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
+            float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
+            float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
+            float l_axisCenter  = maxCorner.x  - l_axisRadius;
+            float l_axis1Center = maxCorner.y - l_axis1Radius;
+            float l_axis2Center = maxCorner.z - l_axis2Radius;
+                            
+            if( (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
+                        (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
+                        (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
+            {
+                final = Vector(1,0,0);
+                F = 1;
             }
+
+            //END TEST BOX
+            
+        //    //Compare sticks with vector field, pick min
+        //    float angleMin = 360.0f;
+        //    float angle = 0.0f;
+        //    float angleMinOut = 360.0f;
+        //    float angleOut = 0.0f;
+        //    for(unsigned int i=0; i < sticks.size()/3; i++)
+        //    {
+        //        Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+        //        
+        //        if(v1.normalizeAndReturn() != 0)
+        //        {     
+        //            if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+        //            {
+        //                field *= -1;
+        //            }
+
+        //            //Angle value
+        //            float dot = field.Dot(v1);
+        //            float acos = std::acos( dot );
+        //            angle = 180 * acos / M_PI;
+        //
+        //            //Direction most probable
+        //            if( angle < angleMin )
+        //            {
+        //                angleMin = angle;
+        //                final = v1;
+        //            }  
+
+        //            //check real direction 
+        //            if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+        //            {
+        //                v1 *= -1;
+        //            }
+        //         
+        //            //Angle value
+        //            float dotOut = vin.Dot(v1);
+        //            float acosOut = std::acos( dotOut );
+        //            angleOut = 180 * acosOut / M_PI;
+        //
+        //            //Direction most probable
+        //            if( angleOut < angleMinOut )
+        //            {
+        //                angleMinOut = angleOut;
+        //                vOut = v1;
+        //            }  
+        //        }
+        //        field = fieldUnchanged;
+        //    }
+
+        //    //Distance & strength
+        //    float Q = selObjs[ b ]->getStrength();
+        //    float rMin = 0;
+        //    float rMax = selObjs[ b ]->getSize().x * DatasetManager::getInstance()->getVoxelX() / 2.0f;
+
+        //    if(D < rMax)
+        //    {
+        //        F = Q;
+        //    }
         }
     }
+
     return final;
 }
 
@@ -1064,15 +1134,16 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
         draftedPeak.push_back(vOut.z);
     }
 
-    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    /*bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
     {
         Vector def(0,0,0);
-        Vector res = magneticField(def, initialPeaks, 0, currPos); 
+        float Q = 0;
+        Vector res = magneticField(def, initialPeaks, 0, currPos, Q); 
         draftedPeak[0] = res.x;
         draftedPeak[1] = res.y;
         draftedPeak[2] = res.z;
-    }
+    }*/
 		
 	return draftedPeak;
 }
@@ -1139,6 +1210,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     unsigned int sticksNumber; 
     int currVoxelx, currVoxely, currVoxelz;
     float angle; 
+    float absPeak = 0;
 
     int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
@@ -1157,8 +1229,9 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     std::vector<float> sticks;
 
     m_countGMstep = 0;
+    absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 && withinMapThreshold(sticksNumber) && !m_stop)
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && withinMapThreshold(sticksNumber) && !m_stop && absPeak != 0)
     {
         bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
         sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
@@ -1181,8 +1254,9 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
         //Corresponding stick number
         sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+        absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 )
+        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && absPeak != 0 )
         {
 
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
@@ -1207,6 +1281,8 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             ///////////////////////////
             //Tracking along the fiber
             //////////////////////////
+            float it = 2;
+            bool insideBox = false;
             while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber) && !m_stop)
             {
                 //Insert point to be rendered
@@ -1227,8 +1303,9 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
 
                 //Corresponding tensor number
                 sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+                absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] == 0) //Out of anatomy
+                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || absPeak == 0 || m_step*it > m_maxFiberLength) //Out of anatomy
                 {
                     break;
                 }
@@ -1251,6 +1328,8 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 float dot = currDirection.Dot(nextDirection);
                 float acos = std::acos( dot );
                 angle = 180 * acos / M_PI;
+
+                it++;
             }
         }
     }

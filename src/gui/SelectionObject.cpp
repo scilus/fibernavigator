@@ -75,6 +75,7 @@ void SelectionObject::doBasicInit()
     
     m_maxCrossSectionIndex  = 0;
     m_minCrossSectionIndex  = 0;
+    m_Q = 0.5;
     
     m_statsNeedUpdating     = true;
     m_statsAreBeingComputed = false;
@@ -1652,17 +1653,22 @@ void SelectionObject::draw()
         l_color[2] = 0.0f; // Blue
     }
 
+    if( m_isSelected )
+        l_color[3] = 0.4f; // Alpha
+    else
+        l_color[3] = 0.2f; // Alpha
+
     if(m_isMagnet)
     {
         l_color[0] = 1.0f;
         l_color[1] = 0.0f; // Green
         l_color[2] = 56.0f/255.0f; // Blue
-    }
 
-    if( m_isSelected )
-        l_color[3] = 0.4f; // Alpha
-    else
-        l_color[3] = 0.2f; // Alpha
+        if( m_isSelected )
+            l_color[3] = 0.3f; // Alpha
+        else
+            l_color[3] = 0.15f; // Alpha
+    }
 
     // Because each type of selection object is unique, this function will
     // draw the selection object according to its specifications.

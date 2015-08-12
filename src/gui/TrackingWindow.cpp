@@ -238,7 +238,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	m_pTrackingSizer->Add( pBoxRow7, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("g"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-    m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 10, 99, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 40, 99, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderPuncture->SetValue( 60 );
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
     m_pTxtPunctureBox = new wxTextCtrl( this, wxID_ANY, wxT("0.60"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -361,7 +361,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     /*-----------------------MAGNET SECTION-----------------------------------*/
 
-    wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(150, -1), wxTE_CENTER | wxTE_READONLY );
+    wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(115, -1), wxTE_CENTER | wxTE_READONLY );
     magnetZone->SetBackgroundColour( *wxLIGHT_GREY );
     wxFont magnet_font = magnetZone->GetFont();
     magnet_font.SetPointSize( 10 );
@@ -373,17 +373,26 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxMagnetZone->Add( magnetZone,   0, wxALIGN_CENTER | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxMagnetZone, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-    wxImage bmpMagnet( MyApp::iconsPath + wxT( "magnet.png" ), wxBITMAP_TYPE_PNG );
-    m_pBtnPlaceMagnet = new wxBitmapButton( this, wxID_ANY, bmpMagnet, wxDefaultPosition, wxSize( 30, -1 ) );
-    Connect( m_pBtnPlaceMagnet->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+    wxImage bmpMagnetR( MyApp::iconsPath + wxT( "magnet_r.png" ), wxBITMAP_TYPE_PNG );
+    m_pBtnPlaceMagnetR = new wxBitmapButton( this, wxID_ANY, bmpMagnetR, wxDefaultPosition, wxSize( 30, -1 ) );
+    Connect( m_pBtnPlaceMagnetR->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+    wxImage bmpMagnetG( MyApp::iconsPath + wxT( "magnet_g.png" ), wxBITMAP_TYPE_PNG );
+    m_pBtnPlaceMagnetG = new wxBitmapButton( this, wxID_ANY, bmpMagnetG, wxDefaultPosition, wxSize( 30, -1 ) );
+    Connect( m_pBtnPlaceMagnetG->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+    wxImage bmpMagnetB( MyApp::iconsPath + wxT( "magnet_b.png" ), wxBITMAP_TYPE_PNG );
+    m_pBtnPlaceMagnetB = new wxBitmapButton( this, wxID_ANY, bmpMagnetB, wxDefaultPosition, wxSize( 30, -1 ) );
+    Connect( m_pBtnPlaceMagnetB->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
 
-    m_pToggleMagnetMode = new wxToggleButton( this, wxID_ANY,wxT("Start magnet"), wxDefaultPosition, wxSize(20, -1) );
+    m_pToggleMagnetMode = new wxToggleButton( this, wxID_ANY,wxT("Start magnet"), wxDefaultPosition, wxSize(115, -1) );
     Connect( m_pToggleMagnetMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnToggleMagnetMode) );
 
     wxBoxSizer *pBoxMagnet1 = new wxBoxSizer( wxHORIZONTAL );
-    pBoxMagnet1->Add( m_pBtnPlaceMagnet, 1, wxEXPAND | wxALL, 1 );
-    pBoxMagnet1->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );
+    pBoxMagnet1->Add( m_pBtnPlaceMagnetR, 1, wxEXPAND | wxALL, 1 );
+    pBoxMagnet1->Add( m_pBtnPlaceMagnetG, 1, wxEXPAND | wxALL, 1 );
+    pBoxMagnet1->Add( m_pBtnPlaceMagnetB, 1, wxEXPAND | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxMagnet1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );
 
 }
 

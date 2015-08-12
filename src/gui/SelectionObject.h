@@ -142,7 +142,10 @@ public :
     bool       getIsVisible()                         { return m_isVisible;                    };
 
     void       setIsMagnet( bool i_isMagnet )       { m_isMagnet = i_isMagnet;             };
+    bool       isMagnet()                           { return m_isMagnet;};
     void       setStrength( float str )             { m_Q = str;             };
+    float      getStrength()                        { return m_Q;              };
+
     
 
     void       setConvexHullColor( wxColour i_color ) { m_convexHullColor = i_color;            }; 
