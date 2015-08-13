@@ -67,7 +67,9 @@ public:
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
-    void OnPlaceMagnet                         ( wxCommandEvent& event );
+    void OnPlaceMagnetR                        ( wxCommandEvent& event );
+    void OnPlaceMagnetG                        ( wxCommandEvent& event );
+    void OnPlaceMagnetB                        ( wxCommandEvent& event );
     void OnToggleMagnetMode                    ( wxCommandEvent& event );
 
 public:

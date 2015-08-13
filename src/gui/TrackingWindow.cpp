@@ -375,13 +375,13 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     wxImage bmpMagnetR( MyApp::iconsPath + wxT( "magnet_r.png" ), wxBITMAP_TYPE_PNG );
     m_pBtnPlaceMagnetR = new wxBitmapButton( this, wxID_ANY, bmpMagnetR, wxDefaultPosition, wxSize( 30, -1 ) );
-    Connect( m_pBtnPlaceMagnetR->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+    Connect( m_pBtnPlaceMagnetR->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnetR ) );
     wxImage bmpMagnetG( MyApp::iconsPath + wxT( "magnet_g.png" ), wxBITMAP_TYPE_PNG );
     m_pBtnPlaceMagnetG = new wxBitmapButton( this, wxID_ANY, bmpMagnetG, wxDefaultPosition, wxSize( 30, -1 ) );
-    Connect( m_pBtnPlaceMagnetG->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+    Connect( m_pBtnPlaceMagnetG->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnetG ) );
     wxImage bmpMagnetB( MyApp::iconsPath + wxT( "magnet_b.png" ), wxBITMAP_TYPE_PNG );
     m_pBtnPlaceMagnetB = new wxBitmapButton( this, wxID_ANY, bmpMagnetB, wxDefaultPosition, wxSize( 30, -1 ) );
-    Connect( m_pBtnPlaceMagnetB->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnet ) );
+    Connect( m_pBtnPlaceMagnetB->GetId(),         wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( TrackingWindow::OnPlaceMagnetB ) );
 
     m_pToggleMagnetMode = new wxToggleButton( this, wxID_ANY,wxT("Start magnet"), wxDefaultPosition, wxSize(115, -1) );
     Connect( m_pToggleMagnetMode->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnToggleMagnetMode) );
@@ -530,7 +530,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
 
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+            m_pMainFrame->createNewSelectionObject( BOX_TYPE, Vector(0,0,0) );
             
             SelectionObject* pNewSelObj(m_pMainFrame->getCurrentSelectionObject());
             
@@ -566,7 +566,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
         
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
-            m_pMainFrame->createNewSelectionObject( BOX_TYPE );
+            m_pMainFrame->createNewSelectionObject( BOX_TYPE, Vector(0,0,0) );
             
             SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();
             
@@ -910,9 +910,25 @@ void TrackingWindow::OnEnableRSN( wxCommandEvent& WXUNUSED(event) )
 		RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
 }
 
-void TrackingWindow::OnPlaceMagnet( wxCommandEvent& WXUNUSED(event) )
+void TrackingWindow::OnPlaceMagnetR( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pMainFrame->createNewSelectionObject( ELLIPSOID_TYPE, true );
+    m_pMainFrame->createNewSelectionObject( BOX_TYPE, Vector(1,0,0) );
+            
+    SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();       
+    m_pMainFrame->m_pTreeWidget->SetItemImage( pNewSelObj->getTreeId(), pNewSelObj->getIcon() );
+}
+
+void TrackingWindow::OnPlaceMagnetG( wxCommandEvent& WXUNUSED(event) )
+{
+    m_pMainFrame->createNewSelectionObject( BOX_TYPE, Vector(0,1,0) );
+            
+    SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();       
+    m_pMainFrame->m_pTreeWidget->SetItemImage( pNewSelObj->getTreeId(), pNewSelObj->getIcon() );
+}
+
+void TrackingWindow::OnPlaceMagnetB( wxCommandEvent& WXUNUSED(event) )
+{
+    m_pMainFrame->createNewSelectionObject( BOX_TYPE, Vector(0,0,1) );
             
     SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();       
     m_pMainFrame->m_pTreeWidget->SetItemImage( pNewSelObj->getTreeId(), pNewSelObj->getIcon() );

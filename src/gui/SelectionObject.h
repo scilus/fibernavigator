@@ -217,7 +217,8 @@ protected :
     bool            m_isVisible;
     bool            m_isMagnet;
     int             m_stepSize;
-    float m_Q;
+    float           m_Q;
+    Vector          m_magnetField;
 
     wxColour        m_color;         // Used for coloring the isosurface.
     

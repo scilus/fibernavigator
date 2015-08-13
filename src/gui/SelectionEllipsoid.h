@@ -19,7 +19,7 @@ class SelectionEllipsoid : public SelectionObject
 public:
     // Constructor / Destructor
     SelectionEllipsoid( Vector i_center, Vector i_size );
-    SelectionEllipsoid( Vector i_center, Vector i_size, bool isMagnet );
+    SelectionEllipsoid( Vector i_center, Vector i_size, Vector magnet );
     SelectionEllipsoid( const wxXmlNode selObjNode );
     virtual ~SelectionEllipsoid();
 

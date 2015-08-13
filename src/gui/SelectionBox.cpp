@@ -33,6 +33,34 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
     update();
 }
 
+SelectionBox::SelectionBox( Vector i_center, Vector i_size, Vector magnet )
+:   SelectionObject( i_center, i_size )
+{
+    m_name       = wxT( "magnet" );
+    m_objectType = BOX_TYPE;
+
+
+    if(magnet.x == 1)
+    {
+        m_size = Vector(2,5,5);
+    }
+    else if(magnet.y == 1)
+    {
+        m_size = Vector(5,2,5);
+    }
+    else
+    {
+        m_size = Vector(5,5,2);
+    }
+    m_isActive = false;
+    m_isVisible = true;
+    m_isMagnet = true;
+    m_name =  wxT( "Magnet" );
+    m_magnetField = magnet;
+
+    update();
+}
+
 SelectionBox::SelectionBox( const wxXmlNode selObjNode )
 : SelectionObject( selObjNode )
 {

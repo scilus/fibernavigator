@@ -350,7 +350,7 @@ void MainFrame::initLayout()
 
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
-    m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
+    m_tab->AddPage( m_pFMRIWindow, wxT( "rsfMRI networks" ) );
 	m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
@@ -1369,7 +1369,7 @@ void MainFrame::displayPropertiesSheet()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 {
-    createNewSelectionObject( ELLIPSOID_TYPE );
+    createNewSelectionObject( ELLIPSOID_TYPE, Vector(0,0,0) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1379,7 +1379,7 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
-    createNewSelectionObject( BOX_TYPE );
+    createNewSelectionObject( BOX_TYPE, Vector(0,0,0) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1387,7 +1387,7 @@ void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 //
 // selObjType         : The type of the new selection object we wat to create.
 ///////////////////////////////////////////////////////////////////////////
-void MainFrame::createNewSelectionObject( ObjectType selObjType, bool isMagnet )
+void MainFrame::createNewSelectionObject( ObjectType selObjType, Vector magnetField )
 {
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
@@ -1403,9 +1403,20 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType, bool isMagnet )
                   l_sizeV / voxelZ );
     
     SelectionObject *pSelObj;
-    if( isMagnet )
+    if( magnetField.getLength() != 0 )
     {
-        pSelObj = new SelectionEllipsoid( l_center, l_size, isMagnet);
+        switch( selObjType )
+        {
+            case ELLIPSOID_TYPE:
+                pSelObj = new SelectionEllipsoid( l_center, l_size, magnetField);
+                break;
+            case BOX_TYPE:
+                pSelObj = new SelectionBox( l_center, l_size, magnetField);
+                break;
+            default:
+                return;
+        }
+        
     }
     else
     {

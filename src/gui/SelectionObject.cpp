@@ -1645,9 +1645,9 @@ void SelectionObject::draw()
 
     if ( ! m_isNOT )
     {
-        l_color[0] = 0.0f; // Red
-        l_color[1] = 1.0f; // Green
-        l_color[2] = 0.0f; // Blue
+        l_color[0] = 138.0f / 255.0f; // Red
+        l_color[1] = 43.0f / 255.0f; // Green
+        l_color[2] = 228.0f / 255.0f; // Blue
     }
     else
     {
@@ -1663,14 +1663,9 @@ void SelectionObject::draw()
 
     if(m_isMagnet)
     {
-        l_color[0] = 1.0f;
-        l_color[1] = 0.0f; // Green
-        l_color[2] = 56.0f/255.0f; // Blue
-
-        if( m_isSelected )
-            l_color[3] = 0.3f; // Alpha
-        else
-            l_color[3] = 0.15f; // Alpha
+        l_color[0] = m_magnetField.x;
+        l_color[1] = m_magnetField.y;
+        l_color[2] = m_magnetField.z;
     }
 
     // Because each type of selection object is unique, this function will

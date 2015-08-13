@@ -21,6 +21,7 @@ class SelectionBox : public SelectionObject
 public:
     // Constructor / Destructor
     SelectionBox( Vector i_center, Vector i_size );
+    SelectionBox( Vector i_center, Vector i_size, Vector magnet );
     SelectionBox( const wxXmlNode selObjNode );
     virtual ~SelectionBox();
 
