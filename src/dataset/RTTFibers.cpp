@@ -153,7 +153,7 @@ void RTTFibers::seed()
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
-            if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
+            if( selObjs[ b ]->getIsNOT() || !selObjs[ b ]->getIsActive() ) //Check for ellipsoid also?
             {
                 continue;
             }
@@ -1166,10 +1166,12 @@ bool RTTFibers::checkExclude( unsigned int sticksNumber)
 ///////////////////////////////////////////////////////////////////////////
 // Returns true if no anatomy is loaded for thresholding or if above the threshold
 ///////////////////////////////////////////////////////////////////////////
-bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
+bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
 {
     bool isOk = false;
     float gmVal = 0;
+    bool insideNotBox = false;
+
 	if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
         gmVal = m_pGMInfo->at(sticksNumber);
@@ -1183,7 +1185,43 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
         }   
     }
 
-	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep)
+    //NOT SELECTION
+    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+
+    for( unsigned int b = 0; b < selObjs.size(); b++ )
+	{
+        if( selObjs[ b ]->getIsNOT() )
+        {
+            Vector minCorner;
+            Vector maxCorner;
+            float xVoxel = DatasetManager::getInstance()->getVoxelX();
+            float yVoxel = DatasetManager::getInstance()->getVoxelY();
+            float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+            minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
+	        minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
+	        minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
+	        maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
+	        maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
+	        maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
+
+            float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
+            float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
+            float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
+            float l_axisCenter  = maxCorner.x  - l_axisRadius;
+            float l_axis1Center = maxCorner.y - l_axis1Radius;
+            float l_axis2Center = maxCorner.z - l_axis2Radius;
+                            
+            if( (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
+                        (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
+                        (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
+            {
+                insideNotBox = true;
+            }
+        }
+    }
+ 
+
+	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep && !insideNotBox)
     {
         isOk = true;
     }
@@ -1231,7 +1269,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     m_countGMstep = 0;
     absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && withinMapThreshold(sticksNumber) && !m_stop && absPeak != 0)
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && withinMapThreshold(sticksNumber, currPosition) && !m_stop && absPeak != 0)
     {
         bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
         sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
@@ -1283,7 +1321,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             //////////////////////////
             float it = 2;
             bool insideBox = false;
-            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber) && !m_stop)
+            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber, nextPosition) && !m_stop)
             {
                 //Insert point to be rendered
                 points.push_back( currPosition );

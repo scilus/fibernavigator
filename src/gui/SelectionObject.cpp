@@ -18,6 +18,7 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/RTTrackingHelper.h"
 #include "../gui/MainFrame.h"
 #include "../misc/Algorithms/ConvexGrahamHull.h"
 #include "../misc/Algorithms/ConvexHullIncremental.h"
@@ -457,6 +458,7 @@ void SelectionObject::objectUpdate()
 bool SelectionObject::toggleIsActive()
 {
     setIsActive( !getIsActive() );
+    RTTrackingHelper::getInstance()->setRTTDirty(true);
     return getIsActive();
 }
 
@@ -515,6 +517,7 @@ int SelectionObject::getIcon()
 bool SelectionObject::toggleIsNOT()
 {
     setIsNOT( !getIsNOT() ); 
+    RTTrackingHelper::getInstance()->setRTTDirty(true);
     return getIsNOT();
 }
 

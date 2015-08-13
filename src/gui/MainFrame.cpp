@@ -1455,6 +1455,7 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType, bool isMagnet )
     m_pTreeWidget->SelectItem(newSelectionObjectId, true);
     
     SceneManager::getInstance()->setSelBoxChanged( true );
+    RTTrackingHelper::getInstance()->setRTTDirty(true);
 }
 
 bool MainFrame::buildSelectionViewFromSelectionTree( SelectionTree *pSelTree )
