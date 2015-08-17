@@ -711,44 +711,26 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
             float l_axisCenter  = maxCorner.x  - l_axisRadius;
             float l_axis1Center = maxCorner.y - l_axis1Radius;
             float l_axis2Center = maxCorner.z - l_axis2Radius;
+
+            //Compare sticks with vector field, pick min
+            float angleMin = 360.0f;
+            float angle = 0.0f;
+            float angleMinOut = 360.0f;
+            float angleOut = 0.0f;
+            Vector field = selObjs[b]->getMagnetField();
             
             //If INSIDE MAGNET                
             if( (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
                         (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
                         (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
             {
-                //Compare sticks with vector field, pick min
-                float angleMin = 360.0f;
-                float angle = 0.0f;
-                float angleMinOut = 360.0f;
-                float angleOut = 0.0f;
-                Vector field = selObjs[b]->getMagnetField();
-                F = selObjs[b]->getStrength();
-
                 for(unsigned int i=0; i < sticks.size()/3; i++)
                 {
                     Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
                 
                     if(v1.normalizeAndReturn() != 0)
                     {    
-                        //check real direction 
-                        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
-                        {
-                            v1 *= -1;
-                        }
-                 
-                        //Angle value
-                        float dotOut = vin.Dot(v1);
-                        float acosOut = std::acos( dotOut );
-                        angleOut = 180 * acosOut / M_PI;
-        
-                        //Direction most probable
-                        if( angleOut < angleMinOut )
-                        {
-                            angleMinOut = angleOut;
-                            vOut = v1;
-                        } 
-
+                        
                         //Field direction
                         if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
                         {
@@ -768,7 +750,37 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
                         }      
                     }
                 }
-            }   
+                F = selObjs[b]->getStrength();
+            } 
+            else
+            {
+
+                for(unsigned int i=0; i < sticks.size()/3; i++)
+                {
+                    Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+                
+                    if(v1.normalizeAndReturn() != 0)
+                    {
+                        //check real direction 
+                        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                        {
+                            v1 *= -1;
+                        }
+                 
+                        //Angle value
+                        float dotOut = vin.Dot(v1);
+                        float acosOut = std::acos( dotOut );
+                        angleOut = 180 * acosOut / M_PI;
+        
+                        //Direction most probable
+                        if( angleOut < angleMinOut )
+                        {
+                            angleMinOut = angleOut;
+                            vOut = v1;
+                        } 
+                    }
+                }           
+            }
         }
     }
 
@@ -1117,7 +1129,7 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
         draftedPeak.push_back(vOut.z);
     }
 
-    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+   /* bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
     {
         Vector def(0,0,0);
@@ -1126,7 +1138,7 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
         draftedPeak[0] = res.x;
         draftedPeak[1] = res.y;
         draftedPeak[2] = res.z;
-    }
+    }*/
 		
 	return draftedPeak;
 }

@@ -40,18 +40,7 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size, Vector magnet )
     m_objectType = BOX_TYPE;
 
 
-    if(magnet.x == 1)
-    {
-        m_size = Vector(2,5,5);
-    }
-    else if(magnet.y == 1)
-    {
-        m_size = Vector(5,2,5);
-    }
-    else
-    {
-        m_size = Vector(5,5,2);
-    }
+    m_size = Vector(8,8,8);
     m_isActive = false;
     m_isVisible = true;
     m_isMagnet = true;
