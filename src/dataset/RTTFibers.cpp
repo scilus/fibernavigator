@@ -146,7 +146,7 @@ void RTTFibers::seed()
     float zVoxel = DatasetManager::getInstance()->getVoxelZ();
 
     Vector minCorner, maxCorner, middle;
-    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
 	//Evenly distanced seeds
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
@@ -687,17 +687,11 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
 
 Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F) 
 {
-    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
     Vector final = vin;
     for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
         if( selObjs[ b ]->isMagnet() )
         {
-            Vector field = Vector(selObjs[ b ]->getCenter().x - pos.x, selObjs[ b ]->getCenter().y - pos.y, selObjs[ b ]->getCenter().z - pos.z);
-            float D = field.normalizeAndReturn();
-            Vector fieldUnchanged(field);
-            
-
             //TEST BOX
             Vector minCorner;
             Vector maxCorner;
@@ -717,75 +711,64 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
             float l_axisCenter  = maxCorner.x  - l_axisRadius;
             float l_axis1Center = maxCorner.y - l_axis1Radius;
             float l_axis2Center = maxCorner.z - l_axis2Radius;
-                            
+            
+            //If INSIDE MAGNET                
             if( (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
                         (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
                         (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
             {
-                final = Vector(1,0,0);
-                F = 1;
-            }
+                //Compare sticks with vector field, pick min
+                float angleMin = 360.0f;
+                float angle = 0.0f;
+                float angleMinOut = 360.0f;
+                float angleOut = 0.0f;
+                Vector field = selObjs[b]->getMagnetField();
+                F = selObjs[b]->getStrength();
 
-            //END TEST BOX
-            
-        //    //Compare sticks with vector field, pick min
-        //    float angleMin = 360.0f;
-        //    float angle = 0.0f;
-        //    float angleMinOut = 360.0f;
-        //    float angleOut = 0.0f;
-        //    for(unsigned int i=0; i < sticks.size()/3; i++)
-        //    {
-        //        Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
-        //        
-        //        if(v1.normalizeAndReturn() != 0)
-        //        {     
-        //            if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
-        //            {
-        //                field *= -1;
-        //            }
+                for(unsigned int i=0; i < sticks.size()/3; i++)
+                {
+                    Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+                
+                    if(v1.normalizeAndReturn() != 0)
+                    {    
+                        //check real direction 
+                        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                        {
+                            v1 *= -1;
+                        }
+                 
+                        //Angle value
+                        float dotOut = vin.Dot(v1);
+                        float acosOut = std::acos( dotOut );
+                        angleOut = 180 * acosOut / M_PI;
+        
+                        //Direction most probable
+                        if( angleOut < angleMinOut )
+                        {
+                            angleMinOut = angleOut;
+                            vOut = v1;
+                        } 
 
-        //            //Angle value
-        //            float dot = field.Dot(v1);
-        //            float acos = std::acos( dot );
-        //            angle = 180 * acos / M_PI;
-        //
-        //            //Direction most probable
-        //            if( angle < angleMin )
-        //            {
-        //                angleMin = angle;
-        //                final = v1;
-        //            }  
+                        //Field direction
+                        if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                        {
+                            v1 *= -1;
+                        }
 
-        //            //check real direction 
-        //            if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
-        //            {
-        //                v1 *= -1;
-        //            }
-        //         
-        //            //Angle value
-        //            float dotOut = vin.Dot(v1);
-        //            float acosOut = std::acos( dotOut );
-        //            angleOut = 180 * acosOut / M_PI;
-        //
-        //            //Direction most probable
-        //            if( angleOut < angleMinOut )
-        //            {
-        //                angleMinOut = angleOut;
-        //                vOut = v1;
-        //            }  
-        //        }
-        //        field = fieldUnchanged;
-        //    }
-
-        //    //Distance & strength
-        //    float Q = selObjs[ b ]->getStrength();
-        //    float rMin = 0;
-        //    float rMax = selObjs[ b ]->getSize().x * DatasetManager::getInstance()->getVoxelX() / 2.0f;
-
-        //    if(D < rMax)
-        //    {
-        //        F = Q;
-        //    }
+                        //Angle value
+                        float dot = field.Dot(v1);
+                        float acos = std::acos( dot );
+                        angle = 180 * acos / M_PI;
+        
+                        //Direction most probable
+                        if( angle < angleMin )
+                        {
+                            angleMin = angle;
+                            final = v1;
+                        }      
+                    }
+                }
+            }   
         }
     }
 
@@ -1134,16 +1117,16 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
         draftedPeak.push_back(vOut.z);
     }
 
-    /*bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
     {
         Vector def(0,0,0);
-        float Q = 0;
-        Vector res = magneticField(def, initialPeaks, 0, currPos, Q); 
+        float F = 0;
+        Vector res = magneticField(def, initialPeaks, 0, currPos, def, F); 
         draftedPeak[0] = res.x;
         draftedPeak[1] = res.y;
         draftedPeak[2] = res.z;
-    }*/
+    }
 		
 	return draftedPeak;
 }
@@ -1185,9 +1168,8 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
         }   
     }
 
-    //NOT SELECTION
-    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
+ //   //NOT SELECTION
     for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
         if( selObjs[ b ]->getIsNOT() )

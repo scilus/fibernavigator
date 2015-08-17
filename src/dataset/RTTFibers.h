@@ -128,6 +128,7 @@ private:
 	std::vector<std::pair<Vector,float> > m_pSeedFromfMRI;
     std::vector<std::vector<Vector> > m_fibersRTT;
     std::vector<std::vector<Vector> > m_colorsRTT;
+    std::vector< SelectionObject* > selObjs;
 
 };
 

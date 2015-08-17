@@ -145,6 +145,7 @@ public :
     bool       isMagnet()                           { return m_isMagnet;};
     void       setStrength( float str )             { m_Q = str;             };
     float      getStrength()                        { return m_Q;              };
+    Vector     getMagnetField()                     { return m_magnetField; };
 
     
 
