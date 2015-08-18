@@ -1663,9 +1663,9 @@ void SelectionObject::draw()
 
     if(m_isMagnet)
     {
-        l_color[0] = m_magnetField.x;
-        l_color[1] = m_magnetField.y;
-        l_color[2] = m_magnetField.z;
+        l_color[0] = std::abs(m_magnetField.x);
+        l_color[1] = std::abs(m_magnetField.y);
+        l_color[2] = std::abs(m_magnetField.z);
     }
 
     // Because each type of selection object is unique, this function will
@@ -2386,6 +2386,10 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 	    pBoxQ->Add( m_pBoxQ,   0, wxALIGN_LEFT | wxALL, 1);
 	    pBoxMain->Add( pBoxQ, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
         pParent->Connect( m_pSliderQ->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderQMoved) );
+
+        m_pToggleFieldDirection           = new wxToggleButton( pParent, wxID_ANY, wxT( "Flip magnetisation" ));
+        pBoxMain->Add(m_pToggleFieldDirection, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+        pParent->Connect( m_pToggleFieldDirection->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleFlipMagnetisation ) );
     }
 
     m_pPropertiesSizer->Add( pBoxMain, 1, wxFIXED_MINSIZE | wxEXPAND, 0 );

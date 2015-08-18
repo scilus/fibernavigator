@@ -146,6 +146,7 @@ public :
     void       setStrength( float str )             { m_Q = str;             };
     float      getStrength()                        { return m_Q;              };
     Vector     getMagnetField()                     { return m_magnetField; };
+    void       setMagnetField(Vector field)         { m_magnetField = field; };
 
     
 
@@ -378,6 +379,7 @@ private:
     wxButton        *m_pbtnDisplayDispersionTube;
     wxStaticText    *m_pLabelAnatomy;
     wxChoice        *m_pCBSelectDataSet;
+    wxToggleButton  *m_pToggleFieldDirection;
     
 
 public:

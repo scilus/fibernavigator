@@ -163,6 +163,7 @@ public:
     void OnSliderAxisMoved                  ( wxCommandEvent& event );
     void OnRecalcMainDir                    ( wxCommandEvent& event );
     void OnSliderQMoved                     ( wxCommandEvent& event );
+    void OnToggleFlipMagnetisation          ( wxCommandEvent& event );
 
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );

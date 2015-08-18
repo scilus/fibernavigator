@@ -205,7 +205,7 @@ void ODFs::extractMaximas()
     float frames  = DatasetManager::getInstance()->getFrames();
 
     std::cout << "Extracting maximas ... please wait \n";
-    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_3 ); // Set number of points to LOD_X for C*B mult
+    m_nbPointsPerGlyph = getLODNbOfPoints( LOD_6 ); // Set number of points to LOD_X for C*B mult
     m_mainDirections.resize( frames * rows * columns );
     
     int currentIdx;
@@ -220,7 +220,7 @@ void ODFs::extractMaximas()
 
                 if( m_coefficients[currentIdx][0] != 0 )
                 {
-                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_3], m_phiThetaDirection[LOD_3], m_axisThreshold );
+                    m_mainDirections[currentIdx] = getODFmax( m_coefficients[currentIdx], m_shMatrix[LOD_6], m_phiThetaDirection[LOD_6], m_axisThreshold );
                 }
             }
         }
@@ -300,8 +300,8 @@ bool ODFs::createStructure( vector< float >& i_fileFloatData )
     m_nbPointsPerGlyph = getLODNbOfPoints( m_currentLOD );
 
     //Create neighboring system once for maximas extraction
-    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_3].getDimensionY()]; 
-    set_nbors(m_phiThetaDirection[LOD_3]); 
+    m_nbors = new std::vector<std::pair<float,int> >[m_phiThetaDirection[LOD_6].getDimensionY()]; 
+    set_nbors(m_phiThetaDirection[LOD_6]); 
     
     // We need to reload the buffer in video memory.
     loadBuffer();
@@ -392,12 +392,12 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
     const float max_allowed_angle = 30.0f;
     const float min_allowed_angle = 1.0f;
  
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++) 
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_6].getDimensionY(); i++) 
     {
     
-        d.x = std::cos(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
-        d.y = std::sin(m_phiThetaDirection[LOD_3](i,0))*std::sin(m_phiThetaDirection[LOD_3](i,1));
-        d.z = std::cos(m_phiThetaDirection[LOD_3](i,1));
+        d.x = std::cos(m_phiThetaDirection[LOD_6](i,0))*std::sin(m_phiThetaDirection[LOD_6](i,1));
+        d.y = std::sin(m_phiThetaDirection[LOD_6](i,0))*std::sin(m_phiThetaDirection[LOD_6](i,1));
+        d.z = std::cos(m_phiThetaDirection[LOD_6](i,1));
         
         /* 
            look at other possible direction sampling neighbors
@@ -405,13 +405,13 @@ void ODFs::set_nbors(FMatrix o_phiThetaDirection)
            if a sampling directions is within +- 3 degrees from i,
            we consider it and check if i is bigger
         */
-        for(unsigned int j=0; j<m_phiThetaDirection[LOD_3].getDimensionY(); j++)
+        for(unsigned int j=0; j<m_phiThetaDirection[LOD_6].getDimensionY(); j++)
         {
             if(j != i ) 
             {
-                d2.x = std::cos(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
-                d2.y = std::sin(m_phiThetaDirection[LOD_3](j,0))*std::sin(m_phiThetaDirection[LOD_3](j,1));
-                d2.z = std::cos(m_phiThetaDirection[LOD_3](j,1));
+                d2.x = std::cos(m_phiThetaDirection[LOD_6](j,0))*std::sin(m_phiThetaDirection[LOD_6](j,1));
+                d2.y = std::sin(m_phiThetaDirection[LOD_6](j,0))*std::sin(m_phiThetaDirection[LOD_6](j,1));
+                d2.z = std::cos(m_phiThetaDirection[LOD_6](j,1));
                         
 				float angle_found = 180*std::acos(d.Dot(d2))/M_PI;
 
@@ -451,7 +451,7 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
     
     
     /* Find all potential candidate to be a main direction according to the max_threshold */
-    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_3].getDimensionY(); i++)
+    for(unsigned int i = 0; i < m_phiThetaDirection[LOD_6].getDimensionY(); i++)
     {
         bool isCandidate = false;
         if(norm_hemisODF[i] > max_thresh)
@@ -473,8 +473,8 @@ std::vector<Vector> ODFs::getODFmax(vector < float > coefs, const FMatrix & SHma
         //Verify if same direction is not instered multiple times
         if(isCandidate)
         {
-            float phi   = m_phiThetaDirection[LOD_3](i,0);
-            float theta = m_phiThetaDirection[LOD_3](i,1);
+            float phi   = m_phiThetaDirection[LOD_6](i,0);
+            float theta = m_phiThetaDirection[LOD_6](i,1);
 
             bool isDiff = true;
 

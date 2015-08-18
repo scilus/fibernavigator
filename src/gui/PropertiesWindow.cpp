@@ -1998,6 +1998,19 @@ void PropertiesWindow::OnSliderQMoved( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnToggleFlipMagnetisation( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleFlipMagnetisation" ), LOGLEVEL_DEBUG );
+
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        Vector field = pSelObj->getMagnetField() * -1;
+        pSelObj->setMagnetField(field);
+        RTTrackingHelper::getInstance()->setRTTDirty( true );
+    }
+}
+
 void PropertiesWindow::OnToggleCrossingFibers( wxEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleCrossingFibers" ), LOGLEVEL_DEBUG );
