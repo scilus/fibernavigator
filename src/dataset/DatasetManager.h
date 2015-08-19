@@ -49,6 +49,7 @@ public:
     int                     getColumns() const;
     int                     getFrames() const;
     int                     getRows() const;
+    int                     getBands() const;
     float                   getVoxelX() const;
     float                   getVoxelY() const;
     float                   getVoxelZ() const;

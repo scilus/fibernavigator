@@ -54,7 +54,7 @@ public:
     void setMinFiberLength( float minLength )						  { m_minFiberLength = minLength; }
     void setMaxFiberLength( float maxLength )						  { m_maxFiberLength = maxLength; }
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
-    void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
+    void setHARDIInfo( Maximas* info );							      
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
     void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
     void setGMInfo( Anatomy* info )                                   { m_pGMInfo = info; }
@@ -116,6 +116,7 @@ private:
 	Anatomy     *m_pSeedMapInfo;
     Anatomy     *m_pGMInfo;
     Vector       m_initVec;
+    
 
 	float m_alpha;
 

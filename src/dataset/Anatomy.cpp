@@ -900,6 +900,7 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     // Flip the data if needed.
     if( m_originalAxialOrientation == ORIENTATION_RIGHT_TO_LEFT )
     {
+        flipAxisInternal( Y_AXIS, false );
         flipAxisInternal( X_AXIS, false );
     }
     

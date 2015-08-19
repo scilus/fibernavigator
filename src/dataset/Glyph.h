@@ -38,6 +38,7 @@ public:
     void         flipAxis     ( AxisType i_axisType, bool i_isFlipped );
     bool         isAxisFlipped( AxisType i_axisType );
     
+    
     void         setColor ( GlyphColorModifier i_colorModifier, float i_value );
     float        getColor ( GlyphColorModifier i_colorModifier );
     

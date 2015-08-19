@@ -36,6 +36,8 @@ public:
     void setRTTDirty( bool dirty )            { m_isRTTDirty = dirty; }
     void setRTTActive( bool active )          { m_isRTTActive = active; }
 	void setSeedFromfMRI( bool seedFromfMRI ) { m_isSeedFromfMRI = seedFromfMRI; }
+    void setMaximaFlip( Vector flip)          { flippedAxes = flip; }
+    Vector getMaximaFlip()          { return flippedAxes; }
 
     bool toggleInterpolateTensors() { return m_interpolateTensors = !m_interpolateTensors; }
     bool toggleShellSeeds()         { return m_isShellSeeds = !m_isShellSeeds; }
@@ -89,6 +91,7 @@ private:
     bool m_isTractoDrivenRSN;
     bool m_isGMallowed;
 	int m_id;
+    Vector flippedAxes;
 
 
 };

@@ -213,6 +213,16 @@ int DatasetManager::getRows() const
     return 1;
 }
 
+int DatasetManager::getBands() const
+{
+    if( !m_anatomies.empty() )
+    {
+        map<DatasetIndex, Anatomy *>::const_iterator it = m_anatomies.begin();
+        return it->second->getBands();
+    }
+    return 1;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 float DatasetManager::getVoxelX() const

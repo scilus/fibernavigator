@@ -1218,12 +1218,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     Vector currPosition(seed); //Current PIXEL position
     Vector nextPosition; //Next Pixel position
     Vector currDirection, nextDirection; //Directions re-aligned 
-    
-
-    GLfloat flippedAxes[3];
-    m_pMaximasInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
-    m_pMaximasInfo->isAxisFlipped(Y_AXIS) ? flippedAxes[1] = -1.0f : flippedAxes[1] = 1.0f;
-    m_pMaximasInfo->isAxisFlipped(Z_AXIS) ? flippedAxes[2] = -1.0f : flippedAxes[2] = 1.0f;
+    Vector flippedAxes(RTTrackingHelper::getInstance()->getMaximaFlip());
 
     unsigned int sticksNumber; 
     int currVoxelx, currVoxely, currVoxelz;
@@ -1254,9 +1249,9 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
         sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
 
-        currDirection.x = flippedAxes[0] * sticks[0];
-        currDirection.y = flippedAxes[1] * sticks[1];
-        currDirection.z = flippedAxes[2] * sticks[2];
+        currDirection.x = flippedAxes.x * sticks[0];
+        currDirection.y = flippedAxes.y * sticks[1];
+        currDirection.z = flippedAxes.z * sticks[2];
 
         //Direction for seeding (forward or backward)
         currDirection.normalize();
@@ -1278,6 +1273,15 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
         {
 
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+            sticks[0] *= flippedAxes.x;
+            sticks[1] *= flippedAxes.y;
+            sticks[2] *= flippedAxes.z;
+            sticks[3] *= flippedAxes.x;
+            sticks[4] *= flippedAxes.y;
+            sticks[5] *= flippedAxes.z;
+            sticks[6] *= flippedAxes.x;
+            sticks[7] *= flippedAxes.y;
+            sticks[8] *= flippedAxes.z;
 
             //Advection next direction
             nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
@@ -1329,6 +1333,15 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
                 }
                 
                 sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
+                sticks[0] *= flippedAxes.x;
+                sticks[1] *= flippedAxes.y;
+                sticks[2] *= flippedAxes.z;
+                sticks[3] *= flippedAxes.x;
+                sticks[4] *= flippedAxes.y;
+                sticks[5] *= flippedAxes.z;
+                sticks[6] *= flippedAxes.x;
+                sticks[7] *= flippedAxes.y;
+                sticks[8] *= flippedAxes.z;
 
                 //Advection next direction
                 nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
@@ -1351,6 +1364,16 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             }
         }
     }
+}
+
+void RTTFibers::setHARDIInfo( Maximas* info )
+{
+    Vector flip;
+    info->isAxisFlipped(X_AXIS) ? flip.x = -1.0f : flip.x = 1.0f;
+    info->isAxisFlipped(Y_AXIS) ? flip.y = -1.0f : flip.y = 1.0f;
+    info->isAxisFlipped(Z_AXIS) ? flip.z = -1.0f : flip.z = 1.0f;
+
+    m_pMaximasInfo = info; RTTrackingHelper::getInstance()->setMaximaFlip(flip); 
 }
 
 //////////////////////////////////////////
