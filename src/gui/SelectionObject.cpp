@@ -76,7 +76,7 @@ void SelectionObject::doBasicInit()
     
     m_maxCrossSectionIndex  = 0;
     m_minCrossSectionIndex  = 0;
-    m_Q = 0.5;
+    m_Q = 0.25;
     
     m_statsNeedUpdating     = true;
     m_statsAreBeingComputed = false;
@@ -2378,11 +2378,11 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
         pParent->Connect( m_pTxtSizeY->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeY ) );
         pParent->Connect( m_pTxtSizeZ->GetId(), wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( PropertiesWindow::OnBoxSizeZ ) ); 
 
-        m_pSliderQ = new MySlider( pParent, wxID_ANY, 50, 0, 100, wxPoint(60,120), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+        m_pSliderQ = new MySlider( pParent, wxID_ANY, 25, 0, 25, wxPoint(60,120), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	    wxBoxSizer *pBoxQ = new wxBoxSizer( wxHORIZONTAL );
         pBoxQ->Add( new wxStaticText( pParent, wxID_ANY, wxT("Strength (Q)"), wxPoint(0,120), wxSize(70, -1), wxALIGN_CENTER ), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
         pBoxQ->Add( m_pSliderQ,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
-        m_pBoxQ = new wxTextCtrl( pParent, wxID_ANY, wxT("0.50"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+        m_pBoxQ = new wxTextCtrl( pParent, wxID_ANY, wxT("0.25"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 	    pBoxQ->Add( m_pBoxQ,   0, wxALIGN_LEFT | wxALL, 1);
 	    pBoxMain->Add( pBoxQ, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
         pParent->Connect( m_pSliderQ->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(PropertiesWindow::OnSliderQMoved) );

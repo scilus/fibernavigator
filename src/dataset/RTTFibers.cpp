@@ -33,7 +33,7 @@ RTTFibers::RTTFibers()
 :   m_trackActionStep(std::numeric_limits<unsigned int>::max()),
     m_timerStep( 0 ),
     m_FAThreshold( 0.20f ),
-    m_angleThreshold( 35.0f ),
+    m_angleThreshold( 40.0f ),
     m_step( 1.0f ),
     m_GMstep( 15 ),
     m_nbSeed ( 10.0f ),
@@ -705,13 +705,6 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
 			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
 			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
 
-            float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
-            float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
-            float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
-            float l_axisCenter  = maxCorner.x  - l_axisRadius;
-            float l_axis1Center = maxCorner.y - l_axis1Radius;
-            float l_axis2Center = maxCorner.z - l_axis2Radius;
-
             //Compare sticks with vector field, pick min
             float angleMin = 360.0f;
             float angle = 0.0f;
@@ -720,9 +713,9 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
             Vector field = selObjs[b]->getMagnetField();
             
             //If INSIDE MAGNET                
-            if( (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
-                        (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
-                        (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
+            if(pos.x <= maxCorner.x && pos.x >= minCorner.x && 
+                       pos.y <= maxCorner.y && pos.y >= minCorner.y &&
+                       pos.z <= maxCorner.z && pos.z >= minCorner.z)
             {
                 for(unsigned int i=0; i < sticks.size()/3; i++)
                 {
@@ -1197,17 +1190,10 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
 	        maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
 	        maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
 	        maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
-
-            float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
-            float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
-            float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
-            float l_axisCenter  = maxCorner.x  - l_axisRadius;
-            float l_axis1Center = maxCorner.y - l_axis1Radius;
-            float l_axis2Center = maxCorner.z - l_axis2Radius;
                             
-            if( (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
-                        (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
-                        (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f )
+            if(pos.x <= maxCorner.x && pos.x >= minCorner.x && 
+                       pos.y <= maxCorner.y && pos.y >= minCorner.y &&
+                       pos.z <= maxCorner.z && pos.z >= minCorner.z)
             {
                 insideNotBox = true;
             }

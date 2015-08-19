@@ -215,9 +215,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     m_pTextAngle = new wxStaticText( this, wxID_ANY, wxT("Max angle"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
     m_pSliderAngle = new MySlider( this, wxID_ANY, 0, 1, 90, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderAngle->SetValue( 35 );
+    m_pSliderAngle->SetValue( 40 );
     Connect( m_pSliderAngle->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderAngleMoved) );
-    m_pTxtAngleBox = new wxTextCtrl( this, wxID_ANY, wxT("35.0 "), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtAngleBox = new wxTextCtrl( this, wxID_ANY, wxT("40.0 "), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 		wxBoxSizer *pBoxRow6 = new wxBoxSizer( wxHORIZONTAL );
     pBoxRow6->Add( m_pTextAngle, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
@@ -238,7 +238,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	m_pTrackingSizer->Add( pBoxRow7, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
     m_pTextPuncture = new wxStaticText( this, wxID_ANY, wxT("g"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-    m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 40, 99, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderPuncture = new MySlider( this, wxID_ANY, 0, 40, 100, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderPuncture->SetValue( 60 );
     Connect( m_pSliderPuncture->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(TrackingWindow::OnSliderPunctureMoved) );
     m_pTxtPunctureBox = new wxTextCtrl( this, wxID_ANY, wxT("0.60"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -570,7 +570,7 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
             
             SelectionObject* pNewSelObj = m_pMainFrame->getCurrentSelectionObject();
             
-            Vector boxSize(4,4,4);
+            Vector boxSize(2/step,2/step,2/step);
             pNewSelObj->setSize(boxSize);
         }
         if(m_pTextFA->IsEnabled())
