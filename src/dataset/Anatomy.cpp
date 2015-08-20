@@ -928,9 +928,6 @@ bool Anatomy::save( wxXmlNode *pNode, const wxString &rootPath ) const
 
 void Anatomy::saveNifti( wxString fileName )
 {
-    // Prevents copying the whole vector
-    vector<float> *pDataset = m_useEqualizedDataset ? &m_equalizedDataset : &m_floatDataset;
-
     int dims[] = { 4, m_columns, m_rows, m_frames, m_bands, 0, 0, 0 };
     nifti_image* pImage(NULL);
     pImage = nifti_make_new_nim( dims, m_dataType, 1 );
@@ -982,6 +979,16 @@ void Anatomy::saveNifti( wxString fileName )
     pImage->qoffset_y = qy;
     pImage->qoffset_z = qz;
     pImage->qfac = qfac;
+
+    //Save RAI (example: drew a new anat, on a RAI-based, if load again, it will be flipped for visu. So need to reorient it's data now.)
+    if(pImage->qto_xyz.m[0][0] < 0)
+    {
+        flipAxis(Y_AXIS);
+        flipAxis(X_AXIS);
+    }
+
+    // Prevents copying the whole vector
+    vector<float> *pDataset = m_useEqualizedDataset ? &m_equalizedDataset : &m_floatDataset;
 
     if( m_type == HEAD_BYTE )
     {
@@ -1049,6 +1056,13 @@ void Anatomy::saveNifti( wxString fileName )
         // not exist anymore, and pImage->data will point to garbage.
         pImage->data = &(*pDataset)[0];
         nifti_image_write( pImage );
+    }
+
+    //Deflip 
+    if(pImage->qto_xyz.m[0][0] < 0)
+    {
+        flipAxis(Y_AXIS);
+        flipAxis(X_AXIS);
     }
 }
 

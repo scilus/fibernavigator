@@ -40,6 +40,8 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     //Content of RTT panel
     /********************************/
 
+    
+
     m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("DTI not selected"), wxPoint(30,0), wxSize(100, -1) );
     Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFileDTI) );
     m_pBtnSelectFile->SetBackgroundColour(wxColour( 255, 147, 147 ));
@@ -102,6 +104,13 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
 	m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxPoint(50,300), wxSize(140, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
+
+    wxTextCtrl *deprecated = new wxTextCtrl( this, wxID_ANY, wxT("Not maintained anymore."), wxPoint(10,330), wxSize(230, -1), wxTE_CENTER | wxTE_READONLY );
+    deprecated->SetBackgroundColour( *wxLIGHT_GREY );
+    wxFont deprec_font = deprecated->GetFont();
+    deprec_font.SetPointSize( 10 );
+    deprec_font.SetWeight( wxFONTWEIGHT_BOLD );
+    deprecated->SetFont( deprec_font );
 
 }
 
