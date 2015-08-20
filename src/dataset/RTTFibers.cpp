@@ -688,10 +688,12 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
 Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F) 
 {
     Vector final = vin;
+    bool alreadyAffected = false;
     for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
-        if( selObjs[ b ]->isMagnet() )
+        if( selObjs[ b ]->isMagnet() && !alreadyAffected)
         {
+            
             //TEST BOX
             Vector minCorner;
             Vector maxCorner;
@@ -744,6 +746,7 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
                     }
                 }
                 F = selObjs[b]->getStrength();
+                alreadyAffected = true;
             } 
             else
             {
