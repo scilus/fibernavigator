@@ -147,13 +147,14 @@ void RTTFibers::seed()
 
     Vector minCorner, maxCorner, middle;
     selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    
 
 	//Evenly distanced seeds
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
-            if( selObjs[ b ]->getIsNOT() || !selObjs[ b ]->getIsActive() ) //Check for ellipsoid also?
+            if( selObjs[ b ]->getIsNOT() || !selObjs[ b ]->getIsActive() || !SceneManager::getInstance()->getSelectionTree().isFirstLevel(selObjs[ b ]) ) //Check for ellipsoid also?
             {
                 continue;
             }
