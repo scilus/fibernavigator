@@ -426,8 +426,8 @@ void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
 
     if( !RTTrackingHelper::getInstance()->isRTTReady() )
     {
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+        SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
+        SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
         //RTTrackingHelper::getInstance()->setRTTDirty( false );
 
         RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
@@ -446,8 +446,8 @@ void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
 void TrackingWindow::OnClearBox( wxTreeEvent&    event )
 {
     m_pMainFrame->onDeleteTreeItem( event );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+    SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
+    SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
     RTTrackingHelper::getInstance()->setRTTDirty( false );
     RTTrackingHelper::getInstance()->setRTTReady( false );
     m_pBtnStart->SetValue( false );
@@ -457,7 +457,7 @@ void TrackingWindow::OnSliderFAMoved(wxCommandEvent& WXUNUSED(event))
 {
     float sliderValue = m_pSliderFA->GetValue() / 100.0f;
     m_pTxtFABox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setFAThreshold( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setFAThreshold( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -465,7 +465,7 @@ void TrackingWindow::OnSliderAngleMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderAngle->GetValue();
     m_pTxtAngleBox->SetValue(wxString::Format( wxT( "%.1f "), sliderValue ) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setAngleThreshold( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setAngleThreshold( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -473,7 +473,7 @@ void TrackingWindow::OnSliderStepMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderStep->GetValue() / 10.0f;
     m_pTxtStepBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setStep( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setStep( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -481,7 +481,7 @@ void TrackingWindow::OnSliderGMStepMoved( wxCommandEvent& WXUNUSED(event) )
 {
     int sliderValue = m_pSliderGMStep->GetValue();
     m_pTxtGMStepBox->SetValue(wxString::Format( wxT( "%i"), sliderValue) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setGMStep( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setGMStep( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -489,8 +489,8 @@ void TrackingWindow::OnSliderPunctureMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderPuncture->GetValue() / 100.0f;
     m_pTxtPunctureBox->SetValue(wxString::Format( wxT( "%.2f"), sliderValue) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setPuncture( sliderValue );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setVinVout( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setPuncture( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setVinVout( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -498,7 +498,7 @@ void TrackingWindow::OnSliderMinLengthMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderMinLength->GetValue();
     m_pTxtMinLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMinFiberLength( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setMinFiberLength( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -506,15 +506,15 @@ void TrackingWindow::OnSliderOpacityMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderOpacity->GetValue() / 100.0f;
     m_pTxtOpacityBox->SetValue(wxString::Format( wxT( "%.2f"), sliderValue) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setOpacity( sliderValue );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->renderRTTFibers(false);
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setOpacity( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->renderRTTFibers(false);
 }
 
 void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = m_pSliderMaxLength->GetValue();
     m_pTxtMaxLengthBox->SetValue(wxString::Format( wxT( "%.1f mm"), sliderValue) );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMaxFiberLength( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setMaxFiberLength( sliderValue );
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -535,7 +535,7 @@ void TrackingWindow::OnSelectFileDTI( wxCommandEvent& WXUNUSED(event) )
 
         //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+        SceneManager::getInstance()->getScene()->getRTTfibers()->setTensorsInfo( (Tensors *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
@@ -570,8 +570,8 @@ void TrackingWindow::OnSelectFileHARDI( wxCommandEvent& WXUNUSED(event) )
 
         //Set Step
         float step = DatasetManager::getInstance()->getVoxelX() / 2.0f;
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setIsHardi( true );
-        m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+        SceneManager::getInstance()->getScene()->getRTTfibers()->setIsHardi( true );
+        SceneManager::getInstance()->getScene()->getRTTfibers()->setHARDIInfo( (Maximas *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         
         if(SceneManager::getInstance()->getSelectionTree().isEmpty())
         {
@@ -600,7 +600,7 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
 	if( pMesh != NULL && pMesh->getType() == ISO_SURFACE )
     {
 		m_pBtnSelectShell->SetLabel( pMesh->getName() );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setShellInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setShellInfo( (DatasetInfo *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 		m_pToggleShell->Enable(true);
         m_pToggleShell->SetValue(true);
 
@@ -616,7 +616,7 @@ void TrackingWindow::OnSelectShell( wxCommandEvent& WXUNUSED(event) )
         }
         else
         {
-            float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
+            float shellSeedNb = SceneManager::getInstance()->getScene()->getRTTfibers()->getShellSeedNb();
             RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
             m_pToggleShell->SetLabel(wxT( "Shell seed ON"));
         } 
@@ -632,7 +632,7 @@ void TrackingWindow::OnSelectSeedMap( wxCommandEvent& WXUNUSED(event) )
 	if( pSeedMap != NULL && pSeedMap->getBands() == 1 )
     {
 		m_pBtnSelectSeed->SetLabel( pSeedMap->getName() );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setSeedMapInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setSeedMapInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 
 		m_pToggleSeedMap->Enable(true);
         m_pToggleSeedMap->SetValue(true);
@@ -652,8 +652,8 @@ void TrackingWindow::OnSelectSeedMap( wxCommandEvent& WXUNUSED(event) )
         {
 			RTTrackingHelper::getInstance()->m_pSliderAxisSeedNb->SetValue( 1 );
 			RTTrackingHelper::getInstance()->m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), 1.0f) );
-			m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 1 );
-            float seedMapNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getSeedMapNb();
+			SceneManager::getInstance()->getScene()->getRTTfibers()->setNbSeed( 1 );
+            float seedMapNb = SceneManager::getInstance()->getScene()->getRTTfibers()->getSeedMapNb();
             RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), seedMapNb) ); 
             m_pToggleSeedMap->SetLabel(wxT( "Seed map ON"));
         } 
@@ -671,7 +671,7 @@ void TrackingWindow::OnMapSeeding( wxCommandEvent& WXUNUSED(event) )
     {
 		RTTrackingHelper::getInstance()->m_pSliderAxisSeedNb->SetValue( 10 );
         RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), 1000.0f) );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 10 );
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setNbSeed( 10 );
 	    RTTrackingHelper::getInstance()->m_pTxtAxisSeedNbBox->SetValue( wxString::Format( wxT( "%.1f"), 10.0f) );
         m_pToggleSeedMap->SetLabel(wxT( "Seed map OFF"));
     }
@@ -679,8 +679,8 @@ void TrackingWindow::OnMapSeeding( wxCommandEvent& WXUNUSED(event) )
     {
 		RTTrackingHelper::getInstance()->m_pSliderAxisSeedNb->SetValue( 1 );
 		RTTrackingHelper::getInstance()->m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), 1.0f) );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( 1 );
-        float seedMapNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getSeedMapNb();
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setNbSeed( 1 );
+        float seedMapNb = SceneManager::getInstance()->getScene()->getRTTfibers()->getSeedMapNb();
         RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), seedMapNb) ); 
         m_pToggleSeedMap->SetLabel(wxT( "Seed map ON"));
     }
@@ -712,12 +712,12 @@ void TrackingWindow::OnSelectMask( wxCommandEvent& WXUNUSED(event) )
     {
 		m_pBtnSelectMap->SetLabel( pMap->getName() );
         m_pBtnSelectMap->SetBackgroundColour(wxNullColour);
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setMaskInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setMaskInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
         m_pTextFA->Enable(true);
         m_pSliderFA->Enable(true);
         m_pTxtFABox->Enable(true);
 	}
-    if(m_pMainFrame->m_pMainGL->m_pRealTimeFibers->isHardiSelected())
+    if(SceneManager::getInstance()->getScene()->getRTTfibers()->isHardiSelected())
     {
         m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->Enable( true );
         m_pMainFrame->m_pTrackingWindowHardi->m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));
@@ -729,7 +729,7 @@ void TrackingWindow::OnInitX( wxCommandEvent& event )
 {
     RTTrackingHelper::getInstance()->toggleInitSeed();
     Vector init = Vector(1,0,0);
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setInitSeed( init );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setInitSeed( init );
     
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
@@ -738,7 +738,7 @@ void TrackingWindow::OnInitY( wxCommandEvent& event )
 {
     RTTrackingHelper::getInstance()->toggleInitSeed();
     Vector init = Vector(0,1,0);
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setInitSeed( init );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setInitSeed( init );
     
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
@@ -747,7 +747,7 @@ void TrackingWindow::OnInitZ( wxCommandEvent& event )
 {
     RTTrackingHelper::getInstance()->toggleInitSeed();
     Vector init = Vector(0,0,1);
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setInitSeed( init );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setInitSeed( init );
     
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
@@ -763,7 +763,7 @@ void TrackingWindow::OnSelectGM( wxCommandEvent& WXUNUSED(event) )
 	if( pMap != NULL && pMap->getBands() == 1 )
     {
 		m_pBtnSelectGM->SetLabel( pMap->getName() );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setGMInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setGMInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 
         m_pToggleGMmap->Enable(true);
         m_pToggleGMmap->SetValue(true);
@@ -791,7 +791,7 @@ void TrackingWindow::OnSelectExclusion( wxCommandEvent& WXUNUSED(event) )
 	if( pMap != NULL && pMap->getBands() == 1 )
     {
 		m_pBtnSelectExclusion->SetLabel( wxT("Exclusion:") + pMap->getName() );
-		m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setExcludeInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setExcludeInfo( (Anatomy *)DatasetManager::getInstance()->getDataset( m_pMainFrame->m_pListCtrl->GetItem( item ) ) );
 	}
 }
 
@@ -810,7 +810,7 @@ void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
     }
     else
     {
-        float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getShellSeedNb();
+        float shellSeedNb = SceneManager::getInstance()->getScene()->getRTTfibers()->getShellSeedNb();
         RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) ); 
         m_pToggleShell->SetLabel(wxT( "Shell seed ON"));
     }
@@ -833,7 +833,7 @@ void TrackingWindow::OnInterpolate( wxCommandEvent& WXUNUSED(event) )
 void TrackingWindow::OnSliderAxisSeedNbMoved( wxCommandEvent& WXUNUSED(event) )
 {
     float sliderValue = RTTrackingHelper::getInstance()->m_pSliderAxisSeedNb->GetValue();
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->setNbSeed( sliderValue );
+    SceneManager::getInstance()->getScene()->getRTTfibers()->setNbSeed( sliderValue );
     RTTrackingHelper::getInstance()->m_pTxtAxisSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), sliderValue) );
 
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap())
@@ -842,12 +842,12 @@ void TrackingWindow::OnSliderAxisSeedNbMoved( wxCommandEvent& WXUNUSED(event) )
     }
 	else if( RTTrackingHelper::getInstance()->isSeedMap())
 	{
-		float mapSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getSeedMapNb();
+		float mapSeedNb = SceneManager::getInstance()->getScene()->getRTTfibers()->getSeedMapNb();
 		RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), mapSeedNb) );
 	}
     else
     {
-        float shellSeedNb = m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getNbMeshPoint();
+        float shellSeedNb = SceneManager::getInstance()->getScene()->getRTTfibers()->getNbMeshPoint();
         RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
     }
     RTTrackingHelper::getInstance()->setRTTDirty( true );
@@ -856,7 +856,7 @@ void TrackingWindow::OnSliderAxisSeedNbMoved( wxCommandEvent& WXUNUSED(event) )
 void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert fibers
-	DatasetIndex index = DatasetManager::getInstance()->createFibers( m_pMainFrame->m_pMainGL->m_pRealTimeFibers->getRTTFibers() );
+	DatasetIndex index = DatasetManager::getInstance()->createFibers( SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFibers() );
 
 	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
     {
@@ -868,8 +868,8 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 
     RTTrackingHelper::getInstance()->setRTTReady(false);
 
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+    SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
+    SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
     //RTTrackingHelper::getInstance()->setRTTDirty( false );
 
     RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
@@ -900,7 +900,7 @@ void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
 {
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
+    SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep = 0;
     RTTrackingHelper::getInstance()->setTrackAction(false);
     RTTrackingHelper::getInstance()->setTrackActionPause(true);
     m_pPlayPause->SetBitmapLabel(m_bmpPlay);

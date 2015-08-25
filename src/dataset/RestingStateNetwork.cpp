@@ -392,8 +392,9 @@ void RestingStateNetwork::seedBased()
 
 	if(RTFMRIHelper::getInstance()->isSeedFromfMRI())
 	{
-		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setSeedFromfMRI(m_3Dpoints);
-		MyApp::frame->m_pMainGL->m_pRealTimeFibers->setNbSeed(ceil(m_xL));
+        
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setSeedFromfMRI(m_3Dpoints);
+		SceneManager::getInstance()->getScene()->getRTTfibers()->setNbSeed(ceil(m_xL));
 		RTTrackingHelper::getInstance()->setRTTDirty(true);
 	}
 

@@ -8,7 +8,6 @@
 #endif
 
 #include "BoundingBox.h"
-#include "../dataset/RTTFibers.h"
 #include "../gfx/TheScene.h"
 #include "../misc/Fantom/FArray.h"
 
@@ -78,7 +77,7 @@ public:
     bool m_isSlizesLocked;
     bool m_isSceneLocked;
     bool m_init;
-    RTTFibers *m_pRealTimeFibers; 
+    
 
 
     DECLARE_EVENT_TABLE()

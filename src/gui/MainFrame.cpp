@@ -2513,9 +2513,9 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
     if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() && !RTTrackingHelper::getInstance()->isTrackActionPaused())
     {
-		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
-        if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
-           m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
+		SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep++;
+        if(SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep > SceneManager::getInstance()->getScene()->getRTTfibers()->getMaxFiberLength())
+           SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep = 0;
     }
 
     refreshAllGLWidgets();

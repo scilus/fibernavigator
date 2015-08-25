@@ -4388,7 +4388,7 @@ void Fibers::convertFromRTT( std::vector<std::vector<Vector> >* RTT )
 
     createColorArray( false );
     m_type = FIBERS;
-    m_fullPath = MyApp::frame->m_pMainGL->m_pRealTimeFibers->getRTTFileName();
+    m_fullPath = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFileName();
 
 	wxString id = wxString::Format(_T("%d"), RTTrackingHelper::getInstance()->generateId());
     m_name = wxT( "RTTFibers" + id );

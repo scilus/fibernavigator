@@ -17,6 +17,8 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetInfo.h"
 #include "../dataset/DatasetManager.h"
+#include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/Mesh.h"
 #include "../dataset/ODFs.h"
@@ -95,6 +97,7 @@ TheScene::TheScene()
     // be initialized to the same values as the real projection and modelview matrix.
     std::fill( m_projection, m_projection + 16, 0.0f );
     std::fill( m_modelview, m_modelview + 16, 0.0f );
+    m_pRealTimeFibers = new RTTFibers();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +111,9 @@ TheScene::~TheScene()
     // On mac, this is just a pointer to the original object that is deleted with the widgets.
     delete m_pMainGLContext;
     m_pMainGLContext = NULL;
+
+    delete m_pRealTimeFibers;
+    m_pRealTimeFibers = NULL;
 #endif
     Logger::getInstance()->print( wxT( "TheScene destructor done" ), LOGLEVEL_DEBUG );
 }
@@ -346,6 +352,30 @@ void TheScene::renderScene()
 
     renderMesh();
     renderFibers();
+
+    //Real-time Fiber Tractography
+    if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
+    {	
+		m_pRealTimeFibers->seed();
+    }
+    else if(m_pRealTimeFibers->getSize() > 0)
+    {
+        if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
+            m_pRealTimeFibers->renderRTTFibers(false);
+        else
+            m_pRealTimeFibers->renderRTTFibers(true);
+    }
+	//Real-time fMRI correlation
+	if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )
+    {	
+		DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
+    }
+	else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
+	{
+		bool move = DatasetManager::getInstance()->m_pRestingStateNetwork->isBoxMoving();
+		DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(move);
+		DatasetManager::getInstance()->m_pRestingStateNetwork->setBoxMoving(false);
+	}
 
     if( SceneManager::getInstance()->getShowAllSelObj() )
     {

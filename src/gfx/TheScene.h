@@ -13,6 +13,8 @@
 #define THESCENE_H_
 
 #include "../gui/ArcBall.h"
+#include "../dataset/RTTFibers.h"
+
 
 #include <GL/glew.h>
 #include <wx/glcanvas.h>
@@ -51,6 +53,7 @@ public:
     void         initGL          ( int whichView );
     void         renderScene     ();
     void         setMainGLContext( wxGLContext* pContext ) { m_pMainGLContext = pContext; };
+    RTTFibers*    getRTTfibers() { return m_pRealTimeFibers; }
 
     bool toggleIsRotateX()      { return m_isRotateX    = !m_isRotateX; }
     bool toggleIsRotateY()      { return m_isRotateY    = !m_isRotateY; }
@@ -94,6 +97,7 @@ private:
     wxGLContext*    m_pMainGLContext;
     float           m_modelview[16];  // Variable for the frustum calculation.
     float           m_projection[16]; // Variable for the frustum calculation.
+    RTTFibers      *m_pRealTimeFibers; 
 };
 
 #endif /*THESCENE_H_*/
