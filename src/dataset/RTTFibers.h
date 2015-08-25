@@ -119,8 +119,10 @@ private:
     
 
 	float m_alpha;
-
-	bool         m_stop;
+    int currentSeedBoxID;
+	bool m_stop;
+    bool m_render;
+    bool m_steppedOnceInsideChildBox;
 
 
     std::vector< FMatrix > m_tensorsMatrix;

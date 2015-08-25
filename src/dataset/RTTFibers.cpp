@@ -48,7 +48,9 @@ RTTFibers::RTTFibers()
 	m_stop( false ),
     m_pExcludeInfo( NULL ),
     m_pSeedMapInfo( NULL ),
-    m_pGMInfo( NULL )
+    m_pGMInfo( NULL ),
+    m_render( true ),
+    m_steppedOnceInsideChildBox( false )
 {
 }
 
@@ -157,8 +159,9 @@ void RTTFibers::seed()
             if( selObjs[ b ]->getIsNOT() || !selObjs[ b ]->getIsActive() || !SceneManager::getInstance()->getSelectionTree().isFirstLevel(selObjs[ b ]) ) //Check for ellipsoid also?
             {
                 continue;
-            }
-            
+            } 
+            currentSeedBoxID = b+1;
+
 			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
 			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
 			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
@@ -196,12 +199,13 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
 							m_fibersRTT.push_back( pointsB ); 
 							m_colorsRTT.push_back( colorB );
+                            m_steppedOnceInsideChildBox = false;
 						}
 					}
 				}
@@ -251,12 +255,13 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
 							m_fibersRTT.push_back( pointsB ); 
 							m_colorsRTT.push_back( colorB );
+                            m_steppedOnceInsideChildBox = false;
 						}
 					}
 				}
@@ -307,12 +312,13 @@ void RTTFibers::seed()
 							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
 						}
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render )
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
 							m_fibersRTT.push_back( pointsB ); 
 							m_colorsRTT.push_back( colorB );
+                            m_steppedOnceInsideChildBox = false;
 						}
 					}
 				}
@@ -350,12 +356,13 @@ void RTTFibers::seed()
 					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                         
-				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render)
 				{
 					m_fibersRTT.push_back( pointsF ); 
 					m_colorsRTT.push_back( colorF );
 					m_fibersRTT.push_back( pointsB ); 
 					m_colorsRTT.push_back( colorB );
+                    m_steppedOnceInsideChildBox = false;
 				}
             }
         }
@@ -1177,33 +1184,49 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
         }   
     }
 
+    //Child
+    std::vector< SelectionObject* >child = SceneManager::getInstance()->getSelectionTree().getDirectChildrenObjects(currentSeedBoxID);
 
- //   //NOT SELECTION
-    for( unsigned int b = 0; b < selObjs.size(); b++ )
+    for( unsigned int b = 0; b < child.size(); b++ )
 	{
-        if( selObjs[ b ]->getIsNOT() )
+        //   //NOT SELECTION
+        if(child[ b ]->getIsActive())
         {
+            if(!m_steppedOnceInsideChildBox)
+                m_render = false;
+
             Vector minCorner;
             Vector maxCorner;
             float xVoxel = DatasetManager::getInstance()->getVoxelX();
             float yVoxel = DatasetManager::getInstance()->getVoxelY();
             float zVoxel = DatasetManager::getInstance()->getVoxelZ();
-            minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
-	        minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
-	        minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
-	        maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
-	        maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
-	        maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
+            minCorner.x = child[b]->getCenter().x - child[b]->getSize().x * xVoxel / 2.0f;
+	        minCorner.y = child[b]->getCenter().y - child[b]->getSize().y * yVoxel / 2.0f;
+	        minCorner.z = child[b]->getCenter().z - child[b]->getSize().z * zVoxel / 2.0f;
+	        maxCorner.x = child[b]->getCenter().x + child[b]->getSize().x * xVoxel / 2.0f;
+	        maxCorner.y = child[b]->getCenter().y + child[b]->getSize().y * yVoxel / 2.0f;
+	        maxCorner.z = child[b]->getCenter().z + child[b]->getSize().z * zVoxel / 2.0f;
                             
-            if(pos.x <= maxCorner.x && pos.x >= minCorner.x && 
-                       pos.y <= maxCorner.y && pos.y >= minCorner.y &&
-                       pos.z <= maxCorner.z && pos.z >= minCorner.z)
+            bool inside = pos.x <= maxCorner.x && pos.x >= minCorner.x && 
+                        pos.y <= maxCorner.y && pos.y >= minCorner.y &&
+                        pos.z <= maxCorner.z && pos.z >= minCorner.z;
+
+            if( child[ b ]->getIsNOT())
             {
-                insideNotBox = true;
+                insideNotBox = inside;
+                m_render = true; // Use this to test if we render the streamline later
             }
+            else if(inside && !m_steppedOnceInsideChildBox) 
+            {
+                m_steppedOnceInsideChildBox = true; //steped once, to be rendered at the end of the propagation stage
+                m_render = true;
+            }  
+        }
+        else
+        {
+            m_render = true; //Always show
         }
     }
- 
 
 	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep && !insideNotBox)
     {
