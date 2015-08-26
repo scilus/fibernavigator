@@ -127,7 +127,7 @@ void FibersGroup::save( wxString filename, int format )
 
     
 
-    if(format == 1)
+    if(format == 0)
     {
         if( filename.AfterLast( '.' ) != _T( "vtk" ) )
         {

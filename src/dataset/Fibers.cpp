@@ -2280,7 +2280,7 @@ void Fibers::save( wxString filename, int format )
     vector<int> colorsToSave;
     int countLines = 0;
 
-    if( format == 1)
+    if( format == 0)
     {
         if( filename.AfterLast( '.' ) != _T( "vtk" ) )
         {
@@ -2335,7 +2335,7 @@ void Fibers::save( wxString filename, int format )
     vBuffer.push_back( '\n' );
     string header3 = "POINT_DATA ";
     header3 += intToString( pointsToSave.size() / 3 );
-    header3 += " float\n";
+    header3 += "\n";
     header3 += "COLOR_SCALARS scalars 3\n";
     for( unsigned int i = 0; i < header3.size(); ++i )
     {

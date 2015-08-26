@@ -593,7 +593,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     }
  
     wxString caption         = wxT( "Choose a file" );
-    wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|VTK fiber files (*.vtk)|*.vtk|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
+    wxString wildcard        = wxT( "VTK fiber files (*.vtk)|*.vtk|VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
