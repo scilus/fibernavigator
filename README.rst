@@ -61,9 +61,9 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _original Fibernavigator: http://code.google.com/p/fibernavigator/
 .. _issue tracker: https://github.com/scilus/fibernavigator/issues
 .. _video tutorials: https://github.com/scilus/fibernavigator/wiki/Video-tutorials
-.. _Build instructions for Ubuntu: https://github.com/scilus/fibernavigator/wiki/Ubuntu-build-instructions
+.. _Build instructions for Ubuntu: https://github.com/chamberm/fibernavigator/wiki/Ubuntu-build-instructions
 .. _Releases: https://github.com/chamberm/fibernavigator/releases
-.. _wiki: https://github.com/scilus/fibernavigator/wiki/_pages
+.. _wiki: https://github.com/chamberm/fibernavigator/wiki/_pages
 .. _Scene navigation: http://www.youtube.com/watch?v=OXuHX8GGaBQ
 .. _Mesh display and interaction: http://www.youtube.com/watch?v=VONdX7iTNSI
 .. _Drawing tool: http://www.youtube.com/watch?v=4vYkQLrdYaY
