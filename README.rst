@@ -43,7 +43,7 @@ How to get the application
 --------------------------
 
 - `Build instructions for Ubuntu`_ and other Linux distributions are provided
-- Windows and OSX builds are available on the Releases_ page.
+- Windows builds are available on the Releases_ page. (32 bit, 64 version to come later).
 
 Development and contact with the team
 -------------------------------------
