@@ -113,7 +113,7 @@ private:
     // Loads an anatomy. Extension supported: .nii and .nii.gz
     DatasetIndex loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
-    // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
+    // Loads a fiber set. Extension supported: .fib, .vtk, .bundlesdata, .trk and .tck
     DatasetIndex loadFibers( const wxString &filename );
 
 

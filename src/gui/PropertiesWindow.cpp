@@ -1552,6 +1552,27 @@ void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnTogglePruneRemove( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTogglePruneRemove" ), LOGLEVEL_DEBUG );
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
+    {
+        pSelObj->togglePruneRemove();
+        if( pSelObj->getIsRemove() )
+        {
+            pSelObj->m_pTogglePruneRemove->SetLabel(wxT("Del"));
+        }
+        else
+        {
+            pSelObj->m_pTogglePruneRemove->SetLabel(wxT("Prune"));
+        }
+        
+    }
+}
+
 
 void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
 {

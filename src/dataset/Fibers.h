@@ -52,7 +52,7 @@ public:
     void    getNbLines( int &nbLines );
     void    loadDMRIFibersInFile( std::ofstream &myfile );
 
-    void    save( wxString filename );
+    void    save( wxString filename, int format );
     bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
     void    saveDMRI( wxString filename );
 

@@ -50,7 +50,8 @@ RTTFibers::RTTFibers()
     m_pSeedMapInfo( NULL ),
     m_pGMInfo( NULL ),
     m_render( true ),
-    m_steppedOnceInsideChildBox( false )
+    m_steppedOnceInsideChildBox( false ),
+    m_prune(true)
 {
 }
 
@@ -183,6 +184,7 @@ void RTTFibers::seed()
 						vector<Vector> colorF; //Color (local directions)Forward
 						vector<Vector> pointsB; // Points to be rendered Backward
 						vector<Vector> colorB; //Color (local directions) Backward
+                        bool draw;
 						m_stop = false;
                         
                         if(m_isHARDI)
@@ -190,6 +192,7 @@ void RTTFibers::seed()
                             Vector rand = generateRandomSeed(minCorner,maxCorner);
 						    //Track both sides
 							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+                            draw = m_render;
 						    performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
                         }
                         else
@@ -199,7 +202,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render)
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
@@ -239,6 +242,7 @@ void RTTFibers::seed()
 						vector<Vector> colorF; //Color (local directions)Forward
 						vector<Vector> pointsB; // Points to be rendered Backward
 						vector<Vector> colorB; //Color (local directions) Backward
+                        bool draw;
 						m_stop = false;
                         
                         if(m_isHARDI)
@@ -246,6 +250,7 @@ void RTTFibers::seed()
                             Vector rand = generateRandomSeed(minCorner,maxCorner);
 						    //Track both sides
 							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+                            draw = m_render;
 						    performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
                         }
                         else
@@ -255,7 +260,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render)
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
@@ -296,6 +301,8 @@ void RTTFibers::seed()
 						vector<Vector> colorF; //Color (local directions)Forward
 						vector<Vector> pointsB; // Points to be rendered Backward
 						vector<Vector> colorB; //Color (local directions) Backward
+                        bool draw;
+						m_stop = false;
                         
 						if(m_isHARDI)
 						{
@@ -303,6 +310,7 @@ void RTTFibers::seed()
 
 							//Track both sides
 							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+                            draw = m_render;
 							performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
 						}
 						else
@@ -312,7 +320,7 @@ void RTTFibers::seed()
 							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
 						}
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render )
+						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && m_render && draw)
 						{
 							m_fibersRTT.push_back( pointsF ); 
 							m_colorsRTT.push_back( colorF );
@@ -341,12 +349,14 @@ void RTTFibers::seed()
 				vector<Vector> colorF; //Color (local directions)Forward
 				vector<Vector> pointsB; // Points to be rendered Backward
 				vector<Vector> colorB; //Color (local directions) Backward
+                bool draw;
 				m_stop = false;
                         
                 if(m_isHARDI)
                 {
 					//Track both sides
 					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, pointsF, colorF); //First pass
+                    draw = m_render;
 					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                 else
@@ -356,7 +366,7 @@ void RTTFibers::seed()
 					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                         
-				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render)
+				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 				{
 					m_fibersRTT.push_back( pointsF ); 
 					m_colorsRTT.push_back( colorF );
@@ -1226,16 +1236,29 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
                 inside = pos.x <= maxCorner.x && pos.x >= minCorner.x && pos.y <= maxCorner.y && pos.y >= minCorner.y && pos.z <= maxCorner.z && pos.z >= minCorner.z;
             }
             
-            if( child[ b ]->getIsNOT())
-            {
-                insideNotBox = inside;
-                m_render = true; // Use this to test if we render the streamline later
-            }
-            else if(inside && !m_steppedOnceInsideChildBox) 
+            if(inside && !m_steppedOnceInsideChildBox) //For selecting or removing
             {
                 m_steppedOnceInsideChildBox = true; //steped once, to be rendered at the end of the propagation stage
                 m_render = true;
-            }  
+            } 
+            if( child[ b ]->getIsNOT()) //For pruning
+            {
+                insideNotBox = inside;
+                m_prune = !child[b]->getIsRemove();
+                if(inside && m_prune)
+                {
+                    m_render = true;
+                }
+                else if(inside && !m_prune && m_steppedOnceInsideChildBox)
+                {
+                    m_render = false;
+                }
+                else
+                {
+                    m_render = true;
+                }
+            }
+             
         }
         else
         {
@@ -1243,7 +1266,7 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
         }
     }
 
-	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep && !insideNotBox)
+	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep && !insideNotBox) //for pruning
     {
         isOk = true;
     }

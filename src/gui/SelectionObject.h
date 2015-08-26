@@ -124,6 +124,10 @@ public :
     void       setIsNOT( bool i_isNOT );
     bool       getIsNOT()                             { return m_isNOT;                        };
 
+    bool       togglePruneRemove();
+    void       setPruneRemove( bool m_isRemove );
+    bool       getIsRemove()                          { return m_isRemove;                     };
+
     void       setPicked( int i_picked )              { m_hitResult.picked = i_picked;         };
 
     void       setSize( float sizeX, float sizeY, float sizeZ ) 
@@ -215,6 +219,7 @@ protected :
     Vector          m_size;
     bool            m_isActive;
     bool            m_isNOT;
+    bool            m_isRemove;
     bool            m_isSelected;
     bool            m_isVisible;
     bool            m_isMagnet;
@@ -391,6 +396,7 @@ public:
     wxTextCtrl      *m_pTxtSizeZ;
     wxSlider        *m_pSliderQ;
     wxTextCtrl      *m_pBoxQ;
+    wxToggleButton  *m_pTogglePruneRemove;
     
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.
     static const int    MEAN_FIBER_NB_POINTS=50;         // This value represent the number of points we want the mean fiber to have.

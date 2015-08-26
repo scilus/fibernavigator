@@ -63,6 +63,7 @@ void SelectionObject::doBasicInit()
     m_size = Vector( 0.0f, 0.0f, 0.0f );
     m_isActive = true;
     m_isNOT = false;
+    m_isRemove = false;
     m_isSelected = false;
     m_isVisible = true;
     m_isMagnet = false;
@@ -521,9 +522,23 @@ bool SelectionObject::toggleIsNOT()
     return getIsNOT();
 }
 
+bool SelectionObject::togglePruneRemove()
+{
+    setPruneRemove( !getIsRemove() ); 
+    RTTrackingHelper::getInstance()->setRTTDirty(true);
+    return getIsRemove();
+}
+
 void SelectionObject::setIsNOT( bool i_isNOT )
 {
     m_isNOT = i_isNOT;
+    SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );
+    SceneManager::getInstance()->setSelBoxChanged( true );
+}
+
+void SelectionObject::setPruneRemove( bool i_isRemove )
+{
+    m_isRemove = i_isRemove;
     SceneManager::getInstance()->getSelectionTree().notifyStatsNeedUpdating( this );
     SceneManager::getInstance()->setSelBoxChanged( true );
 }
@@ -2066,7 +2081,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
         wxImage bmpMeanFiberColor(  MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
         wxImage bmpConvexHullColor( MyApp::iconsPath + wxT( "colorSelect.png" ), wxBITMAP_TYPE_PNG );
 
-        wxButton *pBtnChangeName          = new wxButton( pParent, wxID_ANY, wxT( "Rename" ) );
+        wxButton *pBtnChangeName          = new wxButton( pParent, wxID_ANY, wxT( "Rename" ), DEF_POS, wxSize( 20, -1 ) );
         wxButton *pBtnSelectColorFibers   = new wxButton( pParent, wxID_ANY, wxT( "Select Fibers Color" ) );
 
     #if !_USE_LIGHT_GUI
@@ -2082,7 +2097,8 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
     //     m_pBtnSelectConvexHullColor     = new wxBitmapButton( pParent, wxID_ANY, bmpConvexHullColor );
         m_pToggleVisibility           = new wxToggleButton( pParent, wxID_ANY, wxT( "Visible" ), DEF_POS, wxSize( 20, -1 ) );
         m_pToggleActivate             = new wxToggleButton( pParent, wxID_ANY, wxT( "Activate" ), DEF_POS, wxSize( 20, -1 ) );
-        wxToggleButton *pToggleAndNot = new wxToggleButton( pParent, wxID_ANY, wxT( "And / Not" ) );
+        wxToggleButton *pToggleAndNot = new wxToggleButton( pParent, wxID_ANY, wxT( "And / Not" ), DEF_POS, wxSize( 20, -1 ) );
+        m_pTogglePruneRemove = new wxToggleButton( pParent, wxID_ANY, wxT( "Prune" ), DEF_POS, wxSize( 20, -1 ) );
         m_pToggleCalculatesFibersInfo = new wxToggleButton( pParent, wxID_ANY, wxT( "Calculate Fibers Stats" ) );
 
         m_pToggleDisplayMeanFiber     = new wxToggleButton( pParent, wxID_ANY, wxT( "Display Mean Fiber" ) );
@@ -2124,6 +2140,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
 
         pBoxSizer = new wxBoxSizer( wxHORIZONTAL );
         pBoxSizer->Add( pToggleAndNot,  1, wxEXPAND | wxALL, 1 );
+        pBoxSizer->Add( m_pTogglePruneRemove, 1, wxEXPAND | wxALL, 1 );
         pBoxSizer->Add( pBtnChangeName, 1, wxEXPAND | wxALL, 1 );
         pBoxMain->Add( pBoxSizer, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
@@ -2294,6 +2311,7 @@ void SelectionObject::createPropertiesSizer( PropertiesWindow *pParent )
         pParent->Connect( m_pToggleVisibility->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleShowSelectionObject ) );
         pParent->Connect( m_pToggleActivate->GetId(),   wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxTreeEventHandler(    PropertiesWindow::OnActivateTreeItem ) );
         pParent->Connect( pToggleAndNot->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleAndNot ) );
+        pParent->Connect( m_pTogglePruneRemove->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnTogglePruneRemove ) );
         pParent->Connect( m_pToggleCalculatesFibersInfo->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayFibersInfo ) );
         pParent->Connect( m_pToggleDisplayMeanFiber->GetId(),     wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayMeanFiber ) );
     //     pParent->Connect( m_pToggleDisplayConvexHull->GetId(),    wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnDisplayConvexHull ) );

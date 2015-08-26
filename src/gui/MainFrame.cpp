@@ -364,7 +364,7 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
-const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
+const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.vtk", "*.scn" };
 const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
 
 int compareInputFile( const wxString &first, const wxString &second )
@@ -391,7 +391,7 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
     wxArrayString l_fileNames;
     wxString l_caption          = wxT( "Choose a file" );
-    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers VTK(*.vtk)|*.vtk|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
     wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxFD_OPEN | wxFD_MULTIPLE );
@@ -593,7 +593,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     }
  
     wxString caption         = wxT( "Choose a file" );
-    wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
+    wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|VTK fiber files (*.vtk)|*.vtk|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
@@ -615,13 +615,13 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
                     Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
                     if( pFibers )
                     {
-                        if (dialog.GetFilterIndex()==1)
+                        if (dialog.GetFilterIndex()==2)
                         {
                             pFibers->saveDMRI( dialog.GetPath() );
                         }
                         else
                         {
-                            pFibers->save( dialog.GetPath() );
+                            pFibers->save( dialog.GetPath(), dialog.GetFilterIndex() );
                         }
                     }
                 }
@@ -630,13 +630,13 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
             {
                 FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
                 
-                if (dialog.GetFilterIndex()==1)
+                if (dialog.GetFilterIndex()==2)
                 {
                     l_fibersGroup->saveDMRI( dialog.GetPath() );
                 }
                 else
                 {
-                    l_fibersGroup->save( dialog.GetPath() );
+                    l_fibersGroup->save( dialog.GetPath(), dialog.GetFilterIndex() );
                 }
             }
             
@@ -1440,7 +1440,7 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType, Vector magnetFi
     
     SelectionObject *pCurObj = getCurrentSelectionObject();
     
-    if( selTree.isEmpty() || pCurObj == NULL )
+    if( selTree.isEmpty() || pCurObj == NULL ||  magnetField.getLength() != 0 )
     {
         int itemId = selTree.addChildrenObject( -1, pSelObj );
         

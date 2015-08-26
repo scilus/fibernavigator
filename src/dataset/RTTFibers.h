@@ -123,6 +123,7 @@ private:
 	bool m_stop;
     bool m_render;
     bool m_steppedOnceInsideChildBox;
+    bool m_prune;
 
 
     std::vector< FMatrix > m_tensorsMatrix;

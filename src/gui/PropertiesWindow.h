@@ -140,6 +140,7 @@ public:
     void OnActivateTreeItem                 ( wxTreeEvent&    event );
     void OnRenameBox                        ( wxCommandEvent& event );
     void OnToggleAndNot                     ( wxCommandEvent& event );
+    void OnTogglePruneRemove                ( wxCommandEvent& event );
     void OnColorRoi                         ( wxCommandEvent& event );
     void OnVoiFlipNormals                   ( wxCommandEvent& event );
     void OnAssignColor                      ( wxCommandEvent& event );

@@ -158,7 +158,7 @@ bool Fibers::load( const wxString &filename )
     bool res( false );
 
     wxString extension = filename.AfterLast( '.' );
-    if( wxT( "fib" ) == extension )
+    if( wxT( "fib" ) == extension || wxT( "vtk" ) == extension )
     {
         if( loadVTK( filename ) )
         {
@@ -2268,7 +2268,7 @@ void Fibers::loadDMRIFibersInFile( ofstream& myfile )
 /**
  * Save using the VTK binary format.
  */
-void Fibers::save( wxString filename )
+void Fibers::save( wxString filename, int format )
 {
     ofstream myfile;
     char *pFn;
@@ -2280,9 +2280,19 @@ void Fibers::save( wxString filename )
     vector<int> colorsToSave;
     int countLines = 0;
 
-    if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    if( format == 1)
     {
-        filename += _T( ".fib" );
+        if( filename.AfterLast( '.' ) != _T( "vtk" ) )
+        {
+            filename += _T( ".vtk" );
+        }
+    }
+    else
+    {
+        if( filename.AfterLast( '.' ) != _T( "fib" ) )
+        {
+            filename += _T( ".fib" );
+        }
     }
 
     pFn = ( char * ) malloc( filename.length() );

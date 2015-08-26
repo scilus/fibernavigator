@@ -383,7 +383,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
             result = loadMesh( filename, extension );
         }
     }
-    else if( wxT( "fib" ) == extension || wxT( "trk" ) == extension || wxT( "bundlesdata" ) == extension || wxT( "Bfloat" ) == extension || wxT( "tck" ) == extension )
+    else if( wxT( "fib" ) == extension || wxT( "trk" ) == extension || wxT( "bundlesdata" ) == extension || wxT( "Bfloat" ) == extension || wxT( "tck" ) == extension || wxT( "vtk" ) == extension)
     {
         if( !isAnatomyLoaded() )
         {
@@ -653,7 +653,7 @@ DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_i
 }
 //////////////////////////////////////////////////////////////////////////
 
-// Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
+// Loads a fiber set. Extension supported: .fib, .vtk, .bundlesdata, .trk and .tck
 DatasetIndex DatasetManager::loadFibers( const wxString &filename )
 {
     Fibers* l_fibers = new Fibers();

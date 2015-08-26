@@ -30,7 +30,7 @@ public:
             && m_isSubsamplingToggled && m_isColorModeToggled;
     }
 
-    void    save( wxString filename );
+    void    save( wxString filename, int format );
     bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
 
     void    saveDMRI( wxString filename );
