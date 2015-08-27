@@ -426,7 +426,6 @@ void TrackingWindow::OnStartTracking( wxCommandEvent& WXUNUSED(event) )
     if( !RTTrackingHelper::getInstance()->isRTTReady() )
     {
         SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
-        SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
         //RTTrackingHelper::getInstance()->setRTTDirty( false );
 
         RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
@@ -446,7 +445,6 @@ void TrackingWindow::OnClearBox( wxTreeEvent&    event )
 {
     m_pMainFrame->onDeleteTreeItem( event );
     SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
-    SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
     RTTrackingHelper::getInstance()->setRTTDirty( false );
     RTTrackingHelper::getInstance()->setRTTReady( false );
     m_pBtnStart->SetValue( false );
@@ -506,7 +504,7 @@ void TrackingWindow::OnSliderOpacityMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderOpacity->GetValue() / 100.0f;
     m_pTxtOpacityBox->SetValue(wxString::Format( wxT( "%.2f"), sliderValue) );
     SceneManager::getInstance()->getScene()->getRTTfibers()->setOpacity( sliderValue );
-    SceneManager::getInstance()->getScene()->getRTTfibers()->renderRTTFibers(false);
+    SceneManager::getInstance()->getScene()->getRTTfibers()->renderRTTFibers(true, false);
 }
 
 void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
@@ -868,7 +866,6 @@ void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setRTTReady(false);
 
     SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
-    SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
     //RTTrackingHelper::getInstance()->setRTTDirty( false );
 
     RTFMRIHelper::getInstance()->setRTFMRIDirty( false );

@@ -54,6 +54,7 @@ RTTFibers::RTTFibers()
     m_steppedOnceInsideChildBox( false ),
     m_prune(true)
 {
+    m_bufferObjects = new GLuint[2];
 }
 
 void RTTFibers::setSeedMapInfo(Anatomy *info)
@@ -137,13 +138,29 @@ float RTTFibers::getSeedMapNb()
 	}
     return pts;
 }
+
+void RTTFibers::clearFibersRTT()
+{
+    m_streamlinesColors.clear();
+    m_streamlinesPoints.clear();
+
+    if( SceneManager::getInstance()->isUsingVBO() )
+    {
+        glDeleteBuffers( 2, m_bufferObjects );
+    }
+
+    m_nbPtsPerLine.clear();
+    m_lines = 0;
+    m_linePointer.clear();
+    m_linePointer.push_back(0);
+}
 ///////////////////////////////////////////////////////////////////////////
 // Generate seeds and tracks
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::seed()
 {
-    m_fibersRTT.clear();
-    m_colorsRTT.clear();
+    clearFibersRTT();
+    int previousLinePointer = 0;
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();
@@ -152,7 +169,6 @@ void RTTFibers::seed()
     Vector minCorner, maxCorner, middle;
     selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
     
-
 	//Evenly distanced seeds
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
 	{
@@ -162,6 +178,7 @@ void RTTFibers::seed()
             {
                 continue;
             } 
+
             m_currentSeedBoxID = b+1;
 
 			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
@@ -181,10 +198,11 @@ void RTTFibers::seed()
 				{
 					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
 					{
-						vector<Vector> pointsF; // Points to be rendered Forward
-						vector<Vector> colorF; //Color (local directions)Forward
-						vector<Vector> pointsB; // Points to be rendered Backward
-						vector<Vector> colorB; //Color (local directions) Backward
+						vector<float> pointsF;
+                        vector<float> pointsB;
+                        vector<float> colorF;
+                        vector<float> colorB;
+
                         bool draw;
 						m_stop = false;
                         
@@ -203,12 +221,32 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
-							m_fibersRTT.push_back( pointsF ); 
-							m_colorsRTT.push_back( colorF );
-							m_fibersRTT.push_back( pointsB ); 
-							m_colorsRTT.push_back( colorB );
+                            //Insert strategically for drawArray methods.
+                            if(pointsF.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsF.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                                
+                            }
+                            
+                            if(pointsB.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsB.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                            }
+
                             m_steppedOnceInsideChildBox = false;
 						}
 					}
@@ -216,6 +254,7 @@ void RTTFibers::seed()
 			}
 		}
 	}
+    //Seed from anatomy
 	else if ( RTTrackingHelper::getInstance()->isSeedMap())
 	{
 		for( unsigned int s = 0; s < m_pSeedMap.size(); s++ )
@@ -239,10 +278,11 @@ void RTTFibers::seed()
 				{
 					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
 					{
-						vector<Vector> pointsF; // Points to be rendered Forward
-						vector<Vector> colorF; //Color (local directions)Forward
-						vector<Vector> pointsB; // Points to be rendered Backward
-						vector<Vector> colorB; //Color (local directions) Backward
+						vector<float> pointsF;
+                        vector<float> pointsB;
+                        vector<float> colorF;
+                        vector<float> colorB;
+
                         bool draw;
 						m_stop = false;
                         
@@ -261,12 +301,33 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
-							m_fibersRTT.push_back( pointsF ); 
-							m_colorsRTT.push_back( colorF );
-							m_fibersRTT.push_back( pointsB ); 
-							m_colorsRTT.push_back( colorB );
+                            //Insert strategically for drawArray methods.
+                            if(pointsF.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsF.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                                
+                            }
+                            
+                            if(pointsB.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsB.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                            }
+
                             m_steppedOnceInsideChildBox = false;
 						}
 					}
@@ -297,11 +358,11 @@ void RTTFibers::seed()
 				{
 					for( float z = zz - zVoxel; z < zz + zVoxel + zstep/2.0f; z+= zstep )
 					{
+                        vector<float> pointsF;
+                        vector<float> pointsB;
+                        vector<float> colorF;
+                        vector<float> colorB;
 
-						vector<Vector> pointsF; // Points to be rendered Forward
-						vector<Vector> colorF; //Color (local directions)Forward
-						vector<Vector> pointsB; // Points to be rendered Backward
-						vector<Vector> colorB; //Color (local directions) Backward
                         bool draw;
 						m_stop = false;
                         
@@ -321,12 +382,33 @@ void RTTFibers::seed()
 							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
 						}
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && m_render && draw)
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
-							m_fibersRTT.push_back( pointsF ); 
-							m_colorsRTT.push_back( colorF );
-							m_fibersRTT.push_back( pointsB ); 
-							m_colorsRTT.push_back( colorB );
+                            //Insert strategically for drawArray methods.
+                            if(pointsF.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsF.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                                
+                            }
+                            
+                            if(pointsB.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsB.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                            }
+
                             m_steppedOnceInsideChildBox = false;
 						}
 					}
@@ -346,10 +428,11 @@ void RTTFibers::seed()
 
             for ( size_t k = 0; k < positions.size(); ++k )
             {
-                vector<Vector> pointsF; // Points to be rendered Forward
-				vector<Vector> colorF; //Color (local directions)Forward
-				vector<Vector> pointsB; // Points to be rendered Backward
-				vector<Vector> colorB; //Color (local directions) Backward
+                vector<float> pointsF;
+                vector<float> pointsB;
+                vector<float> colorF;
+                vector<float> colorB;
+
                 bool draw;
 				m_stop = false;
                         
@@ -367,18 +450,38 @@ void RTTFibers::seed()
 					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                         
-				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
+				if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 				{
-					m_fibersRTT.push_back( pointsF ); 
-					m_colorsRTT.push_back( colorF );
-					m_fibersRTT.push_back( pointsB ); 
-					m_colorsRTT.push_back( colorB );
+                    //Insert strategically for drawArray methods.
+                    if(pointsF.size() != 0)
+                    {
+                        m_nbPtsPerLine.push_back(pointsF.size()/3);
+                        m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                        previousLinePointer = m_linePointer[m_lines+1];
+                        m_lines++;
+
+                        m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                        m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                        
+                    }
+                            
+                    if(pointsB.size() != 0)
+                    {
+                        m_nbPtsPerLine.push_back(pointsB.size()/3);
+                        m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                        previousLinePointer = m_linePointer[m_lines+1];
+                        m_lines++;
+
+                        m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                        m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                    }
+
                     m_steppedOnceInsideChildBox = false;
 				}
             }
         }
 	}
-    renderRTTFibers(false);
+    renderRTTFibers(true, false);
 	
 	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
@@ -388,117 +491,49 @@ void RTTFibers::seed()
 ///////////////////////////////////////////////////////////////////////////
 //Rendering stage
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::renderRTTFibers(bool isPlaying)
+void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate)
 {
-    if(!isPlaying)
-		m_trackActionStep = std::numeric_limits<unsigned int>::max();
-
-    if( m_fibersRTT.size() > 0 )
+    if(m_streamlinesPoints.size() != 0)
     {
-        glPushAttrib( GL_ALL_ATTRIB_BITS );
-		if(m_alpha != 1.0f)
-		{
-			glEnable( GL_BLEND );
-			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			glDepthMask( GL_FALSE );
-		}
-        //for fmri
-        std::vector<Vector> positions; 
-	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
-	    { 
-
-		    //POINTS
-		    if( SceneManager::getInstance()->isPointMode() )
-		    {
-			    //Forward
-			    if( m_fibersRTT[j].size() > 0 )
-			    {
-					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size(), m_trackActionStep); i++ )
-				    {
-                        
-					    glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
-					    glBegin( GL_POINTS );
-						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-					    glEnd();
-				    }
-			    }
-			    //Backward
-			    if(m_fibersRTT[j+1].size() > 0)
-			    {
-					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size(), m_trackActionStep); i++ )
-				    {  
-					    glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
-					    glBegin( GL_POINTS );
-						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-					    glEnd();
-				    }
-			    }
-		    }
-		    //LINES
-		    else
-		    {
-			    //Forward
-			    if( m_fibersRTT[j].size() > 2)
-			    {
-                    for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
-				    {
-                        if(i > m_fibersRTT[j].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
-                        {
-                            glPointSize(10.0f);
-                            glColor3f( 1.0f,0.0f,0.0f );
-					        glBegin( GL_POINTS );
-						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-					        glEnd();
-                            positions.push_back(Vector(m_fibersRTT[j][i].x,m_fibersRTT[j][i].y,m_fibersRTT[j][i].z));
-                        }
-                        else
-                        {
-                            glPointSize(1.0f);
-                            glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
-					        glBegin( GL_LINES );
-						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-						        glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
-					        glEnd();
-                        }
-					    
-				    }
-			    }
-			    //Backward
-			    if ( m_fibersRTT[j+1].size() > 2)
-			    {
-                    for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
-				    {
-                        if(i > m_fibersRTT[j+1].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
-                        {
-                            glPointSize(10.0f);
-                            glColor3f( 1.0f, 0.0f, 0.0f );
-					        glBegin( GL_POINTS );
-						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-					        glEnd();
-                            positions.push_back(Vector(m_fibersRTT[j+1][i].x,m_fibersRTT[j+1][i].y,m_fibersRTT[j+1][i].z));
-                        }
-                        else
-                        {
-                            glPointSize(1.0f);
-					        glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
-					        glBegin( GL_LINES );
-						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-						        glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
-					        glEnd();
-                        }
-				    }
-			    }
-				
-		    }   
-	    }
-        glDisable(GL_BLEND);
-		glPopAttrib();
-        if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+        //TODO: Redo animate, opacity and rs-connect N points.
+        if(bindBuffers)
         {
-            DatasetManager::getInstance()->m_pRestingStateNetwork->setSeedFromTracto(positions);
-            RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+            glGenBuffers( 2, m_bufferObjects );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+            glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesPoints.size(), &m_streamlinesPoints[0], GL_STATIC_DRAW );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesColors.size(), &m_streamlinesColors[0], GL_STATIC_DRAW );
         }
-	}   
+
+        glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_COLOR_ARRAY );
+        glEnableClientState( GL_NORMAL_ARRAY );
+
+        if( !SceneManager::getInstance()->isUsingVBO() )
+        {
+            glVertexPointer( 3, GL_FLOAT, 0, &m_streamlinesPoints[0] );
+            glColorPointer( 3, GL_FLOAT, 0, &m_streamlinesColors[0] ); // Local colors.
+            glNormalPointer( GL_FLOAT, 0, &m_streamlinesColors[0] );
+        }
+        else
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+            glVertexPointer( 3, GL_FLOAT, 0, 0 );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glColorPointer( 3, GL_FLOAT, 0, 0 );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glNormalPointer( GL_FLOAT, 0, 0 );
+        }
+
+        for( int i = 0; i < m_lines; i++)
+        {
+            glDrawArrays( GL_LINE_STRIP, m_linePointer[ i ], m_nbPtsPerLine[i] );
+        }
+
+        glDisableClientState( GL_VERTEX_ARRAY );
+        glDisableClientState( GL_COLOR_ARRAY );
+        glDisableClientState( GL_NORMAL_ARRAY );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -875,7 +910,7 @@ void RTTFibers::setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2,
 ///////////////////////////////////////////////////////////////////////////
 // Performs realtime fiber tracking along direction bwdfwd (backward, forward)
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, vector<Vector>& color)
+void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<float>& points, vector<float>& color)
 {   
     //Vars
     Vector currPosition(seed); //Current PIXEL position
@@ -1003,8 +1038,12 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
             while( FAvalue >= FAthreshold && angle <= angleThreshold )
             {
                 //Insert point to be rendered
-                points.push_back( currPosition );
-                color.push_back( currDirection );
+                points.push_back( currPosition.x );
+                points.push_back( currPosition.y );
+                points.push_back( currPosition.z );
+                color.push_back( currDirection.x );
+                color.push_back( currDirection.y );
+                color.push_back( currDirection.z );
 
                 //Advance
                 currPosition = nextPosition;
@@ -1281,7 +1320,7 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
 ///////////////////////////////////////////////////////////////////////////
 // Performs realtime HARDI fiber tracking along direction bwdfwd (backward, forward)
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points, vector<Vector>& color)
+void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<float>& points, vector<float>& color)
 { 
     //Vars
     Vector currPosition(seed); //Current PIXEL position
@@ -1377,8 +1416,12 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
             while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber, nextPosition) && !m_stop)
             {
                 //Insert point to be rendered
-                points.push_back( currPosition );
-                color.push_back( currDirection );
+                points.push_back( currPosition.x );
+                points.push_back( currPosition.y );
+                points.push_back( currPosition.z );
+                color.push_back( std::abs(currDirection.x) );
+                color.push_back( std::abs(currDirection.y) );
+                color.push_back( std::abs(currDirection.z) );
 
                 //Advance
                 currPosition = nextPosition;

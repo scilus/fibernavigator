@@ -87,7 +87,7 @@ public:
     DatasetIndex createMaximas( const wxString &filename )                       { return insert( new Maximas( filename ) ); }
 
     void remove( const DatasetIndex index );
-	DatasetIndex createFibers( std::vector<std::vector<Vector> >* RTT );
+	DatasetIndex createFibers( std::vector<float>* RTT );
     DatasetIndex addFibers( Fibers* fibers );
 
 protected:

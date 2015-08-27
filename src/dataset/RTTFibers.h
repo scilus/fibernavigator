@@ -24,9 +24,9 @@ public:
 
     //RTT functions
     void seed();
-    void renderRTTFibers(bool isPlaying);
-    void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
-    void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
+    void renderRTTFibers(bool bindBuffers, bool isPlaying);
+    void performDTIRTT( Vector seed, int bwdfwd, std::vector<float>& points, std::vector<float>& color );
+    void performHARDIRTT( Vector seed, int bwdfwd, std::vector<float>& points, std::vector<float>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
 	std::vector<float> pickDirection(std::vector<float> initialPeaks, bool initWithDir, Vector currPos);
     bool withinMapThreshold(unsigned int sticksNumber, Vector pos);
@@ -37,8 +37,7 @@ public:
     Vector advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float peaksNumber, Vector pos );
     Vector magneticField( Vector vin, const std::vector<float> &sticks, float peaksNumber, Vector pos, Vector& vOut, float& F);
     
-    void clearFibersRTT()                           { m_fibersRTT.clear(); }
-    void clearColorsRTT()                           { m_colorsRTT.clear(); }
+    void clearFibersRTT();
 
     void setFAThreshold( float FAThreshold )						  { m_FAThreshold = FAThreshold; }
     void setTensorsMatrix( const std::vector<FMatrix> tensorsMatrix ) { m_tensorsMatrix = tensorsMatrix; }
@@ -88,8 +87,8 @@ public:
                                                    else
                                                         return m_pTensorsInfo->getPath(); }
 
-    size_t getSize()                                  { return m_fibersRTT.size(); }
-	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
+    size_t getSize()                                  { return m_streamlinesPoints.size(); }
+	std::vector<float>* getRTTFibers() { return &m_streamlinesPoints; }
 
 
 	unsigned int  m_trackActionStep;
@@ -117,6 +116,9 @@ private:
 	Anatomy     *m_pSeedMapInfo;
     Anatomy     *m_pGMInfo;
     Vector       m_initVec;
+
+    std::vector<float> m_streamlinesPoints; // Points to be rendered Forward
+	std::vector<float> m_streamlinesColors; //Color (local directions)Forward
     
 
 	float m_alpha;
@@ -125,7 +127,7 @@ private:
     bool m_render;
     bool m_steppedOnceInsideChildBox;
     bool m_prune;
-
+    GLuint*     m_bufferObjects;
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;
@@ -134,6 +136,10 @@ private:
     std::vector<std::vector<Vector> > m_fibersRTT;
     std::vector<std::vector<Vector> > m_colorsRTT;
     std::vector< SelectionObject* > selObjs;
+
+    std::vector< int > m_nbPtsPerLine;
+    int m_lines;
+    std::vector< int > m_linePointer;
 
 };
 

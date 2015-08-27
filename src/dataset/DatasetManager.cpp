@@ -680,7 +680,7 @@ DatasetIndex DatasetManager::loadFibers( const wxString &filename )
     return BAD_INDEX;
 }
 
-DatasetIndex DatasetManager::createFibers( std::vector<std::vector<Vector> >* RTT )
+DatasetIndex DatasetManager::createFibers( std::vector<float>* RTT )
 {
     Fibers* l_fibers = new Fibers();
 
