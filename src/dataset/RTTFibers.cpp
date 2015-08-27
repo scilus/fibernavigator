@@ -33,7 +33,7 @@ RTTFibers::RTTFibers()
 :   m_trackActionStep(std::numeric_limits<unsigned int>::max()),
     m_timerStep( 0 ),
     m_FAThreshold( 0.20f ),
-    m_angleThreshold( 40.0f ),
+    m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
     m_GMstep( 15 ),
     m_nbSeed ( 10.0f ),
@@ -43,6 +43,7 @@ RTTFibers::RTTFibers()
     m_minFiberLength( 60 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
+    m_currentSeedBoxID( 0 ),
     m_isHARDI( false ),
     m_countGMstep( 0 ),
 	m_stop( false ),
@@ -161,7 +162,7 @@ void RTTFibers::seed()
             {
                 continue;
             } 
-            currentSeedBoxID = b+1;
+            m_currentSeedBoxID = b+1;
 
 			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
 			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
@@ -1194,75 +1195,78 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
         }   
     }
 
-    //Child
-    std::vector< SelectionObject* >child = SceneManager::getInstance()->getSelectionTree().getDirectChildrenObjects(currentSeedBoxID);
+    //Child (Only works for 1 inclusion or 1 exclusion child so far.)
+    if(m_currentSeedBoxID != 0 )
+    {
+        std::vector< SelectionObject* >child = SceneManager::getInstance()->getSelectionTree().getDirectChildrenObjects(m_currentSeedBoxID);
 
-    for( unsigned int b = 0; b < child.size(); b++ )
-	{
-        //   //NOT SELECTION
-        if(child[ b ]->getIsActive())
-        {
-            if(!m_steppedOnceInsideChildBox)
-                m_render = false;
-
-            Vector minCorner;
-            Vector maxCorner;
-            float xVoxel = DatasetManager::getInstance()->getVoxelX();
-            float yVoxel = DatasetManager::getInstance()->getVoxelY();
-            float zVoxel = DatasetManager::getInstance()->getVoxelZ();
-            minCorner.x = child[b]->getCenter().x - child[b]->getSize().x * xVoxel / 2.0f;
-	        minCorner.y = child[b]->getCenter().y - child[b]->getSize().y * yVoxel / 2.0f;
-	        minCorner.z = child[b]->getCenter().z - child[b]->getSize().z * zVoxel / 2.0f;
-	        maxCorner.x = child[b]->getCenter().x + child[b]->getSize().x * xVoxel / 2.0f;
-	        maxCorner.y = child[b]->getCenter().y + child[b]->getSize().y * yVoxel / 2.0f;
-	        maxCorner.z = child[b]->getCenter().z + child[b]->getSize().z * zVoxel / 2.0f;
-            bool inside;
-
-            if(child[b]->getSelectionType() == ELLIPSOID_TYPE)
+        for( unsigned int b = 0; b < child.size(); b++ )
+	    {
+            //   //NOT SELECTION
+            if(child[ b ]->getIsActive())
             {
-                float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
-                float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
-                float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
-                float l_axisCenter  = maxCorner.x  - l_axisRadius;
-                float l_axis1Center = maxCorner.y - l_axis1Radius;
-                float l_axis2Center = maxCorner.z - l_axis2Radius;
-
-                inside = (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
-                        (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
-                        (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f;
-            }
-            else
-            {          
-                inside = pos.x <= maxCorner.x && pos.x >= minCorner.x && pos.y <= maxCorner.y && pos.y >= minCorner.y && pos.z <= maxCorner.z && pos.z >= minCorner.z;
-            }
-            
-            if(inside && !m_steppedOnceInsideChildBox) //For selecting or removing
-            {
-                m_steppedOnceInsideChildBox = true; //steped once, to be rendered at the end of the propagation stage
-                m_render = true;
-            } 
-            if( child[ b ]->getIsNOT()) //For pruning
-            {
-                insideNotBox = inside;
-                m_prune = !child[b]->getIsRemove();
-                if(inside && m_prune)
-                {
-                    m_render = true;
-                }
-                else if(inside && !m_prune && m_steppedOnceInsideChildBox)
-                {
+                if(!m_steppedOnceInsideChildBox)
                     m_render = false;
+
+                Vector minCorner;
+                Vector maxCorner;
+                float xVoxel = DatasetManager::getInstance()->getVoxelX();
+                float yVoxel = DatasetManager::getInstance()->getVoxelY();
+                float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+                minCorner.x = child[b]->getCenter().x - child[b]->getSize().x * xVoxel / 2.0f;
+	            minCorner.y = child[b]->getCenter().y - child[b]->getSize().y * yVoxel / 2.0f;
+	            minCorner.z = child[b]->getCenter().z - child[b]->getSize().z * zVoxel / 2.0f;
+	            maxCorner.x = child[b]->getCenter().x + child[b]->getSize().x * xVoxel / 2.0f;
+	            maxCorner.y = child[b]->getCenter().y + child[b]->getSize().y * yVoxel / 2.0f;
+	            maxCorner.z = child[b]->getCenter().z + child[b]->getSize().z * zVoxel / 2.0f;
+                bool inside;
+
+                if(child[b]->getSelectionType() == ELLIPSOID_TYPE)
+                {
+                    float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
+                    float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
+                    float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
+                    float l_axisCenter  = maxCorner.x  - l_axisRadius;
+                    float l_axis1Center = maxCorner.y - l_axis1Radius;
+                    float l_axis2Center = maxCorner.z - l_axis2Radius;
+
+                    inside = (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
+                            (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
+                            (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f;
                 }
                 else
-                {
-                    m_render = true;
+                {          
+                    inside = pos.x <= maxCorner.x && pos.x >= minCorner.x && pos.y <= maxCorner.y && pos.y >= minCorner.y && pos.z <= maxCorner.z && pos.z >= minCorner.z;
                 }
-            }
+            
+                if(inside && !m_steppedOnceInsideChildBox) //For selecting or removing
+                {
+                    m_steppedOnceInsideChildBox = true; //steped once, to be rendered at the end of the propagation stage
+                    m_render = true;
+                } 
+                if( child[ b ]->getIsNOT()) //For pruning
+                {
+                    insideNotBox = inside;
+                    m_prune = !child[b]->getIsRemove();
+                    if(inside && m_prune)
+                    {
+                        m_render = true;
+                    }
+                    else if(inside && !m_prune && m_steppedOnceInsideChildBox)
+                    {
+                        m_render = false;
+                    }
+                    else
+                    {
+                        m_render = true;
+                    }
+                }
              
-        }
-        else
-        {
-            m_render = true; //Always show
+            }
+            else
+            {
+                m_render = true; //Always show
+            }    
         }
     }
 

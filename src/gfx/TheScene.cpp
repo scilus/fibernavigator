@@ -335,8 +335,14 @@ void TheScene::renderScene()
 
     Logger::getInstance()->printIfGLError( wxT( "TheScene::renderScene - Navigation" ) );
 
-    // Opaque objects.
     renderSlices();
+
+    // Opaque objects.
+    if( DatasetManager::getInstance()->isOdfsLoaded() )
+        renderODFs();
+
+    if( DatasetManager::getInstance()->isMaximasLoaded() )
+        drawMaximas();
 
     if( DatasetManager::getInstance()->isVectorsLoaded() )
         drawVectors();
@@ -344,14 +350,13 @@ void TheScene::renderScene()
     if( DatasetManager::getInstance()->isTensorsLoaded() )
         renderTensors();
 
-    if( DatasetManager::getInstance()->isOdfsLoaded() )
-        renderODFs();
-
-    if( DatasetManager::getInstance()->isMaximasLoaded() )
-        drawMaximas();
-
     renderMesh();
     renderFibers();
+
+    if( SceneManager::getInstance()->getShowAllSelObj() && m_pRealTimeFibers->getOpacity() < 1)
+    {
+        drawSelectionObjects();
+    }
 
     //Real-time Fiber Tractography
     if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
@@ -377,7 +382,7 @@ void TheScene::renderScene()
 		DatasetManager::getInstance()->m_pRestingStateNetwork->setBoxMoving(false);
 	}
 
-    if( SceneManager::getInstance()->getShowAllSelObj() )
+    if( SceneManager::getInstance()->getShowAllSelObj() && m_pRealTimeFibers->getOpacity() == 1)
     {
         drawSelectionObjects();
     }

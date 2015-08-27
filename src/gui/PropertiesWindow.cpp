@@ -1610,11 +1610,7 @@ void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent& evt )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDeleteTreeItem" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->onDeleteTreeItem( evt );
-    SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
-    SceneManager::getInstance()->getScene()->getRTTfibers()->clearColorsRTT();
-    RTTrackingHelper::getInstance()->setRTTDirty( false );
-    RTTrackingHelper::getInstance()->setRTTReady( false );
-    m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( false );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );  
 }
 
 void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent& evt )

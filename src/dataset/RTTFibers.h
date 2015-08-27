@@ -61,6 +61,7 @@ public:
     void setInitSeed( Vector init )                                   { m_initVec = init; } 
 
 	void setOpacity( float alpha )                                    { m_alpha = alpha; }
+    float getOpacity() {return m_alpha;}
 	void setSeedMapInfo( Anatomy* info );	
 	void setSeedFromfMRI( const std::vector<std::pair<Vector,float> > &seedFromfMRI )	  { m_pSeedFromfMRI = seedFromfMRI; }
 
@@ -119,7 +120,7 @@ private:
     
 
 	float m_alpha;
-    int currentSeedBoxID;
+    int m_currentSeedBoxID;
 	bool m_stop;
     bool m_render;
     bool m_steppedOnceInsideChildBox;
