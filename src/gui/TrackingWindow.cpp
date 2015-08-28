@@ -325,11 +325,15 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	pBoxRow13->Add( m_pTxtOpacityBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pTrackingSizer->Add( pBoxRow13, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
+    m_pBtnToggleSrcAlpha= new wxToggleButton( this, wxID_ANY,wxT("Regular Alpha"), wxDefaultPosition, wxSize(230, -1) );
+	Connect( m_pBtnToggleSrcAlpha->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSrcAlpha) );
+    m_pTrackingSizer->Add( m_pBtnToggleSrcAlpha, 0, wxALL, 2 );
+
 	RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN = new wxToggleButton( this, wxID_ANY,wxT("Enable rs-connectivity"), wxDefaultPosition, wxSize(230, 30) );
 	Connect( RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnEnableRSN) );
     RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->Enable(false);
 
-    m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Convert Fibers"), wxDefaultPosition, wxSize(230, 30) );
+    m_pBtnConvert = new wxButton( this, wxID_ANY,wxT("Export fibers to scene object"), wxDefaultPosition, wxSize(230, 30) );
 	Connect( m_pBtnConvert->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnConvertToFibers) );
 
 	m_pTrackingSizer->Add( RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN, 0, wxALL, 2 );
@@ -504,7 +508,7 @@ void TrackingWindow::OnSliderOpacityMoved( wxCommandEvent& WXUNUSED(event) )
     float sliderValue = m_pSliderOpacity->GetValue() / 100.0f;
     m_pTxtOpacityBox->SetValue(wxString::Format( wxT( "%.2f"), sliderValue) );
     SceneManager::getInstance()->getScene()->getRTTfibers()->setOpacity( sliderValue );
-    SceneManager::getInstance()->getScene()->getRTTfibers()->renderRTTFibers(true, false);
+    SceneManager::getInstance()->getScene()->getRTTfibers()->renderRTTFibers(true, false, true);
 }
 
 void TrackingWindow::OnSliderMaxLengthMoved( wxCommandEvent& WXUNUSED(event) )
@@ -901,6 +905,20 @@ void TrackingWindow::OnStop( wxCommandEvent& WXUNUSED(event) )
     RTTrackingHelper::getInstance()->setTrackActionPause(true);
     m_pPlayPause->SetBitmapLabel(m_bmpPlay);
     m_pMainFrame->setTimerSpeed();
+}
+
+void TrackingWindow::OnSrcAlpha( wxCommandEvent& event )
+{
+    RTTrackingHelper::getInstance()->toggleSrcAlpha();
+    if( !RTTrackingHelper::getInstance()->isSrcAlpha() )
+    {
+        m_pBtnToggleSrcAlpha->SetLabel(wxT( "Flashy alpha"));
+    }
+    else
+    {
+        m_pBtnToggleSrcAlpha->SetLabel(wxT( "Regular alpha"));
+    }
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
 void TrackingWindow::OnEnableRSN( wxCommandEvent& WXUNUSED(event) )

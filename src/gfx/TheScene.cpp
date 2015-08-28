@@ -366,9 +366,9 @@ void TheScene::renderScene()
     else if(m_pRealTimeFibers->getSize() > 0)
     {
         if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
-            m_pRealTimeFibers->renderRTTFibers(false, false);
+            m_pRealTimeFibers->renderRTTFibers(false, false, false);
         else
-            m_pRealTimeFibers->renderRTTFibers(false, true);
+            m_pRealTimeFibers->renderRTTFibers(false, true, false);
     }
 	//Real-time fMRI correlation
 	if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )

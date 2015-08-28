@@ -62,6 +62,7 @@ public:
 	void OnMapSeeding                          ( wxCommandEvent& event );
 	void OnSelectSeedMap                       ( wxCommandEvent& event );
 	void OnSliderOpacityMoved				   ( wxCommandEvent& event );
+    void OnSrcAlpha                            ( wxCommandEvent& event );
     void OnEnableRSN                           ( wxCommandEvent& event );
     void OnToggleGM                            ( wxCommandEvent& event );
 
@@ -113,6 +114,7 @@ private:
 	wxStaticText        *m_pTextOpacity;
     wxSlider            *m_pSliderOpacity;
     wxTextCtrl          *m_pTxtOpacityBox;
+    wxToggleButton      *m_pBtnToggleSrcAlpha;
     wxSlider            *m_pSliderMaxLength;
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;

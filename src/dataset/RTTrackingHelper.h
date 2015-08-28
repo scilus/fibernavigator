@@ -29,6 +29,7 @@ public:
 	bool isSeedFromfMRI() const { return m_isSeedFromfMRI; }
     bool isTractoDrivenRSN() const { return m_isTractoDrivenRSN; }
     bool isGMAllowed() const { return m_isGMallowed; }
+    bool isSrcAlpha() const { return m_isSrcAlpha; }
 
     void setFileSelected( bool selected )     { m_isFileSelected = selected; }
     void setShellSeeds( bool shell )          { m_isShellSeeds = shell; }
@@ -46,6 +47,7 @@ public:
     bool toggleInitSeed()           { return m_isInitSeed = !m_isInitSeed; }
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
     bool toggleMagnet()             { return m_isMagnetOn = !m_isMagnetOn; }
+    bool toggleSrcAlpha()           { return m_isSrcAlpha = !m_isSrcAlpha; }
     
     bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
     bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
@@ -91,6 +93,7 @@ private:
     bool m_isTractoDrivenRSN;
     bool m_isGMallowed;
 	int m_id;
+    bool m_isSrcAlpha;
     Vector flippedAxes;
 
 

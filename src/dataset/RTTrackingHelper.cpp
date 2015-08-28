@@ -19,7 +19,8 @@ RTTrackingHelper::RTTrackingHelper()
 	m_isSeedFromfMRI ( false ),
     m_isTractoDrivenRSN( false ),
     m_isGMallowed( false ),
-	m_id( 0 )
+	m_id( 0 ),
+    m_isSrcAlpha( true )
 {
 }
 

@@ -24,7 +24,7 @@ public:
 
     //RTT functions
     void seed();
-    void renderRTTFibers(bool bindBuffers, bool isPlaying);
+    void renderRTTFibers(bool bindBuffers, bool isPlaying, bool changeAlpha);
     void performDTIRTT( Vector seed, int bwdfwd, std::vector<float>& points, std::vector<float>& color );
     void performHARDIRTT( Vector seed, int bwdfwd, std::vector<float>& points, std::vector<float>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
@@ -63,6 +63,7 @@ public:
     float getOpacity() {return m_alpha;}
 	void setSeedMapInfo( Anatomy* info );	
 	void setSeedFromfMRI( const std::vector<std::pair<Vector,float> > &seedFromfMRI )	  { m_pSeedFromfMRI = seedFromfMRI; }
+    void insertPointsForTractoDriven( std::vector<float> pointsF, std::vector<float> pointsB);
 
 	void setExcludeInfo( Anatomy* info )                              { m_pExcludeInfo = info; }
 	bool checkExclude(unsigned int sticksNumber);						  

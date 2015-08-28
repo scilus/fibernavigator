@@ -246,7 +246,10 @@ void RTTFibers::seed()
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
                             }
-
+                            if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                            {
+                                insertPointsForTractoDriven(pointsF, pointsB);
+                            }
                             m_steppedOnceInsideChildBox = false;
 						}
 					}
@@ -481,7 +484,7 @@ void RTTFibers::seed()
             }
         }
 	}
-    renderRTTFibers(true, false);
+    renderRTTFibers(true, false, false);
 	
 	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
@@ -491,10 +494,18 @@ void RTTFibers::seed()
 ///////////////////////////////////////////////////////////////////////////
 //Rendering stage
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate)
+void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate, bool changeAlpha)
 {
     if(m_streamlinesPoints.size() != 0)
     {
+        if(changeAlpha)
+        {
+            for(unsigned int i = 3;  i < m_streamlinesColors.size(); i+=4)
+            {
+                m_streamlinesColors[i] = m_alpha;
+            }
+        }
+
         //TODO: Redo animate, opacity and rs-connect N points.
         if(bindBuffers)
         {
@@ -512,7 +523,7 @@ void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate)
         if( !SceneManager::getInstance()->isUsingVBO() )
         {
             glVertexPointer( 3, GL_FLOAT, 0, &m_streamlinesPoints[0] );
-            glColorPointer( 3, GL_FLOAT, 0, &m_streamlinesColors[0] ); // Local colors.
+            glColorPointer( 4, GL_FLOAT, 0, &m_streamlinesColors[0] ); // Local colors.
             glNormalPointer( GL_FLOAT, 0, &m_streamlinesColors[0] );
         }
         else
@@ -520,15 +531,30 @@ void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate)
             glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
             glVertexPointer( 3, GL_FLOAT, 0, 0 );
             glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-            glColorPointer( 3, GL_FLOAT, 0, 0 );
+            glColorPointer( 4, GL_FLOAT, 0, 0 );
             glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
             glNormalPointer( GL_FLOAT, 0, 0 );
+        }
+
+        glPushAttrib( GL_ALL_ATTRIB_BITS );
+        if(m_alpha != 1.0f)
+		{
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_ONE, GL_ONE );
+            if(RTTrackingHelper::getInstance()->isSrcAlpha())
+            {
+                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+            }
+            glDepthMask( GL_FALSE );
         }
 
         for( int i = 0; i < m_lines; i++)
         {
             glDrawArrays( GL_LINE_STRIP, m_linePointer[ i ], m_nbPtsPerLine[i] );
         }
+
+        glDisable( GL_BLEND );
+        glPopAttrib();
 
         glDisableClientState( GL_VERTEX_ARRAY );
         glDisableClientState( GL_COLOR_ARRAY );
@@ -1422,6 +1448,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<float>& points, 
                 color.push_back( std::abs(currDirection.x) );
                 color.push_back( std::abs(currDirection.y) );
                 color.push_back( std::abs(currDirection.z) );
+                color.push_back( m_alpha );
 
                 //Advance
                 currPosition = nextPosition;
@@ -1486,6 +1513,36 @@ void RTTFibers::setHARDIInfo( Maximas* info )
     info->isAxisFlipped(Z_AXIS) ? flip.z = -1.0f : flip.z = 1.0f;
 
     m_pMaximasInfo = info; RTTrackingHelper::getInstance()->setMaximaFlip(flip); 
+}
+
+void RTTFibers::insertPointsForTractoDriven(std::vector<float> pointsF, std::vector<float> pointsB)
+{
+    unsigned int nbPtsToUse = 3;
+    std::vector<Vector> positions; 
+
+    if(pointsF.size() >= nbPtsToUse*3)
+    {
+        int it = pointsF.size() - 1;
+        Vector Vector1(pointsF[it-2], pointsF[it-1], pointsF[it]);
+        Vector Vector2(pointsF[it-5], pointsF[it-4], pointsF[it-3]);
+        Vector Vector3(pointsF[it-8], pointsF[it-7], pointsF[it-6]);
+        positions.push_back(Vector1);
+        positions.push_back(Vector2);
+        positions.push_back(Vector3);
+    }
+
+    if(pointsB.size() > nbPtsToUse*3)
+    {
+        int it = pointsB.size() - 1;
+        Vector Vector1(pointsB[it-2], pointsB[it-1], pointsB[it]);
+        Vector Vector2(pointsB[it-5], pointsB[it-4], pointsB[it-3]);
+        Vector Vector3(pointsB[it-8], pointsB[it-7], pointsB[it-6]);
+        positions.push_back(Vector1);
+        positions.push_back(Vector2);
+        positions.push_back(Vector3);
+    }
+    DatasetManager::getInstance()->m_pRestingStateNetwork->setSeedFromTracto(positions);
+    RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
 }
 
 //////////////////////////////////////////
