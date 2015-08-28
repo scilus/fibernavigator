@@ -857,7 +857,7 @@ void TrackingWindow::OnSliderAxisSeedNbMoved( wxCommandEvent& WXUNUSED(event) )
 void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert fibers
-	DatasetIndex index = DatasetManager::getInstance()->createFibers( SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFibers() );
+	DatasetIndex index = DatasetManager::getInstance()->createFibers();
 
 	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
     {

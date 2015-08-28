@@ -154,7 +154,7 @@ public:
     void    updateCrossingFibersThickness();
     void    updateTubeRadius();
 
-	void    convertFromRTT( std::vector<float>* RTT );
+	void    convertFromRTT();
 
     // Inherited from DatasetInfo
     bool    toggleShow();

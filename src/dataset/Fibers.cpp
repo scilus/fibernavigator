@@ -4294,117 +4294,106 @@ void Fibers::releaseShader()
     }
 }
 
-void Fibers::convertFromRTT( std::vector<float>* RTT )
+void Fibers::convertFromRTT()
 {
- //   // the list of points
- //   vector< vector< float > > lines;
- //   m_countPoints = 0;
- //   float back, front;
 
- //   for( unsigned int i = 0; i < RTT->size() - 1; i+=2 )
- //   {
-	//	if( RTT->size() > 0 )
-	//	{
-	//		back = RTT->at(i).size();
-	//		front = RTT->at(i+1).size();
- //           unsigned int nbpoints;
+    //from RTT fibers
+    vector<float>* streamlines = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFibers();
+    vector<int>* linePointers = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTLinePointer();
+    vector<int>* countPoints = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTNbPointsPerLine();
+    vector<bool>* LeftRight = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTLeftRightVector();
 
- //           if( front == 0 )
- //           {
- //               nbpoints = back;
- //           }
- //           else if( back == 0 )
- //           {
- //               nbpoints = front;
- //           }
- //           else
- //           {
-	//		    nbpoints = back + front - 1;
- //           }
+    vector< vector<float> > lines;
+    m_countLines = LeftRight->size();
+    
+    for(unsigned int i = 0; i < LeftRight->size(); i++)
+    {
+        vector<float> currLine;
+        
+        if(LeftRight->at(i))
+        {
+            //Front
+            for(int f = linePointers->at(i*2+1)*3 -3; f >= linePointers->at(i*2)*3; f-=3)
+            {
+                currLine.push_back(streamlines->at(f));
+                currLine.push_back(streamlines->at(f+1));
+                currLine.push_back(streamlines->at(f+2));
+            }
 
- //           vector< float > curLine;
-	//		curLine.resize( nbpoints * 3 );
- //           int skipFirst = 0;
+            //Back
+            for(int b = linePointers->at(i*2+1)*3 + 3; b < linePointers->at(i*2+2)*3; b+=3)
+            {
+                currLine.push_back(streamlines->at(b));
+                currLine.push_back(streamlines->at(b+1));
+                currLine.push_back(streamlines->at(b+2));
+            }
+            
+        }
+        else
+        {
+            for(int j = linePointers->at(i)*3; j < linePointers->at(i+1)*3; j++)
+            {
+                currLine.push_back(streamlines->at(j));
+            }
+        }
+        lines.push_back(currLine);
+        m_countPoints += (currLine.size() / 3);
+    }
 
-	//		if( back > 0 )
-	//		{
- //               skipFirst = 1;
-	//			//back
-	//			for( int j = back - 1; j >= 0; j-- )
-	//			{
-	//				curLine[j * 3]  = RTT->at(i)[back - 1 - j].x;
-	//				curLine[j * 3 + 1] = RTT->at(i)[back - 1 - j].y;
-	//				curLine[j * 3 + 2] = RTT->at(i)[back - 1 - j].z;
-	//			}
- //           }
+    
+  
 
- //           if( front > 0 )
- //           {
-	//			//front
-	//			for( unsigned int j = back, k = 0+skipFirst; j < nbpoints, k < front; j++, k++ )
-	//			{
-	//				curLine[j * 3]  = RTT->at(i+1)[k].x;
-	//				curLine[j * 3 + 1] = RTT->at(i+1)[k].y;
-	//				curLine[j * 3 + 2] = RTT->at(i+1)[k].z;
-	//			}
-	//			
- //           }
+    //set all the data in the right format for the navigator
+    m_countLines = lines.size();
+    m_pointArray.max_size();
+    m_linePointers.resize( m_countLines + 1 );
+    m_pointArray.resize( m_countPoints * 3 );
+    m_linePointers[m_countLines] = m_countPoints;
+    m_reverse.resize( m_countPoints );
+    m_selected.resize( m_countLines, false );
+    m_filtered.resize( m_countLines, false );
+    m_linePointers[0] = 0;
 
- //           m_countPoints += curLine.size() / 3;
-	//		lines.push_back( curLine );
-	//	}
- //   }
+    for( int i = 0; i < m_countLines; ++i )
+    {
+        m_linePointers[i + 1] = m_linePointers[i] + lines[i].size() / 3;
+    }
 
- //   //set all the data in the right format for the navigator
- //   m_countLines = lines.size();
- //   m_pointArray.max_size();
- //   m_linePointers.resize( m_countLines + 1 );
- //   m_pointArray.resize( m_countPoints * 3 );
- //   m_linePointers[m_countLines] = m_countPoints;
- //   m_reverse.resize( m_countPoints );
- //   m_selected.resize( m_countLines, false );
- //   m_filtered.resize( m_countLines, false );
- //   m_linePointers[0] = 0;
+    int lineCounter = 0;
 
- //   for( int i = 0; i < m_countLines; ++i )
- //   {
- //       m_linePointers[i + 1] = m_linePointers[i] + lines[i].size() / 3;
- //   }
+    for( int i = 0; i < m_countPoints; ++i )
+    {
+        if( i == m_linePointers[lineCounter + 1] )
+        {
+            ++lineCounter;
+        }
 
- //   int lineCounter = 0;
+        m_reverse[i] = lineCounter;
+    }
 
- //   for( int i = 0; i < m_countPoints; ++i )
- //   {
- //       if( i == m_linePointers[lineCounter + 1] )
- //       {
- //           ++lineCounter;
- //       }
+    unsigned int pos = 0;
+    vector< vector< float > >::iterator it;
 
- //       m_reverse[i] = lineCounter;
- //   }
+    for( it = lines.begin(); it < lines.end(); it++ )
+    {
+        vector< float >::iterator it2;
 
- //   unsigned int pos = 0;
- //   vector< vector< float > >::iterator it;
+        for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
+        {
+            m_pointArray[pos++] = *it2;
+        }
+    }
 
- //   for( it = lines.begin(); it < lines.end(); it++ )
- //   {
- //       vector< float >::iterator it2;
+    createColorArray( false );
+    m_type = FIBERS;
+    m_fullPath = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFileName();
 
- //       for( it2 = ( *it ).begin(); it2 < ( *it ).end(); it2++ )
- //       {
- //           m_pointArray[pos++] = *it2;
- //       }
- //   }
+	wxString id = wxString::Format(_T("%d"), RTTrackingHelper::getInstance()->generateId());
+    m_name = wxT( "RTTFibers" + id );
 
- //   createColorArray( false );
- //   m_type = FIBERS;
- //   m_fullPath = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFileName();
-
-	//wxString id = wxString::Format(_T("%d"), RTTrackingHelper::getInstance()->generateId());
- //   m_name = wxT( "RTTFibers" + id );
-
-	//m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
 }
+
 void Fibers::updateAlpha()
 {
     m_exponent = m_pSliderFibersAlpha->GetValue() / 10.0f;

@@ -89,7 +89,11 @@ public:
                                                         return m_pTensorsInfo->getPath(); }
 
     size_t getSize()                                  { return m_streamlinesPoints.size(); }
+
 	std::vector<float>* getRTTFibers() { return &m_streamlinesPoints; }
+    std::vector<int>* getRTTLinePointer() { return &m_linePointer; }
+    std::vector<int>* getRTTNbPointsPerLine() { return &m_nbPtsPerLine; }
+    std::vector<bool>* getRTTLeftRightVector() { return & m_LeftRightVector;}
 
 
 	unsigned int  m_trackActionStep;
@@ -139,8 +143,9 @@ private:
     std::vector< SelectionObject* > selObjs;
 
     std::vector< int > m_nbPtsPerLine;
-    int m_lines;
     std::vector< int > m_linePointer;
+    std::vector< bool > m_LeftRightVector;
+    int m_lines;
 
 };
 

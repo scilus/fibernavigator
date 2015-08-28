@@ -150,6 +150,7 @@ void RTTFibers::clearFibersRTT()
     }
 
     m_nbPtsPerLine.clear();
+    m_LeftRightVector.clear();
     m_lines = 0;
     m_linePointer.clear();
     m_linePointer.push_back(0);
@@ -223,6 +224,8 @@ void RTTFibers::seed()
                         
 						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
+                            bool keepRight = false;
+                            bool keepLeft = false;
                             //Insert strategically for drawArray methods.
                             if(pointsF.size() != 0)
                             {
@@ -233,7 +236,7 @@ void RTTFibers::seed()
 
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
-                                
+                                keepRight = true;
                             }
                             
                             if(pointsB.size() != 0)
@@ -245,7 +248,18 @@ void RTTFibers::seed()
 
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                                keepLeft = true;
                             }
+
+                            if(keepLeft && keepRight)
+                            {
+                                m_LeftRightVector.push_back(true);
+                            }
+                            else
+                            {
+                                m_LeftRightVector.push_back(false);
+                            }
+
                             if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
                             {
                                 insertPointsForTractoDriven(pointsF, pointsB);
@@ -306,6 +320,8 @@ void RTTFibers::seed()
                         
 						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
+                            bool keepRight = false;
+                            bool keepLeft = false;
                             //Insert strategically for drawArray methods.
                             if(pointsF.size() != 0)
                             {
@@ -316,7 +332,7 @@ void RTTFibers::seed()
 
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
-                                
+                                keepRight = true;
                             }
                             
                             if(pointsB.size() != 0)
@@ -329,8 +345,22 @@ void RTTFibers::seed()
                                 
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                                keepLeft = true;
                             }
 
+                            if(keepLeft && keepRight)
+                            {
+                                m_LeftRightVector.push_back(true);
+                            }
+                            else
+                            {
+                                m_LeftRightVector.push_back(false);
+                            }
+
+                            if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                            {
+                                insertPointsForTractoDriven(pointsF, pointsB);
+                            }
                             m_steppedOnceInsideChildBox = false;
 						}
 					}
@@ -387,6 +417,8 @@ void RTTFibers::seed()
                         
 						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 						{
+                            bool keepRight = false;
+                            bool keepLeft = false;
                             //Insert strategically for drawArray methods.
                             if(pointsF.size() != 0)
                             {
@@ -397,7 +429,7 @@ void RTTFibers::seed()
 
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
-                                
+                                keepRight = true;
                             }
                             
                             if(pointsB.size() != 0)
@@ -410,8 +442,22 @@ void RTTFibers::seed()
                                 
                                 m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
                                 m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                                keepLeft = true;
                             }
 
+                            if(keepLeft && keepRight)
+                            {
+                                m_LeftRightVector.push_back(true);
+                            }
+                            else
+                            {
+                                m_LeftRightVector.push_back(false);
+                            }
+
+                            if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                            {
+                                insertPointsForTractoDriven(pointsF, pointsB);
+                            }
                             m_steppedOnceInsideChildBox = false;
 						}
 					}
@@ -455,6 +501,8 @@ void RTTFibers::seed()
                         
 				if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
 				{
+                    bool keepRight = false;
+                    bool keepLeft = false;
                     //Insert strategically for drawArray methods.
                     if(pointsF.size() != 0)
                     {
@@ -465,7 +513,7 @@ void RTTFibers::seed()
 
                         m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
                         m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
-                        
+                        keepRight = true;
                     }
                             
                     if(pointsB.size() != 0)
@@ -477,8 +525,22 @@ void RTTFibers::seed()
 
                         m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
                         m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                        keepLeft = true;
                     }
 
+                    if(keepLeft && keepRight)
+                    {
+                        m_LeftRightVector.push_back(true);
+                    }
+                    else
+                    {
+                        m_LeftRightVector.push_back(false);
+                    }
+
+                    if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                    {
+                        insertPointsForTractoDriven(pointsF, pointsB);
+                    }
                     m_steppedOnceInsideChildBox = false;
 				}
             }
