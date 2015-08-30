@@ -4296,38 +4296,48 @@ void Fibers::releaseShader()
 
 void Fibers::convertFromRTT()
 {
-
+    //Check error 1285
     //from RTT fibers
     vector<float>* streamlines = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFibers();
+
     vector<int>* linePointers = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTLinePointer();
     vector<int>* countPoints = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTNbPointsPerLine();
     vector<bool>* LeftRight = SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTLeftRightVector();
 
     vector< vector<float> > lines;
     m_countLines = LeftRight->size();
+    int merge = 0;
+    bool done = false;
+    vector<float> currLine;
     
     for(unsigned int i = 0; i < LeftRight->size(); i++)
     {
-        vector<float> currLine;
         
         if(LeftRight->at(i))
-        {
+        {          
             //Front
-            for(int f = linePointers->at(i*2+1)*3 -3; f >= linePointers->at(i*2)*3; f-=3)
+            if(merge == 0)
             {
-                currLine.push_back(streamlines->at(f));
-                currLine.push_back(streamlines->at(f+1));
-                currLine.push_back(streamlines->at(f+2));
+                for(int f = linePointers->at(i+1)*3 -3; f >= linePointers->at(i)*3; f-=3)
+                {
+                    currLine.push_back(streamlines->at(f));
+                    currLine.push_back(streamlines->at(f+1));
+                    currLine.push_back(streamlines->at(f+2));   
+                }
+                merge++;
             }
-
-            //Back
-            for(int b = linePointers->at(i*2+1)*3 + 3; b < linePointers->at(i*2+2)*3; b+=3)
+            else
             {
-                currLine.push_back(streamlines->at(b));
-                currLine.push_back(streamlines->at(b+1));
-                currLine.push_back(streamlines->at(b+2));
-            }
-            
+                //Back
+                for(int b = linePointers->at(i)*3 + 3; b < linePointers->at(i+1)*3; b+=3)
+                {
+                    currLine.push_back(streamlines->at(b));
+                    currLine.push_back(streamlines->at(b+1));
+                    currLine.push_back(streamlines->at(b+2));
+                }
+                done = true;
+                merge = 0;
+            }            
         }
         else
         {
@@ -4335,9 +4345,15 @@ void Fibers::convertFromRTT()
             {
                 currLine.push_back(streamlines->at(j));
             }
+            done = true;
         }
-        lines.push_back(currLine);
-        m_countPoints += (currLine.size() / 3);
+        if(done)
+        {
+            lines.push_back(currLine);
+            m_countPoints += (currLine.size() / 3);
+            done = false;
+            currLine.clear();
+        }
     }
 
     

@@ -254,6 +254,7 @@ void RTTFibers::seed()
                             if(keepLeft && keepRight)
                             {
                                 m_LeftRightVector.push_back(true);
+                                m_LeftRightVector.push_back(true);
                             }
                             else
                             {

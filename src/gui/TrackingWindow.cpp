@@ -856,30 +856,32 @@ void TrackingWindow::OnSliderAxisSeedNbMoved( wxCommandEvent& WXUNUSED(event) )
 
 void TrackingWindow::OnConvertToFibers( wxCommandEvent& WXUNUSED(event) )
 {
-	//Convert fibers
-	DatasetIndex index = DatasetManager::getInstance()->createFibers();
+    if(!SceneManager::getInstance()->getScene()->getRTTfibers()->getRTTFibers()->empty())
+    { 
+	    //Convert fibers
+	    DatasetIndex index = DatasetManager::getInstance()->createFibers();
 
-	if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
-    {
-        DatasetIndex result = DatasetManager::getInstance()->createFibersGroup();
-        m_pMainFrame->m_pListCtrl->InsertItem( result );
+	    if( !DatasetManager::getInstance()->isFibersGroupLoaded() )
+        {
+            DatasetIndex result = DatasetManager::getInstance()->createFibersGroup();
+            m_pMainFrame->m_pListCtrl->InsertItem( result );
+        }
+
+	    m_pMainFrame->m_pListCtrl->InsertItem( index );
+
+        RTTrackingHelper::getInstance()->setRTTReady(false);
+
+        SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
+        //RTTrackingHelper::getInstance()->setRTTDirty( false );
+
+        RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+	    RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
+	    RTTrackingHelper::getInstance()->setRTTDirty(true);
+        RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->SetValue(false);
+
+        m_pBtnStart->SetLabel(wxT("Start tracking"));
+        m_pBtnStart->SetValue(false);
     }
-
-	m_pMainFrame->m_pListCtrl->InsertItem( index );
-
-    RTTrackingHelper::getInstance()->setRTTReady(false);
-
-    SceneManager::getInstance()->getScene()->getRTTfibers()->clearFibersRTT();
-    //RTTrackingHelper::getInstance()->setRTTDirty( false );
-
-    RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
-	RTFMRIHelper::getInstance()->setTractoDrivenRSN(false);
-	RTTrackingHelper::getInstance()->setRTTDirty(true);
-    RTTrackingHelper::getInstance()->m_pBtnToggleEnableRSN->SetValue(false);
-
-    m_pBtnStart->SetLabel(wxT("Start tracking"));
-    m_pBtnStart->SetValue(false);
-
 }
 
 void TrackingWindow::OnPlay( wxCommandEvent& WXUNUSED(event) )
