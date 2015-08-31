@@ -54,7 +54,7 @@ RTTFibers::RTTFibers()
     m_steppedOnceInsideChildBox( false ),
     m_prune(true)
 {
-    m_bufferObjects = new GLuint[2];
+    m_bufferObjectsRTT = new GLuint[2];
 }
 
 void RTTFibers::setSeedMapInfo(Anatomy *info)
@@ -146,7 +146,7 @@ void RTTFibers::clearFibersRTT()
 
     if( SceneManager::getInstance()->isUsingVBO() )
     {
-        glDeleteBuffers( 2, m_bufferObjects );
+        glDeleteBuffers( 2, m_bufferObjectsRTT );
     }
 
     m_nbPtsPerLine.clear();
@@ -569,21 +569,30 @@ void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate, bool changeAlp
             }
         }
 
+        bool isOK = true;
         //TODO: Redo animate, opacity and rs-connect N points.
         if(bindBuffers)
         {
-            glGenBuffers( 2, m_bufferObjects );
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+            glGenBuffers( 2, m_bufferObjectsRTT );
+
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[0] );
             glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesPoints.size(), &m_streamlinesPoints[0], GL_STATIC_DRAW );
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
-            glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesColors.size(), &m_streamlinesColors[0], GL_STATIC_DRAW );
+
+            isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo points" ) );
+
+            if(isOK)
+            {
+                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[1] );
+                glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesColors.size(), &m_streamlinesColors[0], GL_STATIC_DRAW );
+                isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo colors" ) );
+            }
         }
 
         glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_COLOR_ARRAY );
         glEnableClientState( GL_NORMAL_ARRAY );
 
-        if( !SceneManager::getInstance()->isUsingVBO() )
+        if( !isOK )
         {
             glVertexPointer( 3, GL_FLOAT, 0, &m_streamlinesPoints[0] );
             glColorPointer( 4, GL_FLOAT, 0, &m_streamlinesColors[0] ); // Local colors.
@@ -591,11 +600,11 @@ void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate, bool changeAlp
         }
         else
         {
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[0] );
             glVertexPointer( 3, GL_FLOAT, 0, 0 );
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[1] );
             glColorPointer( 4, GL_FLOAT, 0, 0 );
-            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[1] );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[1] );
             glNormalPointer( GL_FLOAT, 0, 0 );
         }
 

@@ -132,7 +132,7 @@ private:
     bool m_render;
     bool m_steppedOnceInsideChildBox;
     bool m_prune;
-    GLuint*     m_bufferObjects;
+    GLuint*     m_bufferObjectsRTT;
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;
