@@ -95,7 +95,7 @@ bool Logger::printIfGLError( wxString str )
                 str.Append( wxT( " - GL_INVALID_OPERATION" ) );
                 break;
             default:
-                str.Append( wxString::Format( wxT( " - ADD ERROR MESSAGE HERE: ERROR CODE: %f" ), error ) );
+                str.Append( wxString::Format( wxT( " - ADD ERROR MESSAGE HERE: ERROR CODE: %i" ), error ) );
                 break;
         }
 

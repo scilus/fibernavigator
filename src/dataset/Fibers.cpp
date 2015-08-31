@@ -3769,7 +3769,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     // Round to make sure the min and max length sliders reach the real maximal values.
     int minLength = static_cast<int>( std::floor( getMinFibersLength() ) );
-    int maxLength = static_cast<int>( std::ceil( getMaxFibersLength() ) );
+    int maxLength = static_cast<int>( std::ceil( getMaxFibersLength() ) ) + 1;
 
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, minLength, minLength, maxLength, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, maxLength, minLength, maxLength, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -4341,9 +4341,11 @@ void Fibers::convertFromRTT()
         }
         else
         {
-            for(int j = linePointers->at(i)*3; j < linePointers->at(i+1)*3; j++)
+            for(int j = linePointers->at(i)*3; j < linePointers->at(i+1)*3; j+=3)
             {
                 currLine.push_back(streamlines->at(j));
+                currLine.push_back(streamlines->at(j+1));
+                currLine.push_back(streamlines->at(j+2));
             }
             done = true;
         }

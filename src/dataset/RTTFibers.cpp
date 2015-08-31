@@ -256,7 +256,7 @@ void RTTFibers::seed()
                                 m_LeftRightVector.push_back(true);
                                 m_LeftRightVector.push_back(true);
                             }
-                            else
+                            else if(keepLeft || keepRight)
                             {
                                 m_LeftRightVector.push_back(false);
                             }
@@ -352,8 +352,9 @@ void RTTFibers::seed()
                             if(keepLeft && keepRight)
                             {
                                 m_LeftRightVector.push_back(true);
+                                m_LeftRightVector.push_back(true);
                             }
-                            else
+                            else if(keepLeft || keepRight)
                             {
                                 m_LeftRightVector.push_back(false);
                             }
@@ -449,8 +450,9 @@ void RTTFibers::seed()
                             if(keepLeft && keepRight)
                             {
                                 m_LeftRightVector.push_back(true);
+                                m_LeftRightVector.push_back(true);
                             }
-                            else
+                            else if(keepLeft || keepRight)
                             {
                                 m_LeftRightVector.push_back(false);
                             }
@@ -532,8 +534,9 @@ void RTTFibers::seed()
                     if(keepLeft && keepRight)
                     {
                         m_LeftRightVector.push_back(true);
+                        m_LeftRightVector.push_back(true);
                     }
-                    else
+                    else if(keepLeft || keepRight)
                     {
                         m_LeftRightVector.push_back(false);
                     }
