@@ -62,6 +62,9 @@ public:
     bool toogleTractoDrivenRSN()          { return m_isTractoDrivenRSN = !m_isTractoDrivenRSN; }
     void setEnableTractoRSN(){ m_pBtnToggleEnableRSN->Enable ( true ); } 
 
+    GLuint getBufferID() { return m_bufferID; }
+    void setBufferID(GLuint id) { m_bufferID = id;}
+
 	wxSlider            *m_pSliderAxisSeedNb;
 	wxTextCtrl          *m_pTxtTotalSeedNbBox;
 	wxTextCtrl          *m_pTxtAxisSeedNbBox;
@@ -95,6 +98,7 @@ private:
 	int m_id;
     bool m_isSrcAlpha;
     Vector flippedAxes;
+    GLuint m_bufferID;
 
 
 };

@@ -573,10 +573,12 @@ void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate, bool changeAlp
         }
 
         bool isOK = true;
-        //TODO: Redo animate, opacity and rs-connect N points.
+        //TODO: Redo animate.
         if(bindBuffers)
         {
+
             glGenBuffers( 2, m_bufferObjectsRTT );
+            RTTrackingHelper::getInstance()->setBufferID(m_bufferObjectsRTT[0]);
 
             glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[0] );
             glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesPoints.size(), &m_streamlinesPoints[0], GL_STATIC_DRAW );

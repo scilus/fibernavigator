@@ -20,7 +20,8 @@ RTTrackingHelper::RTTrackingHelper()
     m_isTractoDrivenRSN( false ),
     m_isGMallowed( false ),
 	m_id( 0 ),
-    m_isSrcAlpha( true )
+    m_isSrcAlpha( true ),
+    m_bufferID( 0 )
 {
 }
 

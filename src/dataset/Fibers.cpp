@@ -2799,6 +2799,11 @@ void Fibers::initializeBuffer()
     bool isOK = true;
 
     glGenBuffers( 3, m_bufferObjects );
+    while( m_bufferObjects[0] == RTTrackingHelper::getInstance()->getBufferID())
+    {
+        glGenBuffers( 3, m_bufferObjects );
+    }
+
     glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjects[0] );
     glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_countPoints * 3, &m_pointArray[0], GL_STATIC_DRAW );
 
