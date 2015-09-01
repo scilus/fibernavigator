@@ -1480,7 +1480,7 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<float>& points, 
         sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
         absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && absPeak != 0 )
+        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && absPeak != 0 && withinMapThreshold(sticksNumber, nextPosition))
         {
 
             sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
