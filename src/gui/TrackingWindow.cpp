@@ -402,9 +402,9 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxMagnet1->Add( m_pBtnPlaceMagnetR, 1, wxEXPAND | wxALL, 1 );
     pBoxMagnet1->Add( m_pBtnPlaceMagnetG, 1, wxEXPAND | wxALL, 1 );
     pBoxMagnet1->Add( m_pBtnPlaceMagnetB, 1, wxEXPAND | wxALL, 1 );
-	m_pTrackingSizer->Add( pBoxMagnet1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );*/
+	m_pTrackingSizer->Add( pBoxMagnet1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );
+    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );*/
 
 }
 

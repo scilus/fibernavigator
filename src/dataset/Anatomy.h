@@ -61,6 +61,7 @@ public:
     void add( Anatomy* anatomy);
 
     float at( const int i ) const;
+    unsigned int getSize() { return m_floatDataset.size(); }
     std::vector<float>* getFloatDataset();
     std::vector<float>* getEqualizedDataset();
     void setFloatDataset(std::vector<float>& dataset) { m_floatDataset = dataset; }

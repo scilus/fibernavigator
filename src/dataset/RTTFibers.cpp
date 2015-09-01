@@ -787,6 +787,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     float wm = m_pMaskInfo->at(s_number);
     float gm = 0;
     float F = 0;
+
     if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
         gm = m_pGMInfo->at(s_number);
@@ -1320,21 +1321,29 @@ bool RTTFibers::checkExclude( unsigned int sticksNumber)
 ///////////////////////////////////////////////////////////////////////////
 bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
 {
+    if(sticksNumber > m_pMaskInfo->getSize())
+    {
+        return false;
+    }
+
     bool isOk = false;
     float gmVal = 0;
     bool insideNotBox = false;
 
 	if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
-        gmVal = m_pGMInfo->at(sticksNumber);
-	    if(gmVal > 0)
+        if(sticksNumber < m_pGMInfo->getSize())
         {
-            m_countGMstep++;
+            gmVal = m_pGMInfo->at(sticksNumber);
+	        if(gmVal > 0)
+            {
+                m_countGMstep++;
+            }
+            else
+            {
+                m_countGMstep = 0;
+            }   
         }
-        else
-        {
-            m_countGMstep = 0;
-        }   
     }
 
     //Child (Only works for 1 inclusion or 1 exclusion child so far.)
@@ -1453,130 +1462,139 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<float>& points, 
     std::vector<float> sticks;
 
     m_countGMstep = 0;
-    absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
-
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && withinMapThreshold(sticksNumber, currPosition) && !m_stop && absPeak != 0)
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() )
     {
-        bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
-        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
-
-        currDirection.x = flippedAxes.x * sticks[0];
-        currDirection.y = flippedAxes.y * sticks[1];
-        currDirection.z = flippedAxes.z * sticks[2];
-
-        //Direction for seeding (forward or backward)
-        currDirection.normalize();
-        currDirection *= bwdfwd;
-
-        //Next position
-        nextPosition = currPosition + ( m_step * currDirection );
-
-        //Get the voxel stepped into
-        currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
-        currVoxely = (int)( floor(nextPosition.y / yVoxel) );
-        currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
-
-        //Corresponding stick number
-        sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
         absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && absPeak != 0 && withinMapThreshold(sticksNumber, nextPosition))
+        if( withinMapThreshold(sticksNumber, currPosition) && !m_stop && absPeak != 0)
         {
+            bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
+            sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
 
-            sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
-            sticks[0] *= flippedAxes.x;
-            sticks[1] *= flippedAxes.y;
-            sticks[2] *= flippedAxes.z;
-            sticks[3] *= flippedAxes.x;
-            sticks[4] *= flippedAxes.y;
-            sticks[5] *= flippedAxes.z;
-            sticks[6] *= flippedAxes.x;
-            sticks[7] *= flippedAxes.y;
-            sticks[8] *= flippedAxes.z;
+            currDirection.x = flippedAxes.x * sticks[0];
+            currDirection.y = flippedAxes.y * sticks[1];
+            currDirection.z = flippedAxes.z * sticks[2];
 
-            //Advection next direction
-            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
+            //Direction for seeding (forward or backward)
+            currDirection.normalize();
+            currDirection *= bwdfwd;
 
-            //Direction of seeding
-            nextDirection *= bwdfwd;
-            nextDirection.normalize();
+            //Next position
+            nextPosition = currPosition + ( m_step * currDirection );
 
-            if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
+            //Get the voxel stepped into
+            currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
+            currVoxely = (int)( floor(nextPosition.y / yVoxel) );
+            currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
+
+            //Corresponding stick number
+            sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+            if( sticksNumber < m_pMaximasInfo->getMainDirData()->size())
             {
-                nextDirection *= -1;
-            }
-
-            //Angle value
-            float dot = currDirection.Dot(nextDirection);
-            float acos = std::acos( dot );
-            angle = 180 * acos / M_PI;
-
-            ///////////////////////////
-            //Tracking along the fiber
-            //////////////////////////
-            float it = 2;
-            bool insideBox = false;
-            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber, nextPosition) && !m_stop)
-            {
-                //Insert point to be rendered
-                points.push_back( currPosition.x );
-                points.push_back( currPosition.y );
-                points.push_back( currPosition.z );
-                color.push_back( std::abs(currDirection.x) );
-                color.push_back( std::abs(currDirection.y) );
-                color.push_back( std::abs(currDirection.z) );
-                color.push_back( m_alpha );
-
-                //Advance
-                currPosition = nextPosition;
-                currDirection = nextDirection;
-
-                //Next position
-                nextPosition = currPosition + ( m_step * currDirection );
-
-                //Stepped voxels
-                currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
-                currVoxely = (int)( floor(nextPosition.y / yVoxel) );
-                currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
-
-                //Corresponding tensor number
-                sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
                 absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || absPeak == 0 || m_step*it > m_maxFiberLength) //Out of anatomy
+                if( absPeak != 0 && withinMapThreshold(sticksNumber, nextPosition))
                 {
-                    break;
-                }
+
+                    sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+                    sticks[0] *= flippedAxes.x;
+                    sticks[1] *= flippedAxes.y;
+                    sticks[2] *= flippedAxes.z;
+                    sticks[3] *= flippedAxes.x;
+                    sticks[4] *= flippedAxes.y;
+                    sticks[5] *= flippedAxes.z;
+                    sticks[6] *= flippedAxes.x;
+                    sticks[7] *= flippedAxes.y;
+                    sticks[8] *= flippedAxes.z;
+
+                    //Advection next direction
+                    nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
+
+                    //Direction of seeding
+                    nextDirection *= bwdfwd;
+                    nextDirection.normalize();
+
+                    if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
+                    {
+                        nextDirection *= -1;
+                    }
+
+                    //Angle value
+                    float dot = currDirection.Dot(nextDirection);
+                    float acos = std::acos( dot );
+                    angle = 180 * acos / M_PI;
+
+                    ///////////////////////////
+                    //Tracking along the fiber
+                    //////////////////////////
+                    float it = 2;
+                    bool insideBox = false;
+                    while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber, nextPosition) && !m_stop)
+                    {
+                        //Insert point to be rendered
+                        points.push_back( currPosition.x );
+                        points.push_back( currPosition.y );
+                        points.push_back( currPosition.z );
+                        color.push_back( std::abs(currDirection.x) );
+                        color.push_back( std::abs(currDirection.y) );
+                        color.push_back( std::abs(currDirection.z) );
+                        color.push_back( m_alpha );
+
+                        //Advance
+                        currPosition = nextPosition;
+                        currDirection = nextDirection;
+
+                        //Next position
+                        nextPosition = currPosition + ( m_step * currDirection );
+
+                        //Stepped voxels
+                        currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
+                        currVoxely = (int)( floor(nextPosition.y / yVoxel) );
+                        currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
+
+                        //Corresponding tensor number
+                        sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+                        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size())
+                        {
+                            absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
+
+                            if( absPeak == 0 || m_step*it > m_maxFiberLength) //Out of anatomy
+                            {
+                                break;
+                            }
                 
-                sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
-                sticks[0] *= flippedAxes.x;
-                sticks[1] *= flippedAxes.y;
-                sticks[2] *= flippedAxes.z;
-                sticks[3] *= flippedAxes.x;
-                sticks[4] *= flippedAxes.y;
-                sticks[5] *= flippedAxes.z;
-                sticks[6] *= flippedAxes.x;
-                sticks[7] *= flippedAxes.y;
-                sticks[8] *= flippedAxes.z;
+                            sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
+                            sticks[0] *= flippedAxes.x;
+                            sticks[1] *= flippedAxes.y;
+                            sticks[2] *= flippedAxes.z;
+                            sticks[3] *= flippedAxes.x;
+                            sticks[4] *= flippedAxes.y;
+                            sticks[5] *= flippedAxes.z;
+                            sticks[6] *= flippedAxes.x;
+                            sticks[7] *= flippedAxes.y;
+                            sticks[8] *= flippedAxes.z;
 
-                //Advection next direction
-                nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
+                            //Advection next direction
+                            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
 
-                //Direction of seeding (backward of forward)
-                nextDirection *= bwdfwd;
-                nextDirection.normalize();
+                            //Direction of seeding (backward of forward)
+                            nextDirection *= bwdfwd;
+                            nextDirection.normalize();
 
-                if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
-                {
-                    nextDirection *= -1;
+                            if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
+                            {
+                                nextDirection *= -1;
+                            }
+
+                            //Angle value
+                            float dot = currDirection.Dot(nextDirection);
+                            float acos = std::acos( dot );
+                            angle = 180 * acos / M_PI;
+
+                            it++;
+                        }
+                    }
                 }
-
-                //Angle value
-                float dot = currDirection.Dot(nextDirection);
-                float acos = std::acos( dot );
-                angle = 180 * acos / M_PI;
-
-                it++;
             }
         }
     }
