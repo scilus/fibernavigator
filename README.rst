@@ -5,7 +5,7 @@ The Fibernavigator is a tool designed for a fast and versatile visualization of 
 
 **Welcome new users**
 
-You can find a pre-build executable (windows) and all the latest tools here: https://github.com/chamberm/fibernavigator/releases.
+You can find a pre-built executable (windows) and all the latest tools here: https://github.com/chamberm/fibernavigator/releases.
 
 Acknowledgements
 -------------------------------------
@@ -17,7 +17,7 @@ If you use the Fibernavigator, please make sure that you quote the following ref
 
 Tutorials
 ---------
-
+New rs-fMRI and real-time fiber tractography tutorials soon available: `Tutorial Page`_.
 New **video tutorials** of the Fibernavigator are available.
 
 - `Scene navigation`_: how to interact with the 3D view, move planes, etc.
@@ -43,7 +43,7 @@ How to get the application
 --------------------------
 
 - `Build instructions for Ubuntu`_ and other Linux distributions are provided
-- Windows builds are available on the Releases_ page. (32 bit, 64 version to come later).
+- Windows builds are available on the Releases_ page. (32bit, 64bit version to come later).
 
 Development and contact with the team
 -------------------------------------
@@ -71,6 +71,7 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _Tractography-driven resting-state fMRI: https://www.youtube.com/watch?v=eHSyf2AjbHw
 .. _Opacity rendering: https://www.youtube.com/watch?v=IzJ537KNpR0
 .. _Image Gallery: http://chamberm.github.io/media.html
+.. _Tutorial Page: http://chamberm.github.io/fibernavigator_single.html
 
 
 
