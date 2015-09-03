@@ -63,6 +63,7 @@ public:
     void OnFlipX                            ( wxCommandEvent& event );
     void OnFlipY                            ( wxCommandEvent& event );
     void OnFlipZ                            ( wxCommandEvent& event );
+    void OnFitToAnat                        ( wxCommandEvent& event );
 
     void OnDilateDataset                    ( wxCommandEvent& event );
     void OnErodeDataset                     ( wxCommandEvent& event );

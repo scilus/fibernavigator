@@ -106,6 +106,7 @@ public:
     void    setUsingEndpts(bool value);
 
     void    flipAxis( AxisType i_axe );
+    void    fitToAnat();
     
     int     getFibersCount() const { return m_countLines; }
     
@@ -182,6 +183,7 @@ private:
     void            colorWithDistance(      float *pColorData );
     void            colorWithMinDistance(   float *pColorData );
     void            colorWithConstantColor( float *pColorData );
+    
 
     void            toggleEndianess();
     std::string     intToString( const int number );
@@ -287,6 +289,7 @@ private:
     wxTextCtrl     *m_pTxtlinb;
     wxTextCtrl     *m_pTxtclBox;
 
+    wxButton       *m_pFitToAnat;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxButton       *m_pSelectConstantFibersColor;

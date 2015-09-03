@@ -45,6 +45,8 @@ public:
     float getElement(int,int,int,std::vector<float>*);
 	
 	std::vector<float> data; //Used for texture mapping
+    void         flipAnat( AxisType axe );
+
 	
 private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );

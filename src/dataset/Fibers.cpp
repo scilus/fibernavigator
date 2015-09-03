@@ -2106,6 +2106,55 @@ void Fibers::colorWithMinDistance( float *pColorData )
     }
 }
 
+void Fibers::fitToAnat()
+{
+    FMatrix localToWorld = FMatrix( DatasetManager::getInstance()->getNiftiTransform() );
+
+    float voxelX = DatasetManager::getInstance()->getVoxelX();
+    float voxelY = DatasetManager::getInstance()->getVoxelY();
+    float voxelZ = DatasetManager::getInstance()->getVoxelZ();
+
+    if( voxelX != 1.0 || voxelY != 1.0 || voxelZ != 1.0 )
+    {
+        FMatrix rotMat( 3, 3 );
+        localToWorld.getSubMatrix( rotMat, 0, 0 );
+
+        FMatrix scaleInversion( 3, 3 );
+        scaleInversion( 0, 0 ) = 1.0 / voxelX;
+        scaleInversion( 1, 1 ) = 1.0 / voxelY;
+        scaleInversion( 2, 2 ) = 1.0 / voxelZ;
+
+        rotMat = scaleInversion * rotMat;
+
+        localToWorld.setSubMatrix( 0, 0, rotMat );
+    }
+
+    FMatrix invertedTransform( 4, 4 );
+    invertedTransform = invert( localToWorld );
+
+    for( int i = 0; i < m_countPoints * 3; ++i )
+    {
+        FMatrix curPoint( 4, 1 );
+        curPoint( 0, 0 ) = m_pointArray[i];
+        curPoint( 1, 0 ) = m_pointArray[i + 1];
+        curPoint( 2, 0 ) = m_pointArray[i + 2];
+        curPoint( 3, 0 ) = 1;
+
+        FMatrix convertedPoint = invertedTransform * curPoint;
+
+        m_pointArray[i] = convertedPoint( 0, 0 );
+        m_pointArray[i + 1] = convertedPoint( 1, 0 );
+        m_pointArray[i + 2] = convertedPoint( 2, 0 );
+
+        i += 2;
+    }
+
+    /* OcTree points classification */
+    m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+    m_isInitialized = false;
+
+}
+
 void Fibers::colorWithConstantColor( float *pColorData )
 {
     if( pColorData == NULL )
@@ -3818,6 +3867,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Orientation Volume" ) );
 #endif
 
+    m_pFitToAnat  = new wxButton(   pParent, wxID_ANY, wxT( "Fit to Anatomy" ) );
     m_pToggleLocalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
     m_pSelectConstantFibersColor = new wxButton(    pParent, wxID_ANY, wxT( "Select Constant Color..." ) );
@@ -3840,6 +3890,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pToggleEndpts->Enable(false);
 
     //////////////////////////////////////////////////////////////////////////
+
+    pBoxMain->Add( m_pFitToAnat,     0, wxEXPAND | wxLEFT | wxRIGHT, 24 );
 
     wxFlexGridSizer *pGridSliders1 = new wxFlexGridSizer( 2 );
 
@@ -3967,6 +4019,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
 
     //////////////////////////////////////////////////////////////////////////
     // Connect widgets with callback function
+    pParent->Connect( m_pFitToAnat->GetId(),           wxEVT_COMMAND_BUTTON_CLICKED,       wxCommandEventHandler( PropertiesWindow::OnFitToAnat ) );
     pParent->Connect( m_pSliderFibersFilterMin->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
@@ -4415,6 +4468,7 @@ void Fibers::convertFromRTT()
     m_name = wxT( "RTTFibers" + id );
 
 	m_pOctree = new Octree( 2, m_pointArray, m_countPoints );
+    computeGLobalProperties();
 }
 
 void Fibers::updateAlpha()

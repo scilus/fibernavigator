@@ -490,6 +490,26 @@ void PropertiesWindow::OnFlipX( wxCommandEvent& WXUNUSED(event) )
     ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->flipAxis( X_AXIS );
 }
 
+void PropertiesWindow::OnFitToAnat( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFitToAnat" ), LOGLEVEL_DEBUG );
+
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->fitToAnat();
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnFitToAnat - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+
+}
+
 void PropertiesWindow::OnFlipY( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFlipY" ), LOGLEVEL_DEBUG );

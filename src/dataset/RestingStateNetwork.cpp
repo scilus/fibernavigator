@@ -140,8 +140,114 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	//Assign structure to a 2D vector of timelaps
     createStructure( fileFloatData );
 
+    bool m_originalAxialOrientation;
+    bool m_originalSagOrientation;
+    if( pHeader->sform_code > 0 )
+    {
+        if( pHeader->sto_xyz.m[0][0] < 0.0 )
+        {
+            m_originalAxialOrientation = 0;
+        }
+        else
+        {
+            m_originalAxialOrientation = 1;
+        }
+        if( pHeader->sto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = 0;
+        }
+        else
+        {
+            m_originalSagOrientation = 1;
+        }
+    }
+    else if( pHeader->qform_code > 0 )
+    {
+        if( pHeader->qto_xyz.m[0][0] < 0.0 )
+        {
+            m_originalAxialOrientation = 0;
+        }
+        else
+        {
+            m_originalAxialOrientation = 1;
+        }
+        if( pHeader->qto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = 0;
+        }
+        else
+        {
+            m_originalSagOrientation = 1;
+        }
+    }
+
+    if( m_originalAxialOrientation == 0 )
+    { 
+        flipAnat( X_AXIS );     
+    }
+    if( m_originalSagOrientation == 0 )
+    {
+        flipAnat( Y_AXIS );
+    }
     //Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
+}
+
+void RestingStateNetwork::flipAnat( AxisType axe )
+{
+    int curIndex;
+    int flipIndex;
+
+    int row(m_rows);
+    int col(m_columns);
+    int frames(m_frames);
+
+    switch (axe)
+    {
+        case X_AXIS:
+            col /= 2;
+            break;
+        case Y_AXIS:
+            row /= 2;
+            break;
+        case Z_AXIS:
+            frames /= 2;
+            break;
+        default:
+            Logger::getInstance()->print( wxT( "Cannot flip axis. The given axis is undefined." ), LOGLEVEL_ERROR );
+            return;
+    }
+
+    for( int f(0); f < frames; ++f )
+    {
+        for( int r(0); r < row; ++r )
+        {
+            for( int c(0); c < col; ++c )
+            {
+                curIndex = (c + r * m_columns + f * m_columns * m_rows);
+
+                //Compute the index of the value that will be replaced by the one defined by our current index
+                switch (axe)
+                {
+                    case X_AXIS:
+                        flipIndex = ((m_columns - 1 - c) + r * m_columns + f * m_columns * m_rows);
+                        break;
+                    case Y_AXIS:
+                        flipIndex = (c + (m_rows - 1 - r) * m_columns + f * m_columns * m_rows);
+                        break;
+                    case Z_AXIS:
+                        flipIndex = (c + r * m_columns + (m_frames - 1 - f) * m_columns * m_rows);
+                        break;
+                    default:
+                        break;
+                }
+
+                std::vector<float> tmp = m_signalNormalized[curIndex];
+                m_signalNormalized[curIndex] = m_signalNormalized[flipIndex];
+                m_signalNormalized[flipIndex] = tmp;
+            }
+        }
+    }
 }
 
 
@@ -186,7 +292,7 @@ bool RestingStateNetwork::createStructure( std::vector< short int > &i_fileFloat
     {
 		for( int b(0); b < m_bands; ++b )
 		{
-			if((m_signal[s][b] == 0 && dataMin[s] == 0) || (m_signal[s][b] == 16767 && dataMin[s] == 16767)) //Ensure that we dont divide by 0.
+			if((m_signal[s][b] == 0 && dataMin[s] == 0) || (m_signal[s][b] == 16767 && dataMin[s] == 16767) || (dataMax[s] == dataMin[s])) //Ensure that we dont divide by 0.
 				m_signalNormalized[s].push_back(0);
 			else
 				m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));

@@ -115,6 +115,7 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     
     createStructure( l_fileFloatData );
     bool m_originalAxialOrientation;
+    bool m_originalSagOrientation;
     if( pHeader->sform_code > 0 )
     {
         if( pHeader->sto_xyz.m[0][0] < 0.0 )
@@ -124,6 +125,14 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
         else
         {
             m_originalAxialOrientation = 1;
+        }
+        if( pHeader->sto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = 0;
+        }
+        else
+        {
+            m_originalSagOrientation = 1;
         }
     }
     else if( pHeader->qform_code > 0 )
@@ -136,13 +145,24 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
         {
             m_originalAxialOrientation = 1;
         }
+        if( pHeader->qto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = 0;
+        }
+        else
+        {
+            m_originalSagOrientation = 1;
+        }
     }
 
     if( m_originalAxialOrientation == 0 )
+    { 
+        flipAxis( X_AXIS, true );
+        flipAnat( X_AXIS );     
+    }
+    if( m_originalSagOrientation == 0 )
     {
         flipAxis( Y_AXIS, true );
-        flipAxis( X_AXIS, true );
-        flipAnat( X_AXIS );
         flipAnat( Y_AXIS );
     }
 

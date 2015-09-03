@@ -697,6 +697,14 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
         {
             m_originalAxialOrientation = ORIENTATION_LEFT_TO_RIGHT;
         }
+        if( pHeader->sto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = ORIENTATION_ANT_TO_POST;
+        }
+        else
+        {
+            m_originalSagOrientation = ORIENTATION_POST_TO_ANT;
+        }
     }
     else if( pHeader->qform_code > 0 )
     {
@@ -708,6 +716,14 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
         {
             m_originalAxialOrientation = ORIENTATION_LEFT_TO_RIGHT;
         }
+        if( pHeader->qto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = ORIENTATION_ANT_TO_POST;
+        }
+        else
+        {
+            m_originalSagOrientation = ORIENTATION_POST_TO_ANT;
+        }        
     }
     
     // Check the data type.
@@ -900,8 +916,11 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     // Flip the data if needed.
     if( m_originalAxialOrientation == ORIENTATION_RIGHT_TO_LEFT )
     {
-        flipAxisInternal( Y_AXIS, false );
         flipAxisInternal( X_AXIS, false );
+    }
+    if( m_originalSagOrientation == ORIENTATION_ANT_TO_POST )
+    {
+        flipAxisInternal( Y_AXIS, false );
     }
     
     if( m_isLoaded && m_type == VECTORS )
