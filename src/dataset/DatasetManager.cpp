@@ -36,7 +36,9 @@ DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
     m_forceLoadingAsMaximas( false ),
-	m_forceLoadingAsRestingState( false )
+	m_forceLoadingAsRestingState( false ),
+    m_loadedFlipX( false ),
+    m_loadedFlipY( false )
 {
 }
 

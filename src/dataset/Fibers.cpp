@@ -2106,14 +2106,22 @@ void Fibers::colorWithMinDistance( float *pColorData )
     }
 }
 
-void Fibers::fitToAnat()
+void Fibers::fitToAnat(bool saving)
 {
     FMatrix localToWorld = FMatrix( DatasetManager::getInstance()->getNiftiTransform() );
+
+    if(DatasetManager::getInstance()->getFlippedXOnLoad())
+        flipAxis(X_AXIS);
+
+    if(DatasetManager::getInstance()->getFlippedXOnLoad())
+        flipAxis(Y_AXIS);
 
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
     float voxelZ = DatasetManager::getInstance()->getVoxelZ();
 
+    FArray translate = localToWorld.getColumn(3);
+    ////revert
     if( voxelX != 1.0 || voxelY != 1.0 || voxelZ != 1.0 )
     {
         FMatrix rotMat( 3, 3 );
@@ -2129,9 +2137,19 @@ void Fibers::fitToAnat()
         localToWorld.setSubMatrix( 0, 0, rotMat );
     }
 
-    FMatrix invertedTransform( 4, 4 );
-    invertedTransform = invert( localToWorld );
+    FMatrix invertedTransform( localToWorld );
+    if(!saving)
+    {
+        invertedTransform = invert(localToWorld);
+    }
 
+    //HACK nifti
+    invertedTransform(0,0) *= -1;
+    invertedTransform(1,1) *= -1;
+    invertedTransform(0,3) *= -1;
+    invertedTransform(1,3) *= -1;
+    
+    //If saving, fit with localToWorld
     for( int i = 0; i < m_countPoints * 3; ++i )
     {
         FMatrix curPoint( 4, 1 );
@@ -2140,11 +2158,11 @@ void Fibers::fitToAnat()
         curPoint( 2, 0 ) = m_pointArray[i + 2];
         curPoint( 3, 0 ) = 1;
 
-        FMatrix convertedPoint = invertedTransform * curPoint;
+        FMatrix invertedPoint = invertedTransform  * curPoint;
 
-        m_pointArray[i] = convertedPoint( 0, 0 );
-        m_pointArray[i + 1] = convertedPoint( 1, 0 );
-        m_pointArray[i + 2] = convertedPoint( 2, 0 );
+        m_pointArray[i] = invertedPoint( 0, 0 );
+        m_pointArray[i + 1] = invertedPoint( 1, 0 );
+        m_pointArray[i + 2] = invertedPoint( 2, 0 );
 
         i += 2;
     }
@@ -2335,6 +2353,7 @@ void Fibers::save( wxString filename, int format )
         {
             filename += _T( ".vtk" );
         }
+        fitToAnat(true);
     }
     else
     {
@@ -2409,6 +2428,7 @@ void Fibers::save( wxString filename, int format )
 
     delete[] pBuffer;
     pBuffer = NULL;
+    fitToAnat(false);
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -917,10 +917,12 @@ bool Anatomy::load( nifti_image *pHeader, nifti_image *pBody )
     if( m_originalAxialOrientation == ORIENTATION_RIGHT_TO_LEFT )
     {
         flipAxisInternal( X_AXIS, false );
+        DatasetManager::getInstance()->setFlippedXOnLoad(true);
     }
     if( m_originalSagOrientation == ORIENTATION_ANT_TO_POST )
     {
         flipAxisInternal( Y_AXIS, false );
+        DatasetManager::getInstance()->setFlippedYOnLoad(true);
     }
     
     if( m_isLoaded && m_type == VECTORS )

@@ -90,19 +90,17 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     m_voxelSizeY = pHeader->dy;
     m_voxelSizeZ = pHeader->dz;
 
-
-
 	if( pHeader->sform_code > 0 )
     {
-		m_origin.x = floor(pHeader->sto_ijk.m[0][3]);
-		m_origin.y = floor(pHeader->sto_ijk.m[1][3]);
-		m_origin.z = floor(pHeader->sto_ijk.m[2][3]);
+		m_origin.x = floor(pHeader->sto_xyz.m[0][3]);
+		m_origin.y = floor(pHeader->sto_xyz.m[1][3]);
+		m_origin.z = floor(pHeader->sto_xyz.m[2][3]);
     }
     else if( pHeader->qform_code > 0 )
     {
-        m_origin.x = floor(pHeader->qto_ijk.m[0][3]);
-		m_origin.y = floor(pHeader->qto_ijk.m[1][3]);
-        m_origin.z = floor(pHeader->qto_ijk.m[2][3]);
+        m_origin.x = floor(pHeader->qto_xyz.m[0][3]);
+		m_origin.y = floor(pHeader->qto_xyz.m[1][3]);
+        m_origin.z = floor(pHeader->qto_xyz.m[2][3]);
     }
     else
     {

@@ -124,7 +124,7 @@ void MainCanvas::changeOrthoSize()
 
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
+    glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -3000, 3000 );
 }
 
 void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
@@ -714,7 +714,7 @@ void MainCanvas::render()
 
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
-                glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
+                glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -3000, 3000 );
                 glViewport( 0, 0, size, size );
 
                 glPushMatrix();
@@ -731,7 +731,7 @@ void MainCanvas::render()
             {
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
-                glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -500, 500 );
+                glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -3000, 3000 );
                 Logger::getInstance()->printIfGLError( wxT( "MainCanvas::render - glOrtho" ) );
 
                 glPushMatrix();
@@ -792,7 +792,7 @@ void MainCanvas::render()
         default:
             glMatrixMode( GL_PROJECTION );
             glLoadIdentity();
-            glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
+            glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -3000, 3000 );
 
             if ( MyApp::frame->m_pListCtrl->GetItemCount() != 0 )
             {

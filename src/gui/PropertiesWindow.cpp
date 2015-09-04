@@ -500,7 +500,7 @@ void PropertiesWindow::OnFitToAnat( wxCommandEvent& WXUNUSED(event) )
         Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
         if( pFibers != NULL )
         {
-            pFibers->fitToAnat();
+            pFibers->fitToAnat(false);
         }
     }
     else

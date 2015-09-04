@@ -54,6 +54,10 @@ public:
     float                   getVoxelY() const;
     float                   getVoxelZ() const;
     FMatrix &               getNiftiTransform()             { return m_niftiTransform; }
+    bool                    getFlippedXOnLoad()                 { return m_loadedFlipX; }
+    bool                    getFlippedYOnLoad()                 { return m_loadedFlipY; }
+    void                    setFlippedXOnLoad(bool flip) { m_loadedFlipX = flip;}
+    void                    setFlippedYOnLoad(bool flip) { m_loadedFlipY = flip;}
 
     bool                    isDatasetLoaded() const         { return !m_datasets.empty(); }
     bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
@@ -151,6 +155,8 @@ private:
     
     bool m_forceLoadingAsMaximas;
     bool m_forceLoadingAsRestingState;
+    bool m_loadedFlipX;
+    bool m_loadedFlipY;
 };
 
 #endif //DATASETMANAGER_H_
