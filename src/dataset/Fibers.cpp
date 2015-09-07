@@ -2110,11 +2110,20 @@ void Fibers::fitToAnat(bool saving)
 {
     FMatrix localToWorld = FMatrix( DatasetManager::getInstance()->getNiftiTransform() );
 
-    if(DatasetManager::getInstance()->getFlippedXOnLoad())
-        flipAxis(X_AXIS);
+    if(saving)
+    {
+        if(DatasetManager::getInstance()->getFlippedXOnLoad())
+        {
+            flipAxis(X_AXIS);
+            std::cout << "flipX \n";
+        }
 
-    if(DatasetManager::getInstance()->getFlippedXOnLoad())
-        flipAxis(Y_AXIS);
+        if(DatasetManager::getInstance()->getFlippedXOnLoad())
+        {
+            flipAxis(Y_AXIS);
+            std::cout << "flipY \n";
+        }
+    }
 
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
@@ -2138,16 +2147,28 @@ void Fibers::fitToAnat(bool saving)
     }
 
     FMatrix invertedTransform( localToWorld );
-    if(!saving)
-    {
-        invertedTransform = invert(localToWorld);
-    }
 
     //HACK nifti
     invertedTransform(0,0) *= -1;
+    invertedTransform(0,1) *= -1;
+    invertedTransform(1,0) *= -1;
+    invertedTransform(0,2) *= -1;
     invertedTransform(1,1) *= -1;
+    invertedTransform(1,2) *= -1;
     invertedTransform(0,3) *= -1;
     invertedTransform(1,3) *= -1;
+
+    if(!saving)
+    {
+        FMatrix test( localToWorld );
+        test = invert(invertedTransform);
+        invertedTransform = test;
+    }
+
+    std::cout << invertedTransform(0,0) << " " << invertedTransform(0,1) << " " << invertedTransform(0,2) << " " << invertedTransform(0,3) << "\n";
+    std::cout << invertedTransform(1,0) << " " << invertedTransform(1,1) << " " << invertedTransform(1,2) << " " << invertedTransform(1,3) << "\n";
+    std::cout << invertedTransform(2,0) << " " << invertedTransform(2,1) << " " << invertedTransform(2,2) << " " << invertedTransform(2,3) << "\n";
+    std::cout << invertedTransform(3,0) << " " << invertedTransform(3,1) << " " << invertedTransform(3,2) << " " << invertedTransform(3,3) << "\n";
     
     //If saving, fit with localToWorld
     for( int i = 0; i < m_countPoints * 3; ++i )
@@ -2165,6 +2186,21 @@ void Fibers::fitToAnat(bool saving)
         m_pointArray[i + 2] = invertedPoint( 2, 0 );
 
         i += 2;
+    }
+
+    if(!saving)
+    {
+        if(DatasetManager::getInstance()->getFlippedXOnLoad())
+        {
+            flipAxis(X_AXIS);
+            std::cout << "flipX \n";
+        }
+
+        if(DatasetManager::getInstance()->getFlippedXOnLoad())
+        {
+            flipAxis(Y_AXIS);
+            std::cout << "flipY \n";
+        }
     }
 
     /* OcTree points classification */
@@ -2428,7 +2464,11 @@ void Fibers::save( wxString filename, int format )
 
     delete[] pBuffer;
     pBuffer = NULL;
-    fitToAnat(false);
+
+    if( format == 0)
+    {
+        fitToAnat(false);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
