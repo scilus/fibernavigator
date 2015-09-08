@@ -457,6 +457,7 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             stickPos[1] = halfScale*m_mainDirections[currentIdx][i*3+1];
             stickPos[2] = halfScale*m_mainDirections[currentIdx][i*3+2];
 
+            glLineWidth(2);
             glBegin(GL_LINES);  
                 glVertex3f(-stickPos[0],-stickPos[1],-stickPos[2]);
                 glVertex3f(stickPos[0],stickPos[1],stickPos[2]);       
