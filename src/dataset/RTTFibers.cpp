@@ -222,7 +222,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && m_render && draw)
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
 						{
                             bool keepRight = false;
                             bool keepLeft = false;
@@ -1399,17 +1399,13 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
                 {
                     insideNotBox = inside;
                     m_prune = !child[b]->getIsRemove();
-                    if(inside && m_prune)
+                    if(m_prune)
                     {
                         m_render = true;
                     }
                     else if(inside && !m_prune && m_steppedOnceInsideChildBox)
                     {
                         m_render = false;
-                    }
-                    else
-                    {
-                        m_render = true;
                     }
                 }
              
