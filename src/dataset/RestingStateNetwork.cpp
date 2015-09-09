@@ -441,16 +441,21 @@ void RestingStateNetwork::seedBased()
     Vector minCorner, maxCorner, middle;
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
+    //test for optim
+    float m_xLinvert = 1.0f / m_xL;
+    float m_yLinvert = 1.0f / m_yL;
+    float m_zLinvert = 1.0f / m_zL;
+
     if(!RTFMRIHelper::getInstance()->isSeedFromTracto())
     {
 	    for( unsigned int b = 0; b < selObjs.size(); b++ )
 	    {
-		    minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		    minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		    minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
-		    maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
-		    maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
-		    maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+		    minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL * 0.5f ) * m_xLinvert );
+		    minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL * 0.5f ) * m_yLinvert );
+		    minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL * 0.5f ) * m_zLinvert );
+		    maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL * 0.5f ) * m_xLinvert );
+		    maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL * 0.5f ) * m_yLinvert );
+		    maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL * 0.5f ) * m_zLinvert );
 		
 		    for( float x = minCorner.x; x <= maxCorner.x; x++)
 		    {
@@ -475,9 +480,9 @@ void RestingStateNetwork::seedBased()
         for(unsigned int t = 0; t < m_pSeedFromTracto.size(); t++ )
         {
             //Switch to 3x3x3 from t1space
-            int zz = (((m_pSeedFromTracto[t].z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z) / m_zL;
-			int yy = (((m_pSeedFromTracto[t].y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y) / m_yL;
-			int xx = (((m_pSeedFromTracto[t].x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x) / m_xL;
+            int zz = (((m_pSeedFromTracto[t].z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z) * m_zLinvert;
+			int yy = (((m_pSeedFromTracto[t].y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y) * m_yLinvert;
+			int xx = (((m_pSeedFromTracto[t].x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x) * m_xLinvert;
 			int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
 			positions.push_back( i );
         }
@@ -487,9 +492,9 @@ void RestingStateNetwork::seedBased()
 	//TODO can be done in rendering directly while looping, change from fspace to t1space
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
-		m_3Dpoints[s].first.x = ((m_3Dpoints[s].first.x - m_origin.x) * m_voxelSizeX / m_xL) + m_originL.x;
-		m_3Dpoints[s].first.y = ((m_3Dpoints[s].first.y - m_origin.y) * m_voxelSizeY / m_yL) + m_originL.y;
-		m_3Dpoints[s].first.z = ((m_3Dpoints[s].first.z - m_origin.z) * m_voxelSizeZ / m_zL) + m_originL.z;
+		m_3Dpoints[s].first.x = ((m_3Dpoints[s].first.x - m_origin.x) * m_voxelSizeX * m_xLinvert) + m_originL.x;
+		m_3Dpoints[s].first.y = ((m_3Dpoints[s].first.y - m_origin.y) * m_voxelSizeY * m_yLinvert) + m_originL.y;
+		m_3Dpoints[s].first.z = ((m_3Dpoints[s].first.z - m_origin.z) * m_voxelSizeZ * m_zLinvert) + m_originL.z;
     }
 
 	render3D(false);
@@ -566,9 +571,9 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			float R,G,B;
             bool render = true;
 
-			float mid = (m_zMin + m_zMax) / 2.0f;
-			float quart = 1.0f* (m_zMin + m_zMax) / 4.0f;
-			float trois_quart = 3.0f* (m_zMin + m_zMax) / 4.0f;
+			float mid = (m_zMin + m_zMax) * 0.5f;
+			float quart = 1.0f* (m_zMin + m_zMax) * 0.25f;
+			float trois_quart = 3.0f* (m_zMin + m_zMax) * 0.25f;
 			float v = (m_3Dpoints[s].second - m_zMin) / (m_zMax - m_zMin);
 
 			if(m_3Dpoints[s].second < quart)
@@ -652,6 +657,9 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 	float corrSum = 0.0f;
 	int nb = 0;
 
+    //test optim
+    float m_bandInvert = 1.0f / (m_bands-1);
+
 	//Correlate with rest of the brain, i.e find corr factors
 	for( float x = 0; x < m_columns; x++)
 	{
@@ -671,7 +679,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 						num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
 					}
 					value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-					value /= (m_bands-1);
+					value *= m_bandInvert;
 				}
 				nb++;
 				corrFactors[i] = value;
@@ -698,6 +706,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 	//Calculate z-scores, and save them.
 	sigma /= nb-1;
 	sigma = sqrt(sigma);
+    float sigmaInvert = 1.0f/sigma;
 
 	vector<float> zErode(m_datasetSize, 0);
 	vector<bool> binErode(m_datasetSize, false);
@@ -717,7 +726,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 
 				if(corrFactors[i] > 0)
 				{
-					float zScore = (corrFactors[i] - meanCorr) / sigma;
+					float zScore = (corrFactors[i] - meanCorr) * sigmaInvert;
 					if(zScore < m_zMin && zScore > 0.0f)
 						m_zMin = zScore;
 					if(zScore > m_zMax)

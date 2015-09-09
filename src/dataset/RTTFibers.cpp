@@ -169,6 +169,9 @@ void RTTFibers::seed()
 
     Vector minCorner, maxCorner, middle;
     selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+
+    //test to optim
+    float invertNbSeed = 1.0f / float( m_nbSeed - 1.0f ); 
     
 	//Evenly distanced seeds
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
@@ -182,22 +185,22 @@ void RTTFibers::seed()
 
             m_currentSeedBoxID = b+1;
 
-			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
-			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
-			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
-			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
-			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
-			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
+			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel * 0.5f;
+			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel * 0.5f;
+			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel * 0.5f;
+			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel * 0.5f;
+			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel * 0.5f;
+			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel * 0.5f;
 
-			float xstep =  selObjs[b]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
-			float ystep =  selObjs[b]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
-			float zstep =  selObjs[b]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
+			float xstep =  selObjs[b]->getSize().x * xVoxel * invertNbSeed;
+			float ystep =  selObjs[b]->getSize().y * yVoxel * invertNbSeed;
+			float zstep =  selObjs[b]->getSize().z * zVoxel * invertNbSeed;
 			
-			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
+			for( float x = minCorner.x; x < maxCorner.x + xstep*0.5f; x+= xstep )
 			{
-				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
+				for( float y = minCorner.y; y < maxCorner.y + ystep*0.5f; y+= ystep )
 				{
-					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
+					for( float z = minCorner.z; z < maxCorner.z + zstep*0.5f; z+= zstep )
 					{
 						vector<float> pointsF;
                         vector<float> pointsB;
@@ -794,6 +797,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     }
 	vin.normalize();
 
+
     //MAGNET
     bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
@@ -858,12 +862,12 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
             float xVoxel = DatasetManager::getInstance()->getVoxelX();
             float yVoxel = DatasetManager::getInstance()->getVoxelY();
             float zVoxel = DatasetManager::getInstance()->getVoxelZ();
-            minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
-			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
-			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
-			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
-			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
-			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
+            minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel * 0.5f;
+			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel * 0.5f;
+			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel * 0.5f;
+			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel * 0.5f;
+			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel * 0.5f;
+			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel * 0.5f;
 
             //Compare sticks with vector field, pick min
             float angleMin = 360.0f;
@@ -1364,19 +1368,19 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
                 float xVoxel = DatasetManager::getInstance()->getVoxelX();
                 float yVoxel = DatasetManager::getInstance()->getVoxelY();
                 float zVoxel = DatasetManager::getInstance()->getVoxelZ();
-                minCorner.x = child[b]->getCenter().x - child[b]->getSize().x * xVoxel / 2.0f;
-	            minCorner.y = child[b]->getCenter().y - child[b]->getSize().y * yVoxel / 2.0f;
-	            minCorner.z = child[b]->getCenter().z - child[b]->getSize().z * zVoxel / 2.0f;
-	            maxCorner.x = child[b]->getCenter().x + child[b]->getSize().x * xVoxel / 2.0f;
-	            maxCorner.y = child[b]->getCenter().y + child[b]->getSize().y * yVoxel / 2.0f;
-	            maxCorner.z = child[b]->getCenter().z + child[b]->getSize().z * zVoxel / 2.0f;
+                minCorner.x = child[b]->getCenter().x - child[b]->getSize().x * xVoxel * 0.5f;
+	            minCorner.y = child[b]->getCenter().y - child[b]->getSize().y * yVoxel * 0.5f;
+	            minCorner.z = child[b]->getCenter().z - child[b]->getSize().z * zVoxel * 0.5f;
+	            maxCorner.x = child[b]->getCenter().x + child[b]->getSize().x * xVoxel * 0.5f;
+	            maxCorner.y = child[b]->getCenter().y + child[b]->getSize().y * yVoxel * 0.5f;
+	            maxCorner.z = child[b]->getCenter().z + child[b]->getSize().z * zVoxel * 0.5f;
                 bool inside;
 
                 if(child[b]->getSelectionType() == ELLIPSOID_TYPE)
                 {
-                    float l_axisRadius  = ( maxCorner.x  - minCorner.x ) / 2.0f;
-                    float l_axis1Radius = ( maxCorner.y - minCorner.y ) / 2.0f;
-                    float l_axis2Radius = ( maxCorner.z - minCorner.z ) / 2.0f;
+                    float l_axisRadius  = ( maxCorner.x  - minCorner.x ) * 0.5f;
+                    float l_axis1Radius = ( maxCorner.y - minCorner.y ) * 0.5f;
+                    float l_axis2Radius = ( maxCorner.z - minCorner.z ) * 0.5f;
                     float l_axisCenter  = maxCorner.x  - l_axisRadius;
                     float l_axis1Center = maxCorner.y - l_axis1Radius;
                     float l_axis2Center = maxCorner.z - l_axis2Radius;
