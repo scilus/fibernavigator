@@ -119,6 +119,7 @@ private:
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
 	wxButton			*m_pBtnConvert;
+    wxToggleButton      *m_pToggleRandomInit;
     
     
     

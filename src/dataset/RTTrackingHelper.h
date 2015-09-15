@@ -30,6 +30,7 @@ public:
     bool isTractoDrivenRSN() const { return m_isTractoDrivenRSN; }
     bool isGMAllowed() const { return m_isGMallowed; }
     bool isSrcAlpha() const { return m_isSrcAlpha; }
+    bool isRandomInit() const { return m_isRandomInit; }
 
     void setFileSelected( bool selected )     { m_isFileSelected = selected; }
     void setShellSeeds( bool shell )          { m_isShellSeeds = shell; }
@@ -48,6 +49,7 @@ public:
     bool toggleRTTReady()           { return m_isRTTReady = !m_isRTTReady; }
     bool toggleMagnet()             { return m_isMagnetOn = !m_isMagnetOn; }
     bool toggleSrcAlpha()           { return m_isSrcAlpha = !m_isSrcAlpha; }
+    bool toggleRandomInit()         { return m_isRandomInit = !m_isRandomInit; }
     
     bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
     bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
@@ -97,6 +99,7 @@ private:
     bool m_isGMallowed;
 	int m_id;
     bool m_isSrcAlpha;
+    bool m_isRandomInit;
     Vector flippedAxes;
     GLuint m_bufferID;
 

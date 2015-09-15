@@ -21,6 +21,7 @@ RTTrackingHelper::RTTrackingHelper()
     m_isGMallowed( false ),
 	m_id( 0 ),
     m_isSrcAlpha( true ),
+    m_isRandomInit( true ),
     m_bufferID( 0 )
 {
 }

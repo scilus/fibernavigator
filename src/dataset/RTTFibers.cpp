@@ -212,11 +212,15 @@ void RTTFibers::seed()
                         
                         if(m_isHARDI)
                         {
-                            Vector rand = generateRandomSeed(minCorner,maxCorner);
+                            Vector seed(x,y,z);
+                            if(RTTrackingHelper::getInstance()->isRandomInit())
+                            {
+                                seed = generateRandomSeed(minCorner,maxCorner);
+                            }
 						    //Track both sides
-							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
                             draw = m_render;
-						    performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
+						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
@@ -309,11 +313,15 @@ void RTTFibers::seed()
                         
                         if(m_isHARDI)
                         {
-                            Vector rand = generateRandomSeed(minCorner,maxCorner);
+                            Vector seed(x,y,z);
+                            if(RTTrackingHelper::getInstance()->isRandomInit())
+                            {
+                                seed = generateRandomSeed(minCorner,maxCorner);
+                            }
 						    //Track both sides
-							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
                             draw = m_render;
-						    performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
+						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
@@ -406,12 +414,15 @@ void RTTFibers::seed()
                         
 						if(m_isHARDI)
 						{
-                            Vector rand = generateRandomSeed(minCorner,maxCorner);
-
-							//Track both sides
-							performHARDIRTT( rand,  1, pointsF, colorF); //First pass
+                            Vector seed(x,y,z);
+                            if(RTTrackingHelper::getInstance()->isRandomInit())
+                            {
+                                seed = generateRandomSeed(minCorner,maxCorner);
+                            }
+						    //Track both sides
+							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
                             draw = m_render;
-							performHARDIRTT( rand, -1, pointsB, colorB); //Second pass
+						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
 						}
 						else
 						{

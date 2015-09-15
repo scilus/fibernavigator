@@ -191,7 +191,13 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxRowEx->Add( m_pBtnSelectExclusion, 0, wxALIGN_CENTER | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxRowEx, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-    
+    m_pToggleRandomInit = new wxToggleButton( this, wxID_ANY,wxT("Randomly spaced seeds"), wxDefaultPosition, wxSize(230, -1) );
+    Connect( m_pToggleRandomInit->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnRandomSeeding) );
+
+    wxBoxSizer *pBoxRowRand = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRowRand->Add( m_pToggleRandomInit, 0, wxALIGN_CENTER | wxALL, 1 );
+	m_pTrackingSizer->Add( pBoxRowRand, 0, wxFIXED_MINSIZE | wxALL, 2 );
+   
     wxBoxSizer *pBoxFlips = new wxBoxSizer( wxHORIZONTAL );
     pBoxFlips->Add(new wxStaticText( this, wxID_ANY, wxT( "Init. dir." ), wxDefaultPosition, wxSize(30, -1), wxALIGN_CENTER ), 1, wxEXPAND | wxALL, 1 );
     m_pToggleTrackX = new wxToggleButton( this, wxID_ANY, wxT( "L-R" ), wxDefaultPosition, wxSize( 30, -1 ) );
@@ -820,8 +826,18 @@ void TrackingWindow::OnShellSeeding( wxCommandEvent& WXUNUSED(event) )
 //Deprecated
 void TrackingWindow::OnRandomSeeding( wxCommandEvent& WXUNUSED(event) )
 {
-    //RTTrackingHelper::getInstance()->toggleRandomSeeds();
-    //RTTrackingHelper::getInstance()->setRTTDirty( true );
+    RTTrackingHelper::getInstance()->toggleRandomInit();
+    RTTrackingHelper::getInstance()->setRTTDirty( true );
+    
+	//Set nb of seeds depending on the seeding mode 
+    if( !RTTrackingHelper::getInstance()->isRandomInit() )
+    {
+        m_pToggleRandomInit->SetLabel(wxT( "Evenly spaced seeds"));
+    }
+    else
+    {
+        m_pToggleRandomInit->SetLabel(wxT( "Randomly spaced seeds"));
+    }
 }
 
 //Deprecated
