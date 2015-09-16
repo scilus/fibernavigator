@@ -347,7 +347,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     /*-----------------------ANIMATION SECTION -----------------------------------*/
 
-    m_pLineSeparator = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxSize(230,-1),wxHORIZONTAL,wxT("Separator"));
+    /*m_pLineSeparator = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxSize(230,-1),wxHORIZONTAL,wxT("Separator"));
 
     wxTextCtrl *animationZone = new wxTextCtrl( this, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxSize(150, -1), wxTE_CENTER | wxTE_READONLY );
     animationZone->SetBackgroundColour( *wxLIGHT_GREY );
@@ -375,11 +375,11 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 	wxBoxSizer *pBoxRowAnim = new wxBoxSizer( wxHORIZONTAL );
     pBoxRowAnim->Add( m_pPlayPause, 0,  wxALIGN_CENTER , 1 );
 	pBoxRowAnim->Add( m_pBtnStop, 0,  wxALIGN_CENTER, 1 );
-	m_pTrackingSizer->Add( pBoxRowAnim, 0, wxFIXED_MINSIZE | wxALL, 2 );
+	m_pTrackingSizer->Add( pBoxRowAnim, 0, wxFIXED_MINSIZE | wxALL, 2 );*/
 
     /*-----------------------MAGNET SECTION-----------------------------------*/
 
-    wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(115, -1), wxTE_CENTER | wxTE_READONLY );
+    /*wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(115, -1), wxTE_CENTER | wxTE_READONLY );
     magnetZone->SetBackgroundColour( *wxLIGHT_GREY );
     wxFont magnet_font = magnetZone->GetFont();
     magnet_font.SetPointSize( 10 );
@@ -410,7 +410,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxMagnet1->Add( m_pBtnPlaceMagnetB, 1, wxEXPAND | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxMagnet1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );
+    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );*/
 
 }
 
