@@ -73,7 +73,7 @@ SceneManager::SceneManager(void)
     m_screenshotName( wxT( "" ) ),
     m_screenshotPath( wxT( "" ) ),
     m_clearToBlack( true ),
-    m_colorMap( 0 ),
+    m_colorMap( 6 ),
     m_filterIsoSurface( false ),
     m_pSelTree( NULL ),
     m_selBoxChanged( true ),

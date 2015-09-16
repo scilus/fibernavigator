@@ -9,7 +9,8 @@ RTFMRIHelper::RTFMRIHelper()
     m_isRTFMRIActive( false ),
     m_isRTFMRIDirty( false ),
     m_isRTFMRIReady( false ),
-	m_isSeedFromfMRI( false )
+	m_isSeedFromfMRI( false ),
+    m_isTractoDrivenRSN( false )
 {
 }
 

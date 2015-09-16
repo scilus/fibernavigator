@@ -52,7 +52,7 @@ public:
     void    getNbLines( int &nbLines );
     void    loadDMRIFibersInFile( std::ofstream &myfile );
 
-    void    save( wxString filename );
+    void    save( wxString filename, int format );
     bool    save( wxXmlNode *pNode, const wxString &rootPath ) const;
     void    saveDMRI( wxString filename );
 
@@ -106,6 +106,7 @@ public:
     void    setUsingEndpts(bool value);
 
     void    flipAxis( AxisType i_axe );
+    void    fitToAnat( bool saving);
     
     int     getFibersCount() const { return m_countLines; }
     
@@ -154,7 +155,7 @@ public:
     void    updateCrossingFibersThickness();
     void    updateTubeRadius();
 
-	void    convertFromRTT( std::vector<std::vector<Vector> >* RTT );
+	void    convertFromRTT();
 
     // Inherited from DatasetInfo
     bool    toggleShow();
@@ -182,6 +183,7 @@ private:
     void            colorWithDistance(      float *pColorData );
     void            colorWithMinDistance(   float *pColorData );
     void            colorWithConstantColor( float *pColorData );
+    
 
     void            toggleEndianess();
     std::string     intToString( const int number );
@@ -287,6 +289,7 @@ private:
     wxTextCtrl     *m_pTxtlinb;
     wxTextCtrl     *m_pTxtclBox;
 
+    wxButton       *m_pFitToAnat;
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxButton       *m_pSelectConstantFibersColor;

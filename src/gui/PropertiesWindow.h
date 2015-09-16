@@ -63,6 +63,7 @@ public:
     void OnFlipX                            ( wxCommandEvent& event );
     void OnFlipY                            ( wxCommandEvent& event );
     void OnFlipZ                            ( wxCommandEvent& event );
+    void OnFitToAnat                        ( wxCommandEvent& event );
 
     void OnDilateDataset                    ( wxCommandEvent& event );
     void OnErodeDataset                     ( wxCommandEvent& event );
@@ -140,6 +141,7 @@ public:
     void OnActivateTreeItem                 ( wxTreeEvent&    event );
     void OnRenameBox                        ( wxCommandEvent& event );
     void OnToggleAndNot                     ( wxCommandEvent& event );
+    void OnTogglePruneRemove                ( wxCommandEvent& event );
     void OnColorRoi                         ( wxCommandEvent& event );
     void OnVoiFlipNormals                   ( wxCommandEvent& event );
     void OnAssignColor                      ( wxCommandEvent& event );
@@ -162,6 +164,8 @@ public:
     void OnBoxSizeZ                         ( wxCommandEvent& event );
     void OnSliderAxisMoved                  ( wxCommandEvent& event );
     void OnRecalcMainDir                    ( wxCommandEvent& event );
+    void OnSliderQMoved                     ( wxCommandEvent& event );
+    void OnToggleFlipMagnetisation          ( wxCommandEvent& event );
 
     void OnToggleCrossingFibers             ( wxEvent& event );
     void OnCrossingFibersThicknessChange    ( wxCommandEvent& event );

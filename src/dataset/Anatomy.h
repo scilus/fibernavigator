@@ -47,6 +47,11 @@ friend class PropertiesWindow;
         ORIENTATION_RIGHT_TO_LEFT,
         ORIENTATION_UNDEFINED
     };
+    enum SagOrientation
+    {
+        ORIENTATION_ANT_TO_POST,
+        ORIENTATION_POST_TO_ANT,
+    };
 
 public:
     //constructor/destructor
@@ -61,6 +66,7 @@ public:
     void add( Anatomy* anatomy);
 
     float at( const int i ) const;
+    unsigned int getSize() { return m_floatDataset.size(); }
     std::vector<float>* getFloatDataset();
     std::vector<float>* getEqualizedDataset();
     void setFloatDataset(std::vector<float>& dataset) { m_floatDataset = dataset; }
@@ -182,6 +188,7 @@ private:
     unsigned int            m_cdf[256];
     
     AxialOrientation        m_originalAxialOrientation;
+    SagOrientation          m_originalSagOrientation;
 };
 
 #endif /* ANATOMY_H_ */

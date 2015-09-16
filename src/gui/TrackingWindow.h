@@ -62,10 +62,16 @@ public:
 	void OnMapSeeding                          ( wxCommandEvent& event );
 	void OnSelectSeedMap                       ( wxCommandEvent& event );
 	void OnSliderOpacityMoved				   ( wxCommandEvent& event );
+    void OnSrcAlpha                            ( wxCommandEvent& event );
     void OnEnableRSN                           ( wxCommandEvent& event );
+    void OnToggleGM                            ( wxCommandEvent& event );
 
     void OnPlay                                ( wxCommandEvent& event );
     void OnStop                                ( wxCommandEvent& event );
+    void OnPlaceMagnetR                        ( wxCommandEvent& event );
+    void OnPlaceMagnetG                        ( wxCommandEvent& event );
+    void OnPlaceMagnetB                        ( wxCommandEvent& event );
+    void OnToggleMagnetMode                    ( wxCommandEvent& event );
 
 public:
     wxToggleButton      *m_pBtnStart;
@@ -97,6 +103,7 @@ private:
 	wxToggleButton		*m_pToggleSeedMap;
     wxButton            *m_pBtnSelectMap;
     wxButton            *m_pBtnSelectGM;
+    wxToggleButton      *m_pToggleGMmap;
     wxToggleButton      *m_pToggleTrackX;
     wxToggleButton      *m_pToggleTrackY;
     wxToggleButton      *m_pToggleTrackZ;
@@ -107,10 +114,12 @@ private:
 	wxStaticText        *m_pTextOpacity;
     wxSlider            *m_pSliderOpacity;
     wxTextCtrl          *m_pTxtOpacityBox;
+    wxToggleButton      *m_pBtnToggleSrcAlpha;
     wxSlider            *m_pSliderMaxLength;
     wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
 	wxButton			*m_pBtnConvert;
+    wxToggleButton      *m_pToggleRandomInit;
     
     
     
@@ -121,12 +130,11 @@ private:
     wxBitmapButton      *m_pBtnStop;
     wxImage             m_bmpPause;
     wxImage             m_bmpPlay;
-
-    bool m_isGMSelected;
-    bool m_isWMSelected;
+    wxBitmapButton      *m_pBtnPlaceMagnetR;
+    wxBitmapButton      *m_pBtnPlaceMagnetG;
+    wxBitmapButton      *m_pBtnPlaceMagnetB;
+    wxToggleButton      *m_pToggleMagnetMode;
     
-
-
 private:
     wxSizer *m_pTrackingSizer;
     TrackingWindow( wxWindow *pParent, wxWindowID id, const wxPoint &pos, const wxSize &size );

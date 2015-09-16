@@ -13,11 +13,16 @@ RTTrackingHelper::RTTrackingHelper()
     m_isRTTActive( false ),
     m_isRTTDirty( false ),
     m_isRTTReady( false ),
+    m_isMagnetOn( false ),
     m_isTrackActionPlaying( false ),
     m_isPaused( true ),
 	m_isSeedFromfMRI ( false ),
     m_isTractoDrivenRSN( false ),
-	m_id( 0 )
+    m_isGMallowed( false ),
+	m_id( 0 ),
+    m_isSrcAlpha( true ),
+    m_isRandomInit( true ),
+    m_bufferID( 0 )
 {
 }
 

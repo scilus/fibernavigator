@@ -24,20 +24,20 @@ public:
 
     //RTT functions
     void seed();
-    void renderRTTFibers(bool isPlaying);
-    void performDTIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
-    void performHARDIRTT( Vector seed, int bwdfwd, std::vector<Vector>& points, std::vector<Vector>& color );
+    void renderRTTFibers(bool bindBuffers, bool isPlaying, bool changeAlpha);
+    void performDTIRTT( Vector seed, int bwdfwd, std::vector<float>& points, std::vector<float>& color );
+    void performHARDIRTT( Vector seed, int bwdfwd, std::vector<float>& points, std::vector<float>& color );
     void setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2, Vector& e3 );
-	std::vector<float> pickDirection(std::vector<float> initialPeaks, bool initWithDir);
-    bool withinMapThreshold(unsigned int sticksNumber);
+	std::vector<float> pickDirection(std::vector<float> initialPeaks, bool initWithDir, Vector currPos);
+    bool withinMapThreshold(unsigned int sticksNumber, Vector pos);
 
     Vector generateRandomSeed( const Vector &min, const Vector &max );
     FMatrix trilinearInterp( float fx, float fy, float fz );
     Vector advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, Vector e2, Vector e3, float tensorNumber );
-    Vector advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float tensorNumber );
+    Vector advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float peaksNumber, Vector pos );
+    Vector magneticField( Vector vin, const std::vector<float> &sticks, float peaksNumber, Vector pos, Vector& vOut, float& F);
     
-    void clearFibersRTT()                           { m_fibersRTT.clear(); }
-    void clearColorsRTT()                           { m_colorsRTT.clear(); }
+    void clearFibersRTT();
 
     void setFAThreshold( float FAThreshold )						  { m_FAThreshold = FAThreshold; }
     void setTensorsMatrix( const std::vector<FMatrix> tensorsMatrix ) { m_tensorsMatrix = tensorsMatrix; }
@@ -53,15 +53,17 @@ public:
     void setMinFiberLength( float minLength )						  { m_minFiberLength = minLength; }
     void setMaxFiberLength( float maxLength )						  { m_maxFiberLength = maxLength; }
     void setTensorsInfo( Tensors* info )							  { m_pTensorsInfo = info; }
-    void setHARDIInfo( Maximas* info )							      { m_pMaximasInfo = info; }
+    void setHARDIInfo( Maximas* info );							      
 	void setShellInfo( DatasetInfo* info )							  { m_pShellInfo = info; }
     void setMaskInfo( Anatomy* info )                                 { m_pMaskInfo = info; }
     void setGMInfo( Anatomy* info )                                   { m_pGMInfo = info; }
     void setInitSeed( Vector init )                                   { m_initVec = init; } 
 
 	void setOpacity( float alpha )                                    { m_alpha = alpha; }
+    float getOpacity() {return m_alpha;}
 	void setSeedMapInfo( Anatomy* info );	
 	void setSeedFromfMRI( const std::vector<std::pair<Vector,float> > &seedFromfMRI )	  { m_pSeedFromfMRI = seedFromfMRI; }
+    void insertPointsForTractoDriven( std::vector<float> pointsF, std::vector<float> pointsB);
 
 	void setExcludeInfo( Anatomy* info )                              { m_pExcludeInfo = info; }
 	bool checkExclude(unsigned int sticksNumber);						  
@@ -86,8 +88,12 @@ public:
                                                    else
                                                         return m_pTensorsInfo->getPath(); }
 
-    size_t getSize()                                  { return m_fibersRTT.size(); }
-	std::vector<std::vector<Vector> >* getRTTFibers() { return &m_fibersRTT; }
+    size_t getSize()                                  { return m_streamlinesPoints.size(); }
+
+	std::vector<float>* getRTTFibers() { return &m_streamlinesPoints; }
+    std::vector<int>* getRTTLinePointer() { return &m_linePointer; }
+    std::vector<int>* getRTTNbPointsPerLine() { return &m_nbPtsPerLine; }
+    std::vector<bool>* getRTTLeftRightVector() { return & m_LeftRightVector;}
 
 
 	unsigned int  m_trackActionStep;
@@ -116,10 +122,17 @@ private:
     Anatomy     *m_pGMInfo;
     Vector       m_initVec;
 
+    std::vector<float> m_streamlinesPoints; // Points to be rendered Forward
+	std::vector<float> m_streamlinesColors; //Color (local directions)Forward
+    
+
 	float m_alpha;
-
-	bool         m_stop;
-
+    int m_currentSeedBoxID;
+	bool m_stop;
+    bool m_render;
+    bool m_steppedOnceInsideChildBox;
+    bool m_prune;
+    GLuint*     m_bufferObjectsRTT;
 
     std::vector< FMatrix > m_tensorsMatrix;
     std::vector< F::FVector >  m_tensorsEV;
@@ -127,6 +140,12 @@ private:
 	std::vector<std::pair<Vector,float> > m_pSeedFromfMRI;
     std::vector<std::vector<Vector> > m_fibersRTT;
     std::vector<std::vector<Vector> > m_colorsRTT;
+    std::vector< SelectionObject* > selObjs;
+
+    std::vector< int > m_nbPtsPerLine;
+    std::vector< int > m_linePointer;
+    std::vector< bool > m_LeftRightVector;
+    int m_lines;
 
 };
 

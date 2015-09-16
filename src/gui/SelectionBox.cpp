@@ -33,6 +33,23 @@ SelectionBox::SelectionBox( Vector i_center, Vector i_size )
     update();
 }
 
+SelectionBox::SelectionBox( Vector i_center, Vector i_size, Vector magnet )
+:   SelectionObject( i_center, i_size )
+{
+    m_name       = wxT( "magnet" );
+    m_objectType = BOX_TYPE;
+
+
+    m_size = Vector(8,8,8);
+    m_isActive = false;
+    m_isVisible = true;
+    m_isMagnet = true;
+    m_name =  wxT( "Magnet" );
+    m_magnetField = magnet;
+
+    update();
+}
+
 SelectionBox::SelectionBox( const wxXmlNode selObjNode )
 : SelectionObject( selObjNode )
 {
@@ -169,7 +186,7 @@ hitResult SelectionBox::hitTest( Ray* i_ray )
     hitResult hr = { false, 0.0f, 0, NULL };
 
     // TODO selection remove objectType
-    if( m_isVisible && m_isActive && m_objectType == BOX_TYPE ) 
+    if( m_isVisible && m_objectType == BOX_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();
         float voxelY = DatasetManager::getInstance()->getVoxelY();

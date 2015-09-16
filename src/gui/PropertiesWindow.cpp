@@ -490,6 +490,26 @@ void PropertiesWindow::OnFlipX( wxCommandEvent& WXUNUSED(event) )
     ((DatasetInfo*)m_pMainFrame->m_pCurrentSceneObject)->flipAxis( X_AXIS );
 }
 
+void PropertiesWindow::OnFitToAnat( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFitToAnat" ), LOGLEVEL_DEBUG );
+
+    long index = MyApp::frame->getCurrentListIndex();
+    if( -1 != index )
+    {
+        Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( MyApp::frame->m_pListCtrl->GetItem( index ) );
+        if( pFibers != NULL )
+        {
+            pFibers->fitToAnat(false);
+        }
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "PropertiesWindow::OnFitToAnat - Current index is -1" ), LOGLEVEL_ERROR );
+    }
+
+}
+
 void PropertiesWindow::OnFlipY( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFlipY" ), LOGLEVEL_DEBUG );
@@ -1249,6 +1269,7 @@ void PropertiesWindow::OnGlyphXAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphXAxisFlipChecked" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( X_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setMaximaFlip(Vector(-1,1,1));
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -1261,6 +1282,7 @@ void PropertiesWindow::OnGlyphYAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGlyphYAxisFlipChecked" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( Y_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setMaximaFlip(Vector(1,-1,1));
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -1273,6 +1295,7 @@ void PropertiesWindow::OnGlyphZAxisFlipChecked( wxCommandEvent& event )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::" ), LOGLEVEL_DEBUG );
 
     OnGlyphFlip( Z_AXIS, event.IsChecked() );
+    RTTrackingHelper::getInstance()->setMaximaFlip(Vector(1,1,-1));
     RTTrackingHelper::getInstance()->setRTTDirty( true );
 }
 
@@ -1549,6 +1572,27 @@ void PropertiesWindow::OnToggleAndNot( wxCommandEvent& WXUNUSED(event) )
     }
 }
 
+void PropertiesWindow::OnTogglePruneRemove( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnTogglePruneRemove" ), LOGLEVEL_DEBUG );
+    
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    
+    if( pSelObj != NULL )
+    {
+        pSelObj->togglePruneRemove();
+        if( pSelObj->getIsRemove() )
+        {
+            pSelObj->m_pTogglePruneRemove->SetLabel(wxT("Del"));
+        }
+        else
+        {
+            pSelObj->m_pTogglePruneRemove->SetLabel(wxT("Prune"));
+        }
+        
+    }
+}
+
 
 void PropertiesWindow::OnColorRoi( wxCommandEvent& WXUNUSED(event) )
 {
@@ -1586,11 +1630,7 @@ void PropertiesWindow::OnDeleteTreeItem( wxTreeEvent& evt )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnDeleteTreeItem" ), LOGLEVEL_DEBUG );
 
     m_pMainFrame->onDeleteTreeItem( evt );
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
-    m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
-    RTTrackingHelper::getInstance()->setRTTDirty( false );
-    RTTrackingHelper::getInstance()->setRTTReady( false );
-    m_pMainFrame->m_pTrackingWindow->m_pBtnStart->Enable( false );
+    RTTrackingHelper::getInstance()->setRTTDirty( true );  
 }
 
 void PropertiesWindow::OnActivateTreeItem ( wxTreeEvent& evt )
@@ -1982,6 +2022,33 @@ void PropertiesWindow::OnRecalcMainDir( wxCommandEvent& WXUNUSED(event) )
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnRecalcMainDir" ), LOGLEVEL_DEBUG );
 
     ((ODFs*)m_pMainFrame->m_pCurrentSceneObject)->extractMaximas();
+}
+
+void PropertiesWindow::OnSliderQMoved( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnSliderQMoved" ), LOGLEVEL_DEBUG );
+
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        float str = pSelObj->m_pSliderQ->GetValue() / 100.0f;
+        pSelObj->setStrength(str);
+        pSelObj->m_pBoxQ->SetValue( wxString::Format( wxT( "%.2f"), str ) );
+        RTTrackingHelper::getInstance()->setRTTDirty( true );
+    }
+}
+
+void PropertiesWindow::OnToggleFlipMagnetisation( wxCommandEvent& WXUNUSED(event) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnToggleFlipMagnetisation" ), LOGLEVEL_DEBUG );
+
+    SelectionObject *pSelObj = m_pMainFrame->getCurrentSelectionObject();
+    if( pSelObj != NULL )
+    {
+        Vector field = pSelObj->getMagnetField() * -1;
+        pSelObj->setMagnetField(field);
+        RTTrackingHelper::getInstance()->setRTTDirty( true );
+    }
 }
 
 void PropertiesWindow::OnToggleCrossingFibers( wxEvent& WXUNUSED(event) )

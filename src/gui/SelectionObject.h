@@ -124,6 +124,10 @@ public :
     void       setIsNOT( bool i_isNOT );
     bool       getIsNOT()                             { return m_isNOT;                        };
 
+    bool       togglePruneRemove();
+    void       setPruneRemove( bool m_isRemove );
+    bool       getIsRemove()                          { return m_isRemove;                     };
+
     void       setPicked( int i_picked )              { m_hitResult.picked = i_picked;         };
 
     void       setSize( float sizeX, float sizeY, float sizeZ ) 
@@ -140,6 +144,15 @@ public :
     bool       toggleIsVisible()                      { setIsVisible( !getIsVisible() ); return getIsVisible(); };
     void       setIsVisible( bool i_isVisible )       { m_isVisible = i_isVisible;             };
     bool       getIsVisible()                         { return m_isVisible;                    };
+
+    void       setIsMagnet( bool i_isMagnet )       { m_isMagnet = i_isMagnet;             };
+    bool       isMagnet()                           { return m_isMagnet;};
+    void       setStrength( float str )             { m_Q = str;             };
+    float      getStrength()                        { return m_Q;              };
+    Vector     getMagnetField()                     { return m_magnetField; };
+    void       setMagnetField(Vector field)         { m_magnetField = field; };
+
+    
 
     void       setConvexHullColor( wxColour i_color ) { m_convexHullColor = i_color;            }; 
     wxColour   getConvexHullColor()                   { return m_convexHullColor;               };
@@ -206,9 +219,13 @@ protected :
     Vector          m_size;
     bool            m_isActive;
     bool            m_isNOT;
+    bool            m_isRemove;
     bool            m_isSelected;
     bool            m_isVisible;
+    bool            m_isMagnet;
     int             m_stepSize;
+    float           m_Q;
+    Vector          m_magnetField;
 
     wxColour        m_color;         // Used for coloring the isosurface.
     
@@ -367,6 +384,8 @@ private:
     wxButton        *m_pbtnDisplayDispersionTube;
     wxStaticText    *m_pLabelAnatomy;
     wxChoice        *m_pCBSelectDataSet;
+    wxToggleButton  *m_pToggleFieldDirection;
+    
 
 public:
     wxTextCtrl      *m_pTxtBoxX;
@@ -375,6 +394,9 @@ public:
     wxTextCtrl      *m_pTxtSizeX;
     wxTextCtrl      *m_pTxtSizeY;
     wxTextCtrl      *m_pTxtSizeZ;
+    wxSlider        *m_pSliderQ;
+    wxTextCtrl      *m_pBoxQ;
+    wxToggleButton  *m_pTogglePruneRemove;
     
     static const int    DISPERSION_CONE_NB_TUBE_EDGE=25; // This value represent the number of edge the dispersion cone will have.
     static const int    MEAN_FIBER_NB_POINTS=50;         // This value represent the number of points we want the mean fiber to have.

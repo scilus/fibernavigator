@@ -110,7 +110,7 @@ void FibersGroup::saveDMRI( wxString filename )
 /**
  * Save using the VTK binary format.
  */
-void FibersGroup::save( wxString filename )
+void FibersGroup::save( wxString filename, int format )
 {
     ofstream myfile;
     char *pFn = NULL;
@@ -125,9 +125,21 @@ void FibersGroup::save( wxString filename )
     int linesSize = 0;
     int colorsSize = 0;
 
-    if( filename.AfterLast( '.' ) != _T( "fib" ) )
+    
+
+    if(format == 0)
     {
-        filename += _T( ".fib" );
+        if( filename.AfterLast( '.' ) != _T( "vtk" ) )
+        {
+            filename += _T( ".vtk" );
+        }
+    }
+    else
+    {
+        if( filename.AfterLast( '.' ) != _T( "fib" ) )
+        {
+            filename += _T( ".fib" );
+        }
     }
 
     pFn = ( char * ) malloc( filename.length() );

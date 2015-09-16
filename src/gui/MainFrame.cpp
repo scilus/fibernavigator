@@ -350,7 +350,7 @@ void MainFrame::initLayout()
 
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
-    m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
+    m_tab->AddPage( m_pFMRIWindow, wxT( "rsfMRI networks" ) );
 	m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
@@ -364,7 +364,7 @@ void MainFrame::initLayout()
     this->SetSizer( pBoxMain );
 }
 
-const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.scn" };
+const std::string EXTENSIONS[] = { "*.nii", "*.nii.gz", "*.mesh", "*.surf", "*.dip", "*.fib", "*.bundlesdata", "*.trk" , "*.tck", "*.vtk", "*.scn" };
 const int NB_EXTENSIONS = sizeof( EXTENSIONS ) / sizeof( std::string );
 
 int compareInputFile( const wxString &first, const wxString &second )
@@ -391,7 +391,7 @@ void MainFrame::onLoad( wxCommandEvent& WXUNUSED(event) )
 {
     wxArrayString l_fileNames;
     wxString l_caption          = wxT( "Choose a file" );
-    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
+    wxString l_wildcard         = wxT( "*.*|*.*|Nifti (*.nii)|*.nii*|Mesh files (*.mesh)|*.mesh|Mesh files (*.surf)|*.surf|Mesh files (*.dip)|*.dip|Fibers VTK/DMRI (*.fib)|*.fib|Fibers VTK(*.vtk)|*.vtk|Fibers PTK (*.bundlesdata)|*.bundlesdata|Fibers TrackVis (*.trk)|*.trk|Fibers MRtrix (*.tck)|*.tck|Scene Files (*.scn)|*.scn|Tensor files (*.nii*)|*.nii|ODF files (*.nii)|*.nii*" );
     wxString l_defaultDir       = wxEmptyString;
     wxString l_defaultFileName  = wxEmptyString;
     wxFileDialog dialog( this, l_caption, l_defaultDir, l_defaultFileName, l_wildcard, wxFD_OPEN | wxFD_MULTIPLE );
@@ -593,7 +593,7 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
     }
  
     wxString caption         = wxT( "Choose a file" );
-    wxString wildcard        = wxT( "VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
+    wxString wildcard        = wxT( "VTK fiber files (*.vtk)|*.vtk|VTK fiber files (*.fib)|*.fib|DMRI fiber files (*.fib)|*.fib|*.*|*.*" );
     wxString defaultDir      = wxEmptyString;
     wxString defaultFilename = wxEmptyString;
     wxFileDialog dialog( this, caption, defaultDir, defaultFilename, wildcard, wxFD_SAVE );
@@ -615,13 +615,13 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
                     Fibers* pFibers = DatasetManager::getInstance()->getSelectedFibers( m_pListCtrl->GetItem( index ) );
                     if( pFibers )
                     {
-                        if (dialog.GetFilterIndex()==1)
+                        if (dialog.GetFilterIndex()==2)
                         {
                             pFibers->saveDMRI( dialog.GetPath() );
                         }
                         else
                         {
-                            pFibers->save( dialog.GetPath() );
+                            pFibers->save( dialog.GetPath(), dialog.GetFilterIndex() );
                         }
                     }
                 }
@@ -630,13 +630,13 @@ void MainFrame::onSaveFibers( wxCommandEvent& WXUNUSED(event) )
             {
                 FibersGroup* l_fibersGroup = DatasetManager::getInstance()->getFibersGroup();
                 
-                if (dialog.GetFilterIndex()==1)
+                if (dialog.GetFilterIndex()==2)
                 {
                     l_fibersGroup->saveDMRI( dialog.GetPath() );
                 }
                 else
                 {
-                    l_fibersGroup->save( dialog.GetPath() );
+                    l_fibersGroup->save( dialog.GetPath(), dialog.GetFilterIndex() );
                 }
             }
             
@@ -1369,7 +1369,7 @@ void MainFrame::displayPropertiesSheet()
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 {
-    createNewSelectionObject( ELLIPSOID_TYPE );
+    createNewSelectionObject( ELLIPSOID_TYPE, Vector(0,0,0) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1379,7 +1379,7 @@ void MainFrame::onNewSelectionEllipsoid( wxCommandEvent& WXUNUSED(event) )
 ///////////////////////////////////////////////////////////////////////////
 void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 {
-    createNewSelectionObject( BOX_TYPE );
+    createNewSelectionObject( BOX_TYPE, Vector(0,0,0) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1387,7 +1387,7 @@ void MainFrame::onNewSelectionBox( wxCommandEvent& WXUNUSED(event) )
 //
 // selObjType         : The type of the new selection object we wat to create.
 ///////////////////////////////////////////////////////////////////////////
-void MainFrame::createNewSelectionObject( ObjectType selObjType )
+void MainFrame::createNewSelectionObject( ObjectType selObjType, Vector magnetField )
 {
     float voxelX = DatasetManager::getInstance()->getVoxelX();
     float voxelY = DatasetManager::getInstance()->getVoxelY();
@@ -1403,16 +1403,34 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
                   l_sizeV / voxelZ );
     
     SelectionObject *pSelObj;
-    switch( selObjType )
+    if( magnetField.getLength() != 0 )
     {
-        case ELLIPSOID_TYPE:
-            pSelObj = new SelectionEllipsoid( l_center, l_size );
-            break;
-        case BOX_TYPE:
-            pSelObj = new SelectionBox( l_center, l_size );
-            break;
-        default:
-            return;
+        switch( selObjType )
+        {
+            case ELLIPSOID_TYPE:
+                pSelObj = new SelectionEllipsoid( l_center, l_size, magnetField);
+                break;
+            case BOX_TYPE:
+                pSelObj = new SelectionBox( l_center, l_size, magnetField);
+                break;
+            default:
+                return;
+        }
+        
+    }
+    else
+    {
+        switch( selObjType )
+        {
+            case ELLIPSOID_TYPE:
+                pSelObj = new SelectionEllipsoid( l_center, l_size);
+                break;
+            case BOX_TYPE:
+                pSelObj = new SelectionBox( l_center, l_size );
+                break;
+            default:
+                return;
+        }
     }
     
     // Check what is selected in the tree to know where to put this new selection object.
@@ -1422,7 +1440,7 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     
     SelectionObject *pCurObj = getCurrentSelectionObject();
     
-    if( selTree.isEmpty() || pCurObj == NULL )
+    if( selTree.isEmpty() || pCurObj == NULL ||  magnetField.getLength() != 0 )
     {
         int itemId = selTree.addChildrenObject( -1, pSelObj );
         
@@ -1448,6 +1466,7 @@ void MainFrame::createNewSelectionObject( ObjectType selObjType )
     m_pTreeWidget->SelectItem(newSelectionObjectId, true);
     
     SceneManager::getInstance()->setSelBoxChanged( true );
+    RTTrackingHelper::getInstance()->setRTTDirty(true);
 }
 
 bool MainFrame::buildSelectionViewFromSelectionTree( SelectionTree *pSelTree )
@@ -2494,9 +2513,9 @@ void MainFrame::onTimerEvent( wxTimerEvent& WXUNUSED(event) )
 
     if ( RTTrackingHelper::getInstance()->isTrackActionPlaying() && !RTTrackingHelper::getInstance()->isTrackActionPaused())
     {
-		m_pMainGL->m_pRealTimeFibers->m_trackActionStep++;
-        if(m_pMainGL->m_pRealTimeFibers->m_trackActionStep > m_pMainGL->m_pRealTimeFibers->getMaxFiberLength())
-           m_pMainGL->m_pRealTimeFibers->m_trackActionStep = 0;
+		SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep++;
+        if(SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep > SceneManager::getInstance()->getScene()->getRTTfibers()->getMaxFiberLength())
+           SceneManager::getInstance()->getScene()->getRTTfibers()->m_trackActionStep = 0;
     }
 
     refreshAllGLWidgets();

@@ -28,6 +28,23 @@ SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size )
     update();
 }
 
+SelectionEllipsoid::SelectionEllipsoid( Vector i_center, Vector i_size, Vector magnet )
+:   SelectionObject( i_center, i_size )
+{
+    m_name       = wxT( "magnet" );
+    m_objectType = ELLIPSOID_TYPE;
+    
+    
+    m_size = Vector(5,5,5);
+    m_isActive = false;
+    m_isVisible = true;
+    m_isMagnet = true;
+    m_name =  wxT( "Magnet" );
+    m_magnetField = magnet;
+
+    update();
+}
+
 SelectionEllipsoid::SelectionEllipsoid( const wxXmlNode selObjNode )
 : SelectionObject( selObjNode )
 {
@@ -82,7 +99,7 @@ hitResult SelectionEllipsoid::hitTest( Ray* i_ray )
     hitResult hr = { false, 0.0f, 0, NULL };
 
     // TODO selection remove objectType
-    if( m_isVisible && m_isActive && m_objectType == ELLIPSOID_TYPE ) 
+    if( m_isVisible && m_objectType == ELLIPSOID_TYPE ) 
     {
         float voxelX = DatasetManager::getInstance()->getVoxelX();
         float voxelY = DatasetManager::getInstance()->getVoxelY();

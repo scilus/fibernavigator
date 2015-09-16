@@ -39,17 +39,22 @@ RTTFibers::RTTFibers()
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
-    m_vinvout( 0.2f ),
+    m_vinvout( 0.6f ),
     m_minFiberLength( 60 ),
     m_maxFiberLength( 200 ),
 	m_alpha( 1.0f ),
+    m_currentSeedBoxID( 0 ),
     m_isHARDI( false ),
     m_countGMstep( 0 ),
 	m_stop( false ),
     m_pExcludeInfo( NULL ),
     m_pSeedMapInfo( NULL ),
-    m_pGMInfo( NULL )
+    m_pGMInfo( NULL ),
+    m_render( true ),
+    m_steppedOnceInsideChildBox( false ),
+    m_prune(true)
 {
+    m_bufferObjectsRTT = new GLuint[2];
 }
 
 void RTTFibers::setSeedMapInfo(Anatomy *info)
@@ -133,59 +138,89 @@ float RTTFibers::getSeedMapNb()
 	}
     return pts;
 }
+
+void RTTFibers::clearFibersRTT()
+{
+    m_streamlinesColors.clear();
+    m_streamlinesPoints.clear();
+
+    if( SceneManager::getInstance()->isUsingVBO() )
+    {
+        glDeleteBuffers( 2, m_bufferObjectsRTT );
+    }
+
+    m_nbPtsPerLine.clear();
+    m_LeftRightVector.clear();
+    m_lines = 0;
+    m_linePointer.clear();
+    m_linePointer.push_back(0);
+}
 ///////////////////////////////////////////////////////////////////////////
 // Generate seeds and tracks
 ///////////////////////////////////////////////////////////////////////////
 void RTTFibers::seed()
 {
-    m_fibersRTT.clear();
-    m_colorsRTT.clear();
+    clearFibersRTT();
+    int previousLinePointer = 0;
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();
     float zVoxel = DatasetManager::getInstance()->getVoxelZ();
 
     Vector minCorner, maxCorner, middle;
-    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+    selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
 
+    //test to optim
+    float invertNbSeed = 1.0f / float( m_nbSeed - 1.0f ); 
+    
 	//Evenly distanced seeds
 	if( !RTTrackingHelper::getInstance()->isShellSeeds() && !RTTrackingHelper::getInstance()->isSeedMap() && !RTTrackingHelper::getInstance()->isSeedFromfMRI())
 	{
 		for( unsigned int b = 0; b < selObjs.size(); b++ )
 		{
-            if( selObjs[ b ]->getSelectionType() != BOX_TYPE )
+            if( selObjs[ b ]->getIsNOT() || !selObjs[ b ]->getIsActive() || !SceneManager::getInstance()->getSelectionTree().isFirstLevel(selObjs[ b ])  || selObjs[b]->getSelectionType() == ELLIPSOID_TYPE) //Check for ellipsoid also?
             {
                 continue;
-            }
-            
-			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel / 2.0f;
-			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel / 2.0f;
-			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel / 2.0f;
-			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel / 2.0f;
-			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel / 2.0f;
-			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel / 2.0f;
+            } 
 
-			float xstep =  selObjs[b]->getSize().x * xVoxel / float( m_nbSeed - 1.0f );
-			float ystep =  selObjs[b]->getSize().y * yVoxel / float( m_nbSeed - 1.0f );
-			float zstep =  selObjs[b]->getSize().z * zVoxel / float( m_nbSeed - 1.0f );
+            m_currentSeedBoxID = b+1;
+
+			minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel * 0.5f;
+			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel * 0.5f;
+			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel * 0.5f;
+			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel * 0.5f;
+			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel * 0.5f;
+			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel * 0.5f;
+
+			float xstep =  selObjs[b]->getSize().x * xVoxel * invertNbSeed;
+			float ystep =  selObjs[b]->getSize().y * yVoxel * invertNbSeed;
+			float zstep =  selObjs[b]->getSize().z * zVoxel * invertNbSeed;
 			
-			for( float x = minCorner.x; x < maxCorner.x + xstep/2.0f; x+= xstep )
+			for( float x = minCorner.x; x < maxCorner.x + xstep*0.5f; x+= xstep )
 			{
-				for( float y = minCorner.y; y < maxCorner.y + ystep/2.0f; y+= ystep )
+				for( float y = minCorner.y; y < maxCorner.y + ystep*0.5f; y+= ystep )
 				{
-					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
+					for( float z = minCorner.z; z < maxCorner.z + zstep*0.5f; z+= zstep )
 					{
-						vector<Vector> pointsF; // Points to be rendered Forward
-						vector<Vector> colorF; //Color (local directions)Forward
-						vector<Vector> pointsB; // Points to be rendered Backward
-						vector<Vector> colorB; //Color (local directions) Backward
+						vector<float> pointsF;
+                        vector<float> pointsB;
+                        vector<float> colorF;
+                        vector<float> colorB;
+
+                        bool draw;
 						m_stop = false;
                         
                         if(m_isHARDI)
                         {
+                            Vector seed(x,y,z);
+                            if(RTTrackingHelper::getInstance()->isRandomInit())
+                            {
+                                seed = generateRandomSeed(minCorner,maxCorner);
+                            }
 						    //Track both sides
-							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
+                            draw = m_render;
+						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
@@ -194,18 +229,57 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
 						{
-							m_fibersRTT.push_back( pointsF ); 
-							m_colorsRTT.push_back( colorF );
-							m_fibersRTT.push_back( pointsB ); 
-							m_colorsRTT.push_back( colorB );
+                            bool keepRight = false;
+                            bool keepLeft = false;
+                            //Insert strategically for drawArray methods.
+                            if(pointsF.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsF.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                                keepRight = true;
+                            }
+                            
+                            if(pointsB.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsB.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                                keepLeft = true;
+                            }
+
+                            if(keepLeft && keepRight)
+                            {
+                                m_LeftRightVector.push_back(true);
+                                m_LeftRightVector.push_back(true);
+                            }
+                            else if(keepLeft || keepRight)
+                            {
+                                m_LeftRightVector.push_back(false);
+                            }
+
+                            if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                            {
+                                insertPointsForTractoDriven(pointsF, pointsB);
+                            }
+                            m_steppedOnceInsideChildBox = false;
 						}
 					}
 				}
 			}
 		}
 	}
+    //Seed from anatomy
 	else if ( RTTrackingHelper::getInstance()->isSeedMap())
 	{
 		for( unsigned int s = 0; s < m_pSeedMap.size(); s++ )
@@ -229,17 +303,25 @@ void RTTFibers::seed()
 				{
 					for( float z = minCorner.z; z < maxCorner.z + zstep/2.0f; z+= zstep )
 					{
-						vector<Vector> pointsF; // Points to be rendered Forward
-						vector<Vector> colorF; //Color (local directions)Forward
-						vector<Vector> pointsB; // Points to be rendered Backward
-						vector<Vector> colorB; //Color (local directions) Backward
+						vector<float> pointsF;
+                        vector<float> pointsB;
+                        vector<float> colorF;
+                        vector<float> colorB;
+
+                        bool draw;
 						m_stop = false;
                         
                         if(m_isHARDI)
                         {
+                            Vector seed(x,y,z);
+                            if(RTTrackingHelper::getInstance()->isRandomInit())
+                            {
+                                seed = generateRandomSeed(minCorner,maxCorner);
+                            }
 						    //Track both sides
-							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-						    performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
+                            draw = m_render;
+						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
                         }
                         else
                         {
@@ -248,12 +330,51 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
 						{
-							m_fibersRTT.push_back( pointsF ); 
-							m_colorsRTT.push_back( colorF );
-							m_fibersRTT.push_back( pointsB ); 
-							m_colorsRTT.push_back( colorB );
+                            bool keepRight = false;
+                            bool keepLeft = false;
+                            //Insert strategically for drawArray methods.
+                            if(pointsF.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsF.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                                keepRight = true;
+                            }
+                            
+                            if(pointsB.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsB.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                                keepLeft = true;
+                            }
+
+                            if(keepLeft && keepRight)
+                            {
+                                m_LeftRightVector.push_back(true);
+                                m_LeftRightVector.push_back(true);
+                            }
+                            else if(keepLeft || keepRight)
+                            {
+                                m_LeftRightVector.push_back(false);
+                            }
+
+                            if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                            {
+                                insertPointsForTractoDriven(pointsF, pointsB);
+                            }
+                            m_steppedOnceInsideChildBox = false;
 						}
 					}
 				}
@@ -283,17 +404,25 @@ void RTTFibers::seed()
 				{
 					for( float z = zz - zVoxel; z < zz + zVoxel + zstep/2.0f; z+= zstep )
 					{
+                        vector<float> pointsF;
+                        vector<float> pointsB;
+                        vector<float> colorF;
+                        vector<float> colorB;
 
-						vector<Vector> pointsF; // Points to be rendered Forward
-						vector<Vector> colorF; //Color (local directions)Forward
-						vector<Vector> pointsB; // Points to be rendered Backward
-						vector<Vector> colorB; //Color (local directions) Backward
+                        bool draw;
+						m_stop = false;
                         
 						if(m_isHARDI)
 						{
-							//Track both sides
-							performHARDIRTT( Vector(x,y,z),  1, pointsF, colorF); //First pass
-							performHARDIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
+                            Vector seed(x,y,z);
+                            if(RTTrackingHelper::getInstance()->isRandomInit())
+                            {
+                                seed = generateRandomSeed(minCorner,maxCorner);
+                            }
+						    //Track both sides
+							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
+                            draw = m_render;
+						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
 						}
 						else
 						{
@@ -302,12 +431,51 @@ void RTTFibers::seed()
 							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
 						}
                         
-						if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() )
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
 						{
-							m_fibersRTT.push_back( pointsF ); 
-							m_colorsRTT.push_back( colorF );
-							m_fibersRTT.push_back( pointsB ); 
-							m_colorsRTT.push_back( colorB );
+                            bool keepRight = false;
+                            bool keepLeft = false;
+                            //Insert strategically for drawArray methods.
+                            if(pointsF.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsF.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                                keepRight = true;
+                            }
+                            
+                            if(pointsB.size() != 0)
+                            {
+                                m_nbPtsPerLine.push_back(pointsB.size()/3);
+                                m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                                previousLinePointer = m_linePointer[m_lines+1];
+                                m_lines++;
+
+                                
+                                m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                                m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                                keepLeft = true;
+                            }
+
+                            if(keepLeft && keepRight)
+                            {
+                                m_LeftRightVector.push_back(true);
+                                m_LeftRightVector.push_back(true);
+                            }
+                            else if(keepLeft || keepRight)
+                            {
+                                m_LeftRightVector.push_back(false);
+                            }
+
+                            if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                            {
+                                insertPointsForTractoDriven(pointsF, pointsB);
+                            }
+                            m_steppedOnceInsideChildBox = false;
 						}
 					}
 				}
@@ -326,16 +494,19 @@ void RTTFibers::seed()
 
             for ( size_t k = 0; k < positions.size(); ++k )
             {
-                vector<Vector> pointsF; // Points to be rendered Forward
-				vector<Vector> colorF; //Color (local directions)Forward
-				vector<Vector> pointsB; // Points to be rendered Backward
-				vector<Vector> colorB; //Color (local directions) Backward
+                vector<float> pointsF;
+                vector<float> pointsB;
+                vector<float> colorF;
+                vector<float> colorB;
+
+                bool draw;
 				m_stop = false;
                         
                 if(m_isHARDI)
                 {
 					//Track both sides
 					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, pointsF, colorF); //First pass
+                    draw = m_render;
 					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                 else
@@ -345,17 +516,55 @@ void RTTFibers::seed()
 					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                         
-				if( (pointsF.size() + pointsB.size()) * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size()) * getStep() < getMaxFiberLength() && !m_stop)
+				if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
 				{
-					m_fibersRTT.push_back( pointsF ); 
-					m_colorsRTT.push_back( colorF );
-					m_fibersRTT.push_back( pointsB ); 
-					m_colorsRTT.push_back( colorB );
+                    bool keepRight = false;
+                    bool keepLeft = false;
+                    //Insert strategically for drawArray methods.
+                    if(pointsF.size() != 0)
+                    {
+                        m_nbPtsPerLine.push_back(pointsF.size()/3);
+                        m_linePointer.push_back(previousLinePointer + pointsF.size()/3);
+                        previousLinePointer = m_linePointer[m_lines+1];
+                        m_lines++;
+
+                        m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsF.begin(), pointsF.end());
+                        m_streamlinesColors.insert(m_streamlinesColors.end(), colorF.begin(), colorF.end());
+                        keepRight = true;
+                    }
+                            
+                    if(pointsB.size() != 0)
+                    {
+                        m_nbPtsPerLine.push_back(pointsB.size()/3);
+                        m_linePointer.push_back(previousLinePointer + pointsB.size()/3);
+                        previousLinePointer = m_linePointer[m_lines+1];
+                        m_lines++;
+
+                        m_streamlinesPoints.insert(m_streamlinesPoints.end(), pointsB.begin(), pointsB.end());
+                        m_streamlinesColors.insert(m_streamlinesColors.end(), colorB.begin(), colorB.end());
+                        keepLeft = true;
+                    }
+
+                    if(keepLeft && keepRight)
+                    {
+                        m_LeftRightVector.push_back(true);
+                        m_LeftRightVector.push_back(true);
+                    }
+                    else if(keepLeft || keepRight)
+                    {
+                        m_LeftRightVector.push_back(false);
+                    }
+
+                    if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+                    {
+                        insertPointsForTractoDriven(pointsF, pointsB);
+                    }
+                    m_steppedOnceInsideChildBox = false;
 				}
             }
         }
 	}
-    renderRTTFibers(false);
+    renderRTTFibers(true, false, false);
 	
 	RTTrackingHelper::getInstance()->setRTTDirty( false );
 }
@@ -365,117 +574,83 @@ void RTTFibers::seed()
 ///////////////////////////////////////////////////////////////////////////
 //Rendering stage
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::renderRTTFibers(bool isPlaying)
+void RTTFibers::renderRTTFibers(bool bindBuffers, bool isAnimate, bool changeAlpha)
 {
-    if(!isPlaying)
-		m_trackActionStep = std::numeric_limits<unsigned int>::max();
-
-    if( m_fibersRTT.size() > 0 )
+    if(m_streamlinesPoints.size() != 0)
     {
-        glPushAttrib( GL_ALL_ATTRIB_BITS );
-		if(m_alpha != 1.0f)
-		{
-			glEnable( GL_BLEND );
-			glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			glDepthMask( GL_FALSE );
-		}
-        //for fmri
-        std::vector<Vector> positions; 
-	    for( unsigned int j = 0; j < m_fibersRTT.size() - 1; j+=2 )
-	    { 
-
-		    //POINTS
-		    if( SceneManager::getInstance()->isPointMode() )
-		    {
-			    //Forward
-			    if( m_fibersRTT[j].size() > 0 )
-			    {
-					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size(), m_trackActionStep); i++ )
-				    {
-                        
-					    glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
-					    glBegin( GL_POINTS );
-						    glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-					    glEnd();
-				    }
-			    }
-			    //Backward
-			    if(m_fibersRTT[j+1].size() > 0)
-			    {
-					for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size(), m_trackActionStep); i++ )
-				    {  
-					    glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
-					    glBegin( GL_POINTS );
-						    glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-					    glEnd();
-				    }
-			    }
-		    }
-		    //LINES
-		    else
-		    {
-			    //Forward
-			    if( m_fibersRTT[j].size() > 2)
-			    {
-                    for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j].size() - 1,m_trackActionStep); i++ )
-				    {
-                        if(i > m_fibersRTT[j].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
-                        {
-                            glPointSize(10.0f);
-                            glColor3f( 1.0f,0.0f,0.0f );
-					        glBegin( GL_POINTS );
-						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-					        glEnd();
-                            positions.push_back(Vector(m_fibersRTT[j][i].x,m_fibersRTT[j][i].y,m_fibersRTT[j][i].z));
-                        }
-                        else
-                        {
-                            glPointSize(1.0f);
-                            glColor4f( std::abs(m_colorsRTT[j][i].x), std::abs(m_colorsRTT[j][i].y), std::abs(m_colorsRTT[j][i].z), m_alpha );
-					        glBegin( GL_LINES );
-						        glVertex3f( m_fibersRTT[j][i].x, m_fibersRTT[j][i].y, m_fibersRTT[j][i].z );
-						        glVertex3f( m_fibersRTT[j][i+1].x, m_fibersRTT[j][i+1].y, m_fibersRTT[j][i+1].z );
-					        glEnd();
-                        }
-					    
-				    }
-			    }
-			    //Backward
-			    if ( m_fibersRTT[j+1].size() > 2)
-			    {
-                    for( unsigned int i = 0; i < std::min((unsigned int)m_fibersRTT[j+1].size() - 1, m_trackActionStep); i++ )
-				    {
-                        if(i > m_fibersRTT[j+1].size() - 5 && RTTrackingHelper::getInstance()->isTractoDrivenRSN())
-                        {
-                            glPointSize(10.0f);
-                            glColor3f( 1.0f, 0.0f, 0.0f );
-					        glBegin( GL_POINTS );
-						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-					        glEnd();
-                            positions.push_back(Vector(m_fibersRTT[j+1][i].x,m_fibersRTT[j+1][i].y,m_fibersRTT[j+1][i].z));
-                        }
-                        else
-                        {
-                            glPointSize(1.0f);
-					        glColor4f( std::abs(m_colorsRTT[j+1][i].x), std::abs(m_colorsRTT[j+1][i].y), std::abs(m_colorsRTT[j+1][i].z), m_alpha );
-					        glBegin( GL_LINES );
-						        glVertex3f( m_fibersRTT[j+1][i].x, m_fibersRTT[j+1][i].y, m_fibersRTT[j+1][i].z );
-						        glVertex3f( m_fibersRTT[j+1][i+1].x, m_fibersRTT[j+1][i+1].y, m_fibersRTT[j+1][i+1].z );
-					        glEnd();
-                        }
-				    }
-			    }
-				
-		    }   
-	    }
-        glDisable(GL_BLEND);
-		glPopAttrib();
-        if(RTTrackingHelper::getInstance()->isTractoDrivenRSN())
+        if(changeAlpha)
         {
-            DatasetManager::getInstance()->m_pRestingStateNetwork->setSeedFromTracto(positions);
-            RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
+            for(unsigned int i = 3;  i < m_streamlinesColors.size(); i+=4)
+            {
+                m_streamlinesColors[i] = m_alpha;
+            }
         }
-	}   
+
+        bool isOK = true;
+        //TODO: Redo animate.
+        if(bindBuffers)
+        {
+
+            glGenBuffers( 2, m_bufferObjectsRTT );
+            RTTrackingHelper::getInstance()->setBufferID(m_bufferObjectsRTT[0]);
+
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[0] );
+            glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesPoints.size(), &m_streamlinesPoints[0], GL_STATIC_DRAW );
+
+            isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo points" ) );
+
+            if(isOK)
+            {
+                glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[1] );
+                glBufferData( GL_ARRAY_BUFFER, sizeof( GLfloat ) * m_streamlinesColors.size(), &m_streamlinesColors[0], GL_STATIC_DRAW );
+                isOK = !Logger::getInstance()->printIfGLError( wxT( "initialize vbo colors" ) );
+            }
+        }
+
+        glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_COLOR_ARRAY );
+        glEnableClientState( GL_NORMAL_ARRAY );
+
+        if( !isOK )
+        {
+            glVertexPointer( 3, GL_FLOAT, 0, &m_streamlinesPoints[0] );
+            glColorPointer( 4, GL_FLOAT, 0, &m_streamlinesColors[0] ); // Local colors.
+            glNormalPointer( GL_FLOAT, 0, &m_streamlinesColors[0] );
+        }
+        else
+        {
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[0] );
+            glVertexPointer( 3, GL_FLOAT, 0, 0 );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[1] );
+            glColorPointer( 4, GL_FLOAT, 0, 0 );
+            glBindBuffer( GL_ARRAY_BUFFER, m_bufferObjectsRTT[1] );
+            glNormalPointer( GL_FLOAT, 0, 0 );
+        }
+
+        glPushAttrib( GL_ALL_ATTRIB_BITS );
+        if(m_alpha != 1.0f)
+		{
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_ONE, GL_ONE );
+            if(RTTrackingHelper::getInstance()->isSrcAlpha())
+            {
+                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+            }
+            glDepthMask( GL_FALSE );
+        }
+
+        for( int i = 0; i < m_lines; i++)
+        {
+            glDrawArrays( GL_LINE_STRIP, m_linePointer[ i ], m_nbPtsPerLine[i] );
+        }
+
+        glDisable( GL_BLEND );
+        glPopAttrib();
+
+        glDisableClientState( GL_VERTEX_ARRAY );
+        glDisableClientState( GL_COLOR_ARRAY );
+        glDisableClientState( GL_NORMAL_ARRAY );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -616,51 +791,169 @@ Vector RTTFibers::advecIntegrate( Vector vin, const FMatrix &tensor, Vector e1, 
     return vprop;
 }
 
-Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number ) 
+Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sticks, float s_number, Vector pos ) 
 {
     Vector vOut(0,0,0);
+    Vector vMagnet(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
     float puncture = m_vinvout;
     float wm = m_pMaskInfo->at(s_number);
     float gm = 0;
-    if(m_pGMInfo != NULL)
+    float F = 0;
+
+    if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
     {
         gm = m_pGMInfo->at(s_number);
     }
 	vin.normalize();
 
-    for(unsigned int i=0; i < sticks.size()/3; i++)
+
+    //MAGNET
+    bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    if(isMagnetOn)
+    {  
+        vMagnet = magneticField(vin, sticks, s_number, pos, vOut, F);
+    }
+    else
     {
-        Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
-        v1.normalize();
-        
-        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+        for(unsigned int i=0; i < sticks.size()/3; i++)
         {
-            v1 *= -1;
+            Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+            
+            if(v1.normalizeAndReturn() != 0)
+            {
+                if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                {
+                    v1 *= -1;
+                }
+
+                //Angle value
+                float dot = vin.Dot(v1);
+                float acos = std::acos( dot );
+                angle = 180 * acos / M_PI;
+        
+                //Direction most probable
+                if( angle < angleMin )
+                {
+                    angleMin = angle;
+                    vOut = v1;
+                } 
+            }
         }
-
-        //Angle value
-        float dot = vin.Dot(v1);
-        float acos = std::acos( dot );
-        angle = 180 * acos / M_PI;
-        
-        //Direction most probable
-        if( angle < angleMin )
-        {
-            angleMin = angle;
-            vOut = v1;
-        }     
     }
 
-    Vector res = 0.5f * wm * vOut + (0.5f * wm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    //White Matter version of Chamberland et al. 2014 Frontiers in Neuroinformatics 
+    //Vector res = 0.5f * wm * vOut + (0.5f * wm) * ( (1.0 - puncture ) * vin + puncture * vOut);
     
-    if(gm != 0)
-    {
-        res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    //Previous Chamberland et al. 2014 Frontiers in Neuroinformatics
+    //if(gm != 0)
+    //{
+    //    res = (1.0 - gm) * vOut + (gm) * ( (1.0 - puncture ) * vin + puncture * vOut);
+    //}
+
+    //Weight between in and out directions. Magnet will also be weighted by distance.
+    Vector res = (1-F)*((1.0 - puncture ) * vin + puncture * vOut) + F * vMagnet;
+   
+    return res;
+}
+
+Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F) 
+{
+    Vector final = vin;
+    bool alreadyAffected = false;
+    for( unsigned int b = 0; b < selObjs.size(); b++ )
+	{
+        if( selObjs[ b ]->isMagnet() && !alreadyAffected)
+        {
+            
+            //TEST BOX
+            Vector minCorner;
+            Vector maxCorner;
+            float xVoxel = DatasetManager::getInstance()->getVoxelX();
+            float yVoxel = DatasetManager::getInstance()->getVoxelY();
+            float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+            minCorner.x = selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel * 0.5f;
+			minCorner.y = selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel * 0.5f;
+			minCorner.z = selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel * 0.5f;
+			maxCorner.x = selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel * 0.5f;
+			maxCorner.y = selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel * 0.5f;
+			maxCorner.z = selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel * 0.5f;
+
+            //Compare sticks with vector field, pick min
+            float angleMin = 360.0f;
+            float angle = 0.0f;
+            float angleMinOut = 360.0f;
+            float angleOut = 0.0f;
+            Vector field = selObjs[b]->getMagnetField();
+            
+            //If INSIDE MAGNET                
+            if(pos.x <= maxCorner.x && pos.x >= minCorner.x && 
+                       pos.y <= maxCorner.y && pos.y >= minCorner.y &&
+                       pos.z <= maxCorner.z && pos.z >= minCorner.z)
+            {
+                for(unsigned int i=0; i < sticks.size()/3; i++)
+                {
+                    Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+                
+                    if(v1.normalizeAndReturn() != 0)
+                    {    
+                        
+                        //Field direction
+                        if( field.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                        {
+                            v1 *= -1;
+                        }
+
+                        //Angle value
+                        float dot = field.Dot(v1);
+                        float acos = std::acos( dot );
+                        angle = 180 * acos / M_PI;
+        
+                        //Direction most probable
+                        if( angle < angleMin )
+                        {
+                            angleMin = angle;
+                            final = v1;
+                        }      
+                    }
+                }
+                F = selObjs[b]->getStrength();
+                alreadyAffected = true;
+            } 
+            else
+            {
+
+                for(unsigned int i=0; i < sticks.size()/3; i++)
+                {
+                    Vector v1(sticks[i*3],sticks[i*3+1], sticks[i*3+2]);
+                
+                    if(v1.normalizeAndReturn() != 0)
+                    {
+                        //check real direction 
+                        if( vin.Dot(v1) < 0 ) //Ensures both vectors points in the same direction
+                        {
+                            v1 *= -1;
+                        }
+                 
+                        //Angle value
+                        float dotOut = vin.Dot(v1);
+                        float acosOut = std::acos( dotOut );
+                        angleOut = 180 * acosOut / M_PI;
+        
+                        //Direction most probable
+                        if( angleOut < angleMinOut )
+                        {
+                            angleMinOut = angleOut;
+                            vOut = v1;
+                        } 
+                    }
+                }           
+            }
+        }
     }
 
-    return res;
+    return final;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -736,7 +1029,7 @@ void RTTFibers::setDiffusionAxis( const FMatrix &tensor, Vector& e1, Vector& e2,
 ///////////////////////////////////////////////////////////////////////////
 // Performs realtime fiber tracking along direction bwdfwd (backward, forward)
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, vector<Vector>& color)
+void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<float>& points, vector<float>& color)
 {   
     //Vars
     Vector currPosition(seed); //Current PIXEL position
@@ -864,8 +1157,12 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
             while( FAvalue >= FAthreshold && angle <= angleThreshold )
             {
                 //Insert point to be rendered
-                points.push_back( currPosition );
-                color.push_back( currDirection );
+                points.push_back( currPosition.x );
+                points.push_back( currPosition.y );
+                points.push_back( currPosition.z );
+                color.push_back( currDirection.x );
+                color.push_back( currDirection.y );
+                color.push_back( currDirection.z );
 
                 //Advance
                 currPosition = nextPosition;
@@ -932,7 +1229,7 @@ void RTTFibers::performDTIRTT(Vector seed, int bwdfwd, vector<Vector>& points, v
 // Draft a direction to start the tracking process using a probabilistic random
 // [0 --- |v1| --- |v2| --- |v3|]
 ///////////////////////////////////////////////////////////////////////////
-std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, bool initWithDir)
+std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, bool initWithDir, Vector currPos)
 {
     std::vector<float> draftedPeak;
     if(!initWithDir)
@@ -1004,6 +1301,17 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
         draftedPeak.push_back(vOut.y);
         draftedPeak.push_back(vOut.z);
     }
+
+   /* bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
+    if(isMagnetOn)
+    {
+        Vector def(0,0,0);
+        float F = 0;
+        Vector res = magneticField(def, initialPeaks, 0, currPos, def, F); 
+        draftedPeak[0] = res.x;
+        draftedPeak[1] = res.y;
+        draftedPeak[2] = res.z;
+    }*/
 		
 	return draftedPeak;
 }
@@ -1026,24 +1334,105 @@ bool RTTFibers::checkExclude( unsigned int sticksNumber)
 ///////////////////////////////////////////////////////////////////////////
 // Returns true if no anatomy is loaded for thresholding or if above the threshold
 ///////////////////////////////////////////////////////////////////////////
-bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
+bool RTTFibers::withinMapThreshold(unsigned int sticksNumber, Vector pos)
 {
-    bool isOk = false;
-    float gmVal = 0;
-	if(m_pGMInfo != NULL)
+    if(sticksNumber > m_pMaskInfo->getSize())
     {
-        gmVal = m_pGMInfo->at(sticksNumber);
-	    if(gmVal > 0)
-        {
-            m_countGMstep++;
-        }
-        else
-        {
-            m_countGMstep = 0;
-        }   
+        return false;
     }
 
-	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep < m_GMstep)
+    bool isOk = false;
+    float gmVal = 0;
+    bool insideNotBox = false;
+
+	if(m_pGMInfo != NULL && RTTrackingHelper::getInstance()->isGMAllowed())
+    {
+        if(sticksNumber < m_pGMInfo->getSize())
+        {
+            gmVal = m_pGMInfo->at(sticksNumber);
+	        if(gmVal > 0)
+            {
+                m_countGMstep++;
+            }
+            else
+            {
+                m_countGMstep = 0;
+            }   
+        }
+    }
+
+    //Child (Only works for 1 inclusion or 1 exclusion child so far.)
+    if(m_currentSeedBoxID != 0 )
+    {
+        std::vector< SelectionObject* >child = SceneManager::getInstance()->getSelectionTree().getDirectChildrenObjects(m_currentSeedBoxID);
+
+        for( unsigned int b = 0; b < child.size(); b++ )
+	    {
+            //   //NOT SELECTION
+            if(child[ b ]->getIsActive())
+            {
+                if(!m_steppedOnceInsideChildBox)
+                    m_render = false;
+
+                Vector minCorner;
+                Vector maxCorner;
+                float xVoxel = DatasetManager::getInstance()->getVoxelX();
+                float yVoxel = DatasetManager::getInstance()->getVoxelY();
+                float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+                minCorner.x = child[b]->getCenter().x - child[b]->getSize().x * xVoxel * 0.5f;
+	            minCorner.y = child[b]->getCenter().y - child[b]->getSize().y * yVoxel * 0.5f;
+	            minCorner.z = child[b]->getCenter().z - child[b]->getSize().z * zVoxel * 0.5f;
+	            maxCorner.x = child[b]->getCenter().x + child[b]->getSize().x * xVoxel * 0.5f;
+	            maxCorner.y = child[b]->getCenter().y + child[b]->getSize().y * yVoxel * 0.5f;
+	            maxCorner.z = child[b]->getCenter().z + child[b]->getSize().z * zVoxel * 0.5f;
+                bool inside;
+
+                if(child[b]->getSelectionType() == ELLIPSOID_TYPE)
+                {
+                    float l_axisRadius  = ( maxCorner.x  - minCorner.x ) * 0.5f;
+                    float l_axis1Radius = ( maxCorner.y - minCorner.y ) * 0.5f;
+                    float l_axis2Radius = ( maxCorner.z - minCorner.z ) * 0.5f;
+                    float l_axisCenter  = maxCorner.x  - l_axisRadius;
+                    float l_axis1Center = maxCorner.y - l_axis1Radius;
+                    float l_axis2Center = maxCorner.z - l_axis2Radius;
+
+                    inside = (pos.x  - l_axisCenter)*(pos.x  - l_axisCenter) / ( l_axisRadius  * l_axisRadius  ) + 
+                            (pos.y - l_axis1Center)*(pos.y - l_axis1Center) / ( l_axis1Radius * l_axis1Radius ) + 
+                            (pos.z - l_axis2Center)*(pos.z - l_axis2Center) / ( l_axis2Radius * l_axis2Radius ) <= 1.0f;
+                }
+                else
+                {          
+                    inside = pos.x <= maxCorner.x && pos.x >= minCorner.x && pos.y <= maxCorner.y && pos.y >= minCorner.y && pos.z <= maxCorner.z && pos.z >= minCorner.z;
+                }
+            
+                if(inside && !m_steppedOnceInsideChildBox) //For selecting or removing
+                {
+                    m_steppedOnceInsideChildBox = true; //steped once, to be rendered at the end of the propagation stage
+                    m_render = true;
+                } 
+                if( child[ b ]->getIsNOT()) //For pruning
+                {
+                    insideNotBox = inside;
+                    m_prune = !child[b]->getIsRemove();
+                    if(m_prune)
+                    {
+                        m_render = true;
+                    }
+                    else if(inside && !m_prune && m_steppedOnceInsideChildBox)
+                    {
+                        m_render = false;
+                    }
+                }
+             
+            }
+            else
+            {
+                m_render = true; //Always show
+            }    
+        }
+    }
+
+	if((m_pMaskInfo->at(sticksNumber) > m_FAThreshold || gmVal > m_FAThreshold) && checkExclude(sticksNumber) && m_countGMstep <= m_GMstep && !insideNotBox) //for pruning
     {
         isOk = true;
     }
@@ -1054,22 +1443,18 @@ bool RTTFibers::withinMapThreshold(unsigned int sticksNumber)
 ///////////////////////////////////////////////////////////////////////////
 // Performs realtime HARDI fiber tracking along direction bwdfwd (backward, forward)
 ///////////////////////////////////////////////////////////////////////////
-void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points, vector<Vector>& color)
+void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<float>& points, vector<float>& color)
 { 
     //Vars
     Vector currPosition(seed); //Current PIXEL position
     Vector nextPosition; //Next Pixel position
     Vector currDirection, nextDirection; //Directions re-aligned 
-    
-
-    GLfloat flippedAxes[3];
-    m_pMaximasInfo->isAxisFlipped(X_AXIS) ? flippedAxes[0] = -1.0f : flippedAxes[0] = 1.0f;
-    m_pMaximasInfo->isAxisFlipped(Y_AXIS) ? flippedAxes[1] = -1.0f : flippedAxes[1] = 1.0f;
-    m_pMaximasInfo->isAxisFlipped(Z_AXIS) ? flippedAxes[2] = -1.0f : flippedAxes[2] = 1.0f;
+    Vector flippedAxes(RTTrackingHelper::getInstance()->getMaximaFlip());
 
     unsigned int sticksNumber; 
     int currVoxelx, currVoxely, currVoxelz;
     float angle; 
+    float absPeak = 0;
 
     int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
@@ -1088,103 +1473,182 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<Vector>& points,
     std::vector<float> sticks;
 
     m_countGMstep = 0;
-
-    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() &&  m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 && withinMapThreshold(sticksNumber) && !m_stop)
+    if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() )
     {
-        bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
-        sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir); 
+        absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-        currDirection.x = flippedAxes[0] * sticks[0];
-        currDirection.y = flippedAxes[1] * sticks[1];
-        currDirection.z = flippedAxes[2] * sticks[2];
-
-        //Direction for seeding (forward or backward)
-        currDirection.normalize();
-        currDirection *= bwdfwd;
-
-        //Next position
-        nextPosition = currPosition + ( m_step * currDirection );
-
-        //Get the voxel stepped into
-        currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
-        currVoxely = (int)( floor(nextPosition.y / yVoxel) );
-        currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
-
-        //Corresponding stick number
-        sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
-
-        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size() && m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] != 0 )
+        if( withinMapThreshold(sticksNumber, currPosition) && !m_stop && absPeak != 0)
         {
+            bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
+            sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
 
-            sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+            currDirection.x = flippedAxes.x * sticks[0];
+            currDirection.y = flippedAxes.y * sticks[1];
+            currDirection.z = flippedAxes.z * sticks[2];
 
-            //Advection next direction
-            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
+            //Direction for seeding (forward or backward)
+            currDirection.normalize();
+            currDirection *= bwdfwd;
 
-            //Direction of seeding
-            nextDirection *= bwdfwd;
-            nextDirection.normalize();
+            //Next position
+            nextPosition = currPosition + ( m_step * currDirection );
 
-            if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
+            //Get the voxel stepped into
+            currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
+            currVoxely = (int)( floor(nextPosition.y / yVoxel) );
+            currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
+
+            //Corresponding stick number
+            sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+            if( sticksNumber < m_pMaximasInfo->getMainDirData()->size())
             {
-                nextDirection *= -1;
-            }
+                absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
 
-            //Angle value
-            float dot = currDirection.Dot(nextDirection);
-            float acos = std::acos( dot );
-            angle = 180 * acos / M_PI;
-
-            ///////////////////////////
-            //Tracking along the fiber
-            //////////////////////////
-            while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber) && !m_stop)
-            {
-                //Insert point to be rendered
-                points.push_back( currPosition );
-                color.push_back( currDirection );
-
-                //Advance
-                currPosition = nextPosition;
-                currDirection = nextDirection;
-
-                //Next position
-                nextPosition = currPosition + ( m_step * currDirection );
-
-                //Stepped voxels
-                currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
-                currVoxely = (int)( floor(nextPosition.y / yVoxel) );
-                currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
-
-                //Corresponding tensor number
-                sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
-
-                if( sticksNumber > m_pMaximasInfo->getMainDirData()->size() || m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] == 0) //Out of anatomy
+                if( absPeak != 0 && withinMapThreshold(sticksNumber, nextPosition))
                 {
-                    break;
-                }
+
+                    sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber); 
+                    sticks[0] *= flippedAxes.x;
+                    sticks[1] *= flippedAxes.y;
+                    sticks[2] *= flippedAxes.z;
+                    sticks[3] *= flippedAxes.x;
+                    sticks[4] *= flippedAxes.y;
+                    sticks[5] *= flippedAxes.z;
+                    sticks[6] *= flippedAxes.x;
+                    sticks[7] *= flippedAxes.y;
+                    sticks[8] *= flippedAxes.z;
+
+                    //Advection next direction
+                    nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
+
+                    //Direction of seeding
+                    nextDirection *= bwdfwd;
+                    nextDirection.normalize();
+
+                    if( currDirection.Dot(nextDirection) < 0 ) //Ensures the two vectors have the same directions
+                    {
+                        nextDirection *= -1;
+                    }
+
+                    //Angle value
+                    float dot = currDirection.Dot(nextDirection);
+                    float acos = std::acos( dot );
+                    angle = 180 * acos / M_PI;
+
+                    ///////////////////////////
+                    //Tracking along the fiber
+                    //////////////////////////
+                    float it = 2;
+                    bool insideBox = false;
+                    while( angle <= m_angleThreshold && withinMapThreshold(sticksNumber, nextPosition) && !m_stop)
+                    {
+                        //Insert point to be rendered
+                        points.push_back( currPosition.x );
+                        points.push_back( currPosition.y );
+                        points.push_back( currPosition.z );
+                        color.push_back( std::abs(currDirection.x) );
+                        color.push_back( std::abs(currDirection.y) );
+                        color.push_back( std::abs(currDirection.z) );
+                        color.push_back( m_alpha );
+
+                        //Advance
+                        currPosition = nextPosition;
+                        currDirection = nextDirection;
+
+                        //Next position
+                        nextPosition = currPosition + ( m_step * currDirection );
+
+                        //Stepped voxels
+                        currVoxelx = (int)( floor(nextPosition.x / xVoxel) );
+                        currVoxely = (int)( floor(nextPosition.y / yVoxel) );
+                        currVoxelz = (int)( floor(nextPosition.z / zVoxel) );
+
+                        //Corresponding tensor number
+                        sticksNumber = currVoxelz * columns * rows + currVoxely * columns + currVoxelx;
+                        if( sticksNumber < m_pMaximasInfo->getMainDirData()->size())
+                        {
+                            absPeak = std::abs(m_pMaximasInfo->getMainDirData()->at(sticksNumber)[0] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[1] + m_pMaximasInfo->getMainDirData()->at(sticksNumber)[2]);
+
+                            if( absPeak == 0 || m_step*it > m_maxFiberLength) //Out of anatomy
+                            {
+                                break;
+                            }
                 
-                sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
+                            sticks = m_pMaximasInfo->getMainDirData()->at(sticksNumber);
+                            sticks[0] *= flippedAxes.x;
+                            sticks[1] *= flippedAxes.y;
+                            sticks[2] *= flippedAxes.z;
+                            sticks[3] *= flippedAxes.x;
+                            sticks[4] *= flippedAxes.y;
+                            sticks[5] *= flippedAxes.z;
+                            sticks[6] *= flippedAxes.x;
+                            sticks[7] *= flippedAxes.y;
+                            sticks[8] *= flippedAxes.z;
 
-                //Advection next direction
-                nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber );
+                            //Advection next direction
+                            nextDirection = advecIntegrateHARDI( currDirection, sticks, sticksNumber, nextPosition );
 
-                //Direction of seeding (backward of forward)
-                nextDirection *= bwdfwd;
-                nextDirection.normalize();
+                            //Direction of seeding (backward of forward)
+                            nextDirection *= bwdfwd;
+                            nextDirection.normalize();
 
-                if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
-                {
-                    nextDirection *= -1;
+                            if( currDirection.Dot(nextDirection) < 0 ) //Ensures both vectors points in the same direction
+                            {
+                                nextDirection *= -1;
+                            }
+
+                            //Angle value
+                            float dot = currDirection.Dot(nextDirection);
+                            float acos = std::acos( dot );
+                            angle = 180 * acos / M_PI;
+
+                            it++;
+                        }
+                    }
                 }
-
-                //Angle value
-                float dot = currDirection.Dot(nextDirection);
-                float acos = std::acos( dot );
-                angle = 180 * acos / M_PI;
             }
         }
     }
+}
+
+void RTTFibers::setHARDIInfo( Maximas* info )
+{
+    Vector flip;
+    info->isAxisFlipped(X_AXIS) ? flip.x = -1.0f : flip.x = 1.0f;
+    info->isAxisFlipped(Y_AXIS) ? flip.y = -1.0f : flip.y = 1.0f;
+    info->isAxisFlipped(Z_AXIS) ? flip.z = -1.0f : flip.z = 1.0f;
+
+    m_pMaximasInfo = info; RTTrackingHelper::getInstance()->setMaximaFlip(flip); 
+}
+
+void RTTFibers::insertPointsForTractoDriven(std::vector<float> pointsF, std::vector<float> pointsB)
+{
+    unsigned int nbPtsToUse = 3;
+    std::vector<Vector> positions; 
+
+    if(pointsF.size() >= nbPtsToUse*3)
+    {
+        int it = pointsF.size() - 1;
+        Vector Vector1(pointsF[it-2], pointsF[it-1], pointsF[it]);
+        Vector Vector2(pointsF[it-5], pointsF[it-4], pointsF[it-3]);
+        Vector Vector3(pointsF[it-8], pointsF[it-7], pointsF[it-6]);
+        positions.push_back(Vector1);
+        positions.push_back(Vector2);
+        positions.push_back(Vector3);
+    }
+
+    if(pointsB.size() > nbPtsToUse*3)
+    {
+        int it = pointsB.size() - 1;
+        Vector Vector1(pointsB[it-2], pointsB[it-1], pointsB[it]);
+        Vector Vector2(pointsB[it-5], pointsB[it-4], pointsB[it-3]);
+        Vector Vector3(pointsB[it-8], pointsB[it-7], pointsB[it-6]);
+        positions.push_back(Vector1);
+        positions.push_back(Vector2);
+        positions.push_back(Vector3);
+    }
+    DatasetManager::getInstance()->m_pRestingStateNetwork->setSeedFromTracto(positions);
+    RTFMRIHelper::getInstance()->setRTFMRIDirty(true);
 }
 
 //////////////////////////////////////////

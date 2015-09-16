@@ -49,10 +49,15 @@ public:
     int                     getColumns() const;
     int                     getFrames() const;
     int                     getRows() const;
+    int                     getBands() const;
     float                   getVoxelX() const;
     float                   getVoxelY() const;
     float                   getVoxelZ() const;
     FMatrix &               getNiftiTransform()             { return m_niftiTransform; }
+    bool                    getFlippedXOnLoad()                 { return m_loadedFlipX; }
+    bool                    getFlippedYOnLoad()                 { return m_loadedFlipY; }
+    void                    setFlippedXOnLoad(bool flip) { m_loadedFlipX = flip;}
+    void                    setFlippedYOnLoad(bool flip) { m_loadedFlipY = flip;}
 
     bool                    isDatasetLoaded() const         { return !m_datasets.empty(); }
     bool                    isAnatomyLoaded() const         { return !m_anatomies.empty(); }
@@ -86,7 +91,7 @@ public:
     DatasetIndex createMaximas( const wxString &filename )                       { return insert( new Maximas( filename ) ); }
 
     void remove( const DatasetIndex index );
-	DatasetIndex createFibers( std::vector<std::vector<Vector> >* RTT );
+	DatasetIndex createFibers();
     DatasetIndex addFibers( Fibers* fibers );
 
 protected:
@@ -112,7 +117,7 @@ private:
     // Loads an anatomy. Extension supported: .nii and .nii.gz
     DatasetIndex loadAnatomy( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
 
-    // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
+    // Loads a fiber set. Extension supported: .fib, .vtk, .bundlesdata, .trk and .tck
     DatasetIndex loadFibers( const wxString &filename );
 
 
@@ -150,6 +155,8 @@ private:
     
     bool m_forceLoadingAsMaximas;
     bool m_forceLoadingAsRestingState;
+    bool m_loadedFlipX;
+    bool m_loadedFlipY;
 };
 
 #endif //DATASETMANAGER_H_

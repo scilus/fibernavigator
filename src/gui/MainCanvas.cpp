@@ -83,16 +83,13 @@ const wxPoint& i_pos,const wxSize & i_size, long i_style, const wxString& i_name
     m_isDrawerHit = false;
     m_isSlizesLocked = false;
     m_isSceneLocked = false;
-    m_pRealTimeFibers = new RTTFibers();
+    
 }
 
 MainCanvas::~MainCanvas()
 {
     delete m_pArcBall;
     m_pArcBall = NULL;
-
-    delete m_pRealTimeFibers;
-    m_pRealTimeFibers = NULL;
 }
 
 void MainCanvas::init()
@@ -127,7 +124,7 @@ void MainCanvas::changeOrthoSize()
 
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
+    glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -3000, 3000 );
 }
 
 void MainCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
@@ -717,14 +714,13 @@ void MainCanvas::render()
 
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
-                glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
+                glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -3000, 3000 );
                 glViewport( 0, 0, size, size );
 
                 glPushMatrix();
                 SceneManager::getInstance()->doMatrixManipulation();
 
                 SceneManager::getInstance()->getScene()->renderScene();
-				m_pRealTimeFibers->renderRTTFibers(false);
                 glPopMatrix();
 
                 fbo.getTexObject( 1 )->saveImageToPPM( SceneManager::getInstance()->getScreenshotName().mb_str() );
@@ -735,7 +731,7 @@ void MainCanvas::render()
             {
                 glMatrixMode( GL_PROJECTION );
                 glLoadIdentity();
-                glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -500, 500 );
+                glOrtho( -m_orthoModX, m_orthoSizeNormal + m_orthoModX, -m_orthoModY, m_orthoSizeNormal + m_orthoModY, -3000, 3000 );
                 Logger::getInstance()->printIfGLError( wxT( "MainCanvas::render - glOrtho" ) );
 
                 glPushMatrix();
@@ -782,29 +778,7 @@ void MainCanvas::render()
                     //TODO, may be useful later
                     //renderDrawerDisplay();
                 }
-				//Real-time Fiber Tractography
-                if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
-                {	
-					m_pRealTimeFibers->seed();
-                }
-                else if(m_pRealTimeFibers->getSize() > 0)
-                {
-                    if(!RTTrackingHelper::getInstance()->isTrackActionPlaying())
-                        m_pRealTimeFibers->renderRTTFibers(false);
-                    else
-                        m_pRealTimeFibers->renderRTTFibers(true);
-                }
-				//Real-time fMRI correlation
-				if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )
-                {	
-					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
-                }
-				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
-				{
-					bool move = DatasetManager::getInstance()->m_pRestingStateNetwork->isBoxMoving();
-					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(move);
-					DatasetManager::getInstance()->m_pRestingStateNetwork->setBoxMoving(false);
-				}
+				
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
@@ -818,7 +792,7 @@ void MainCanvas::render()
         default:
             glMatrixMode( GL_PROJECTION );
             glLoadIdentity();
-            glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -500, 500 );
+            glOrtho( 0, m_orthoSizeNormal, 0, m_orthoSizeNormal, -3000, 3000 );
 
             if ( MyApp::frame->m_pListCtrl->GetItemCount() != 0 )
             {

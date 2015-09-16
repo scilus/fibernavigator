@@ -35,6 +35,7 @@ public:
     
     //Empty
     void    draw();
+    void         flipAnat( AxisType axe );
 
 private:
     

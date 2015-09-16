@@ -114,10 +114,63 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     }
     
     createStructure( l_fileFloatData );
+    bool m_originalAxialOrientation;
+    bool m_originalSagOrientation;
+    if( pHeader->sform_code > 0 )
+    {
+        if( pHeader->sto_xyz.m[0][0] < 0.0 )
+        {
+            m_originalAxialOrientation = 0;
+        }
+        else
+        {
+            m_originalAxialOrientation = 1;
+        }
+        if( pHeader->sto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = 0;
+        }
+        else
+        {
+            m_originalSagOrientation = 1;
+        }
+    }
+    else if( pHeader->qform_code > 0 )
+    {
+        if( pHeader->qto_xyz.m[0][0] < 0.0 )
+        {
+            m_originalAxialOrientation = 0;
+        }
+        else
+        {
+            m_originalAxialOrientation = 1;
+        }
+        if( pHeader->qto_xyz.m[1][1] < 0.0 )
+        {
+            m_originalSagOrientation = 0;
+        }
+        else
+        {
+            m_originalSagOrientation = 1;
+        }
+    }
+
+    if( m_originalAxialOrientation == 0 )
+    { 
+        flipAxis( X_AXIS, true );
+        flipAnat( X_AXIS );     
+    }
+    if( m_originalSagOrientation == 0 )
+    {
+        flipAxis( Y_AXIS, true );
+        flipAnat( Y_AXIS );
+    }
 
     m_isLoaded = true;
     return true;
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////
 void Maximas::saveNifti( wxString fileName )
@@ -216,6 +269,8 @@ bool Maximas::createStructure  ( std::vector< float > &i_fileFloatData )
     return true;
 }
 
+
+
 //////////////////////////////////////////////////////////////////////////
 // NOTE: This currently only supports 3 maximas, because when we extract 
 // Maximas from ODFs, only 3 are extracted.
@@ -251,6 +306,68 @@ bool Maximas::createMaximas( std::vector<std::vector<Vector> > &mainDirections)
 
     m_isLoaded = true;
     return true;
+}
+
+void Maximas::flipAnat( AxisType axe )
+{
+    int curIndex;
+    int flipIndex;
+
+    int row(DatasetManager::getInstance()->getRows());
+    int col(DatasetManager::getInstance()->getColumns());
+    int frames(DatasetManager::getInstance()->getFrames());
+
+    int m_rows = DatasetManager::getInstance()->getRows();
+    int m_columns = DatasetManager::getInstance()->getColumns();
+    int m_frames = DatasetManager::getInstance()->getFrames();
+    int m_bands = DatasetManager::getInstance()->getBands();
+
+    switch (axe)
+    {
+        case X_AXIS:
+            col /= 2;
+            break;
+        case Y_AXIS:
+            row /= 2;
+            break;
+        case Z_AXIS:
+            frames /= 2;
+            break;
+        default:
+            Logger::getInstance()->print( wxT( "Cannot flip axis. The given axis is undefined." ), LOGLEVEL_ERROR );
+            return;
+    }
+
+    for( int f(0); f < frames; ++f )
+    {
+        for( int r(0); r < row; ++r )
+        {
+            for( int c(0); c < col; ++c )
+            {
+                curIndex = (c + r * m_columns + f * m_columns * m_rows);
+
+                //Compute the index of the value that will be replaced by the one defined by our current index
+                switch (axe)
+                {
+                    case X_AXIS:
+                        flipIndex = ((m_columns - 1 - c) + r * m_columns + f * m_columns * m_rows);
+                        break;
+                    case Y_AXIS:
+                        flipIndex = (c + (m_rows - 1 - r) * m_columns + f * m_columns * m_rows);
+                        break;
+                    case Z_AXIS:
+                        flipIndex = (c + r * m_columns + (m_frames - 1 - f) * m_columns * m_rows);
+                        break;
+                    default:
+                        break;
+                }
+
+                std::vector<float> tmp = m_mainDirections[curIndex];
+                m_mainDirections[curIndex] = m_mainDirections[flipIndex];
+                m_mainDirections[flipIndex] = tmp;
+            }
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -340,6 +457,7 @@ void Maximas::drawGlyph( int i_zVoxel, int i_yVoxel, int i_xVoxel, AxisType i_ax
             stickPos[1] = halfScale*m_mainDirections[currentIdx][i*3+1];
             stickPos[2] = halfScale*m_mainDirections[currentIdx][i*3+2];
 
+            glLineWidth(2);
             glBegin(GL_LINES);  
                 glVertex3f(-stickPos[0],-stickPos[1],-stickPos[2]);
                 glVertex3f(stickPos[0],stickPos[1],stickPos[2]);       
