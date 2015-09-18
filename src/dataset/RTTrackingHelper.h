@@ -38,7 +38,7 @@ public:
     void setRTTDirty( bool dirty )            { m_isRTTDirty = dirty; }
     void setRTTActive( bool active )          { m_isRTTActive = active; }
 	void setSeedFromfMRI( bool seedFromfMRI ) { m_isSeedFromfMRI = seedFromfMRI; }
-    void setMaximaFlip( Vector flip)          { flippedAxes = flip; }
+    void setMaximaFlip( Vector flip)          { flippedAxes.x = flip.x; flippedAxes.y = flip.y; flippedAxes.z = flip.z; }
     Vector getMaximaFlip()          { return flippedAxes; }
 
     bool toggleInterpolateTensors() { return m_interpolateTensors = !m_interpolateTensors; }
