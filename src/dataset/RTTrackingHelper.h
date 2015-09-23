@@ -29,6 +29,8 @@ public:
 	bool isSeedFromfMRI() const { return m_isSeedFromfMRI; }
     bool isTractoDrivenRSN() const { return m_isTractoDrivenRSN; }
     bool isGMAllowed() const { return m_isGMallowed; }
+    bool isNotMapOn() const {return m_isNotMapOn;}
+    bool isAndMapOn() const {return m_isAndMapOn;}
     bool isSrcAlpha() const { return m_isSrcAlpha; }
     bool isRandomInit() const { return m_isRandomInit; }
 
@@ -50,6 +52,8 @@ public:
     bool toggleMagnet()             { return m_isMagnetOn = !m_isMagnetOn; }
     bool toggleSrcAlpha()           { return m_isSrcAlpha = !m_isSrcAlpha; }
     bool toggleRandomInit()         { return m_isRandomInit = !m_isRandomInit; }
+    bool toggleNotMap()             { return m_isNotMapOn = !m_isNotMapOn;}
+    bool toggleAndMap()             { return m_isAndMapOn = !m_isAndMapOn;}
     
     bool togglePlayStop()             { return m_isPaused = !m_isPaused; }
     bool isTrackActionPlaying() const { return m_isTrackActionPlaying; }
@@ -59,6 +63,8 @@ public:
 	void setShellSeed(bool enabled) {m_isShellSeeds = enabled;}
 	void setSeedMap(bool enabled) {m_isSeedMap = enabled;}
     void setGMmap(bool enabled) {m_isGMallowed = enabled;}
+    void setNotmap(bool enabled) {m_isNotMapOn = enabled;}
+    void setAndmap(bool enabled) {m_isAndMapOn = enabled;}
 
 	int generateId() {return (++m_id);}
     bool toogleTractoDrivenRSN()          { return m_isTractoDrivenRSN = !m_isTractoDrivenRSN; }
@@ -97,6 +103,8 @@ private:
 	bool m_isSeedFromfMRI;
     bool m_isTractoDrivenRSN;
     bool m_isGMallowed;
+    bool m_isNotMapOn;
+    bool m_isAndMapOn;
 	int m_id;
     bool m_isSrcAlpha;
     bool m_isRandomInit;

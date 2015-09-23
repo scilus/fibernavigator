@@ -66,7 +66,9 @@ public:
     void insertPointsForTractoDriven( std::vector<float> pointsF, std::vector<float> pointsB);
 
 	void setExcludeInfo( Anatomy* info )                              { m_pExcludeInfo = info; }
+    void setIncludeInfo( Anatomy* info )                              { m_pIncludeInfo = info; }
 	bool checkExclude(unsigned int sticksNumber);						  
+    void setAnd(bool val) { m_and = val;}
 
     float getFAThreshold()                       { return m_FAThreshold; }
     float getAngleThreshold()                    { return m_angleThreshold; }
@@ -118,6 +120,7 @@ private:
 	DatasetInfo *m_pShellInfo;
     Anatomy     *m_pMaskInfo;
 	Anatomy     *m_pExcludeInfo;
+    Anatomy     *m_pIncludeInfo;
 	Anatomy     *m_pSeedMapInfo;
     Anatomy     *m_pGMInfo;
     Vector       m_initVec;
@@ -129,8 +132,10 @@ private:
 	float m_alpha;
     int m_currentSeedBoxID;
 	bool m_stop;
+    bool m_and;
     bool m_render;
     bool m_steppedOnceInsideChildBox;
+    bool m_steppedOnceIntoAND;
     bool m_prune;
     GLuint*     m_bufferObjectsRTT;
 
