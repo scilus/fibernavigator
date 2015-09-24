@@ -804,7 +804,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     Vector vMagnet(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
-    float puncture = m_vinvout;
+    float g = m_vinvout;
     float wm = m_pMaskInfo->at(s_number);
     float gm = 0;
     float F = 0;
@@ -820,7 +820,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
     {  
-        vMagnet = magneticField(vin, sticks, s_number, pos, vOut, F);
+        vMagnet = magneticField(vin, sticks, s_number, pos, vOut, F, g);
     }
     else
     {
@@ -860,12 +860,12 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     //}
 
     //Weight between in and out directions. Magnet will also be weighted by distance.
-    Vector res = (1-F)*((1.0 - puncture ) * vin + puncture * vOut) + F * vMagnet;
+    Vector res = (1-F)*((1.0 - g) * vin + g * vOut) + F * vMagnet;
    
     return res;
 }
 
-Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F) 
+Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F, float& G) 
 {
     Vector final = vin;
     bool alreadyAffected = false;
@@ -921,11 +921,12 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
                         if( angle < angleMin )
                         {
                             angleMin = angle;
-                            final = v1;
+                            vOut = v1;
                         }      
                     }
                 }
-                F = selObjs[b]->getStrength();
+                //F = selObjs[b]->getStrength();
+                //G = 0;
                 alreadyAffected = true;
             } 
             else
