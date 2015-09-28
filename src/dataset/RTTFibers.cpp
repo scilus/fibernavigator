@@ -1242,14 +1242,14 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
     std::vector<float> draftedPeak;
     if(!initWithDir)
     {
-	    
-	    float norms[3];
+	    unsigned int nbPeaks = initialPeaks.size()/3;
+	    std::vector<float> norms;
 	    float sum = 0.0f;
 
-	    for(unsigned int i=0; i < initialPeaks.size()/3; i++)
+	    for(unsigned int i=0; i < nbPeaks; i++)
         {
             Vector v1(initialPeaks[i*3],initialPeaks[i*3+1], initialPeaks[i*3+2]);
-		    norms[i] = v1.getLength();
+            norms.push_back(v1.getLength());
 		    sum += norms[i];
 	    }
     
