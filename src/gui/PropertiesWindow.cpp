@@ -499,6 +499,7 @@ void PropertiesWindow::OnFitToAnat( wxCommandEvent& WXUNUSED(event) )
         if( pFibers != NULL )
         {
             pFibers->fitToAnat(false);
+            pFibers->updateLinesShown();
         }
     }
     else

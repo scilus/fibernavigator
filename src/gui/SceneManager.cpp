@@ -602,7 +602,7 @@ bool SceneManager::loadOldVersion( wxXmlNode * pRoot, const wxString &rootPath  
                 }
                 else
                 {
-                    wxFileName fullDatasetPath( rootPath + wxFileName::GetPathSeparator() + path );
+                    wxFileName fullDatasetPath( path );
                     index = DatasetManager::getInstance()->load( fullDatasetPath.GetFullPath(), extension );
                 }
 

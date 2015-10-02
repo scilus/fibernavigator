@@ -537,3 +537,13 @@ void Maximas::updatePropertiesSizer()
     m_pRadMapOnSphere->Hide();
     m_pRadMainAxis->Hide();
 }
+
+bool Maximas::save( wxXmlNode *pNode, const wxString &rootPath ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode, rootPath );
+
+    return true;
+}
