@@ -36,7 +36,7 @@ Highlights:
 - Interactive selection of fibers.
 - Real-time fiber tractography (Chamberland et al. 2014, Frontiers in Neuroinformatics).
 - Tractography-driven resting-state fMRI (Chamberland et al. 2015, Frontiers in Neuroscience).
-- Orientation-dependent opacity rendering (Tax et al. 2014, ISMRM).
+- Orientation-dependent opacity rendering (Tax et al. 2015, PLoS ONE).
 - Display of MRI & functional MRI. `Image Gallery`_
 
 How to get the application
