@@ -397,7 +397,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
 
     /*-----------------------MAGNET SECTION-----------------------------------*/
 
-    wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(115, -1), wxTE_CENTER | wxTE_READONLY );
+    /*wxTextCtrl *magnetZone = new wxTextCtrl( this, wxID_ANY, wxT("Magnet tracking"), wxDefaultPosition, wxSize(115, -1), wxTE_CENTER | wxTE_READONLY );
     magnetZone->SetBackgroundColour( *wxLIGHT_GREY );
     wxFont magnet_font = magnetZone->GetFont();
     magnet_font.SetPointSize( 10 );
@@ -428,7 +428,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     pBoxMagnet1->Add( m_pBtnPlaceMagnetB, 1, wxEXPAND | wxALL, 1 );
 	m_pTrackingSizer->Add( pBoxMagnet1, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );
+    m_pTrackingSizer->Add( m_pToggleMagnetMode, 1, wxEXPAND | wxALL, 1 );*/
 
 }
 
