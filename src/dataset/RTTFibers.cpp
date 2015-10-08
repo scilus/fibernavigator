@@ -35,7 +35,7 @@ RTTFibers::RTTFibers()
     m_FAThreshold( 0.20f ),
     m_angleThreshold( 35.0f ),
     m_step( 1.0f ),
-    m_GMstep( 15 ),
+    m_GMstep( 5 ),
     m_nbSeed ( 10.0f ),
     m_nbMeshPt ( 0 ),
     m_puncture( 0.2f ),
@@ -47,11 +47,14 @@ RTTFibers::RTTFibers()
     m_isHARDI( false ),
     m_countGMstep( 0 ),
 	m_stop( false ),
+    m_and( true ),
     m_pExcludeInfo( NULL ),
+    m_pIncludeInfo( NULL ),
     m_pSeedMapInfo( NULL ),
     m_pGMInfo( NULL ),
     m_render( true ),
     m_steppedOnceInsideChildBox( false ),
+    m_steppedOnceIntoAND( false ),
     m_prune(true)
 {
     m_bufferObjectsRTT = new GLuint[2];
@@ -219,7 +222,7 @@ void RTTFibers::seed()
                             }
 						    //Track both sides
 							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
-                            draw = m_render;
+                            draw = m_render && m_and;
 						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
                         }
                         else
@@ -229,7 +232,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && (m_render || draw )&& (draw || m_and))
 						{
                             bool keepRight = false;
                             bool keepLeft = false;
@@ -273,6 +276,7 @@ void RTTFibers::seed()
                                 insertPointsForTractoDriven(pointsF, pointsB);
                             }
                             m_steppedOnceInsideChildBox = false;
+                            m_steppedOnceIntoAND = false;
 						}
 					}
 				}
@@ -320,7 +324,7 @@ void RTTFibers::seed()
                             }
 						    //Track both sides
 							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
-                            draw = m_render;
+                            draw = m_render && m_and;
 						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
                         }
                         else
@@ -330,7 +334,7 @@ void RTTFibers::seed()
 						    performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
                         }
                         
-						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && (m_render || draw )&& (draw || m_and))
 						{
                             bool keepRight = false;
                             bool keepLeft = false;
@@ -375,6 +379,7 @@ void RTTFibers::seed()
                                 insertPointsForTractoDriven(pointsF, pointsB);
                             }
                             m_steppedOnceInsideChildBox = false;
+                            m_steppedOnceIntoAND = false;
 						}
 					}
 				}
@@ -421,7 +426,7 @@ void RTTFibers::seed()
                             }
 						    //Track both sides
 							performHARDIRTT( seed,  1, pointsF, colorF); //First pass
-                            draw = m_render;
+                            draw = m_render && m_and;
 						    performHARDIRTT( seed, -1, pointsB, colorB); //Second pass
 						}
 						else
@@ -431,7 +436,7 @@ void RTTFibers::seed()
 							performDTIRTT( Vector(x,y,z), -1, pointsB, colorB); //Second pass
 						}
                         
-						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
+						if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && (m_render || draw ) && (draw || m_and))
 						{
                             bool keepRight = false;
                             bool keepLeft = false;
@@ -476,6 +481,7 @@ void RTTFibers::seed()
                                 insertPointsForTractoDriven(pointsF, pointsB);
                             }
                             m_steppedOnceInsideChildBox = false;
+                            m_steppedOnceIntoAND = false;
 						}
 					}
 				}
@@ -506,7 +512,7 @@ void RTTFibers::seed()
                 {
 					//Track both sides
 					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z),  1, pointsF, colorF); //First pass
-                    draw = m_render;
+                    draw = m_render && m_and;
 					performHARDIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                 else
@@ -516,7 +522,7 @@ void RTTFibers::seed()
 					performDTIRTT( Vector(positions[k].x,positions[k].y,positions[k].z), -1, pointsB, colorB); //Second pass
                 }
                         
-				if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && !m_stop && (m_render || draw))
+				if( (pointsF.size() + pointsB.size())/3 * getStep() > getMinFiberLength() && (pointsF.size() + pointsB.size())/3 * getStep() < getMaxFiberLength() && (m_render || draw) && (draw || m_and))
 				{
                     bool keepRight = false;
                     bool keepLeft = false;
@@ -560,6 +566,7 @@ void RTTFibers::seed()
                         insertPointsForTractoDriven(pointsF, pointsB);
                     }
                     m_steppedOnceInsideChildBox = false;
+                    m_steppedOnceIntoAND = false;
 				}
             }
         }
@@ -797,7 +804,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     Vector vMagnet(0,0,0);
     float angleMin = 360.0f;
     float angle = 0.0f;
-    float puncture = m_vinvout;
+    float g = m_vinvout;
     float wm = m_pMaskInfo->at(s_number);
     float gm = 0;
     float F = 0;
@@ -813,7 +820,7 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     bool isMagnetOn = RTTrackingHelper::getInstance()->isMagnetOn();
     if(isMagnetOn)
     {  
-        vMagnet = magneticField(vin, sticks, s_number, pos, vOut, F);
+        vMagnet = magneticField(vin, sticks, s_number, pos, vOut, F, g);
     }
     else
     {
@@ -853,12 +860,12 @@ Vector RTTFibers::advecIntegrateHARDI( Vector vin, const std::vector<float> &sti
     //}
 
     //Weight between in and out directions. Magnet will also be weighted by distance.
-    Vector res = (1-F)*((1.0 - puncture ) * vin + puncture * vOut) + F * vMagnet;
+    Vector res = (1-F)*((1.0 - g) * vin + g * vOut) + F * vMagnet;
    
     return res;
 }
 
-Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F) 
+Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, float s_number, Vector pos, Vector& vOut, float& F, float& G) 
 {
     Vector final = vin;
     bool alreadyAffected = false;
@@ -914,11 +921,12 @@ Vector RTTFibers::magneticField(Vector vin, const std::vector<float> &sticks, fl
                         if( angle < angleMin )
                         {
                             angleMin = angle;
-                            final = v1;
+                            vOut = v1;
                         }      
                     }
                 }
-                F = selObjs[b]->getStrength();
+                //F = selObjs[b]->getStrength();
+                //G = 0;
                 alreadyAffected = true;
             } 
             else
@@ -1234,14 +1242,14 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
     std::vector<float> draftedPeak;
     if(!initWithDir)
     {
-	    
-	    float norms[3];
+	    unsigned int nbPeaks = initialPeaks.size()/3;
+	    std::vector<float> norms;
 	    float sum = 0.0f;
 
-	    for(unsigned int i=0; i < initialPeaks.size()/3; i++)
+	    for(unsigned int i=0; i < nbPeaks; i++)
         {
             Vector v1(initialPeaks[i*3],initialPeaks[i*3+1], initialPeaks[i*3+2]);
-		    norms[i] = v1.getLength();
+            norms.push_back(v1.getLength());
 		    sum += norms[i];
 	    }
     
@@ -1319,7 +1327,8 @@ std::vector<float> RTTFibers::pickDirection(std::vector<float> initialPeaks, boo
 bool RTTFibers::checkExclude( unsigned int sticksNumber)
 {
 	bool res = true;
-	if(m_pExcludeInfo != NULL)
+
+    if(m_pExcludeInfo != NULL && RTTrackingHelper::getInstance()->isNotMapOn())
 	{
 		if(m_pExcludeInfo->at(sticksNumber) != 0)
 		{
@@ -1327,6 +1336,17 @@ bool RTTFibers::checkExclude( unsigned int sticksNumber)
 			m_stop = true;
 		}
 	}
+
+    if(m_pIncludeInfo != NULL && RTTrackingHelper::getInstance()->isAndMapOn())
+    {
+        if(!m_steppedOnceIntoAND)
+            m_and = false;
+        if(m_pIncludeInfo->at(sticksNumber) != 0)
+        {
+            m_and = true;
+            m_steppedOnceIntoAND = true;
+        }
+    }
 
 	return res;	
 }

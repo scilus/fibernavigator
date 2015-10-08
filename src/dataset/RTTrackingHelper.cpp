@@ -19,9 +19,12 @@ RTTrackingHelper::RTTrackingHelper()
 	m_isSeedFromfMRI ( false ),
     m_isTractoDrivenRSN( false ),
     m_isGMallowed( false ),
+    m_isNotMapOn( false ),
+    m_isAndMapOn( false ),
 	m_id( 0 ),
     m_isSrcAlpha( true ),
     m_isRandomInit( true ),
+    flippedAxes( 1, 1, 1),
     m_bufferID( 0 )
 {
 }

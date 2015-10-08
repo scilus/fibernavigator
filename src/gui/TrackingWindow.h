@@ -33,8 +33,6 @@ public:
     void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
     
-
-
     void OnStartTracking                       ( wxCommandEvent& event );
 	void OnSelectShell						   ( wxCommandEvent& event );
     void OnClearBox                            ( wxTreeEvent&    event );
@@ -52,7 +50,10 @@ public:
     void OnInitY                               ( wxCommandEvent& event ); 
     void OnInitZ                               ( wxCommandEvent& event ); 
 	void OnSelectExclusion					   ( wxCommandEvent& event );
-
+    void OnToggleNotMap                        ( wxCommandEvent& event );
+    void OnSelectInclusion					   ( wxCommandEvent& event );
+    void OnToggleAndMap                        ( wxCommandEvent& event );
+                          
     void OnInterpolate                         ( wxCommandEvent& event );
     void OnSliderPunctureMoved                 ( wxCommandEvent& event );
     void OnSliderMinLengthMoved                ( wxCommandEvent& event );
@@ -76,8 +77,6 @@ public:
 public:
     wxToggleButton      *m_pBtnStart;
     
-    
-
 
 private:
     MainFrame           *m_pMainFrame;
@@ -85,16 +84,16 @@ private:
     wxTextCtrl          *m_pTxtFABox;
     wxStaticText        *m_pTextFA;
     wxSlider            *m_pSliderAngle;
-    wxStaticText        *m_pTextAngle;
+    //wxStaticText        *m_pTextAngle;
     wxTextCtrl          *m_pTxtAngleBox;
     wxSlider            *m_pSliderStep;
-    wxStaticText        *m_pTextStep;
+    //wxStaticText        *m_pTextStep;
     wxTextCtrl          *m_pTxtStepBox;
     wxSlider            *m_pSliderPuncture;
-    wxStaticText        *m_pTextPuncture;
+    //wxStaticText        *m_pTextPuncture;
     wxTextCtrl          *m_pTxtPunctureBox;
     wxSlider            *m_pSliderGMStep;
-    wxStaticText        *m_pTextGMStep;
+    //wxStaticText        *m_pTextGMStep;
     wxTextCtrl          *m_pTxtGMStepBox;
     wxButton            *m_pBtnSelectFile;
 	wxButton			*m_pBtnSelectShell;
@@ -107,35 +106,37 @@ private:
     wxToggleButton      *m_pToggleTrackX;
     wxToggleButton      *m_pToggleTrackY;
     wxToggleButton      *m_pToggleTrackZ;
-	wxButton			*m_pBtnSelectExclusion;
-    wxStaticText        *m_pTextMinLength;
+	wxButton			*m_pBtnSelectNotMap;
+    wxToggleButton      *m_pToggleNotMap;
+    wxButton			*m_pBtnSelectAndMap;
+    wxToggleButton      *m_pToggleAndMap;
+    //wxStaticText        *m_pTextMinLength;
     wxSlider            *m_pSliderMinLength;
     wxTextCtrl          *m_pTxtMinLengthBox;
-	wxStaticText        *m_pTextOpacity;
+	//wxStaticText        *m_pTextOpacity;
     wxSlider            *m_pSliderOpacity;
     wxTextCtrl          *m_pTxtOpacityBox;
     wxToggleButton      *m_pBtnToggleSrcAlpha;
     wxSlider            *m_pSliderMaxLength;
-    wxStaticText        *m_pTextMaxLength;
+    //wxStaticText        *m_pTextMaxLength;
     wxTextCtrl          *m_pTxtMaxLengthBox;
 	wxButton			*m_pBtnConvert;
     wxToggleButton      *m_pToggleRandomInit;
     
-    
-    
-    wxStaticText        *m_pTextAxisSeedNb;
-    wxStaticText        *m_pTextTotalSeedNb;
-    wxStaticLine        *m_pLineSeparator;
-    wxBitmapButton      *m_pPlayPause;
-    wxBitmapButton      *m_pBtnStop;
-    wxImage             m_bmpPause;
-    wxImage             m_bmpPlay;
-    wxBitmapButton      *m_pBtnPlaceMagnetR;
-    wxBitmapButton      *m_pBtnPlaceMagnetG;
-    wxBitmapButton      *m_pBtnPlaceMagnetB;
+    //wxStaticText        *m_pTextAxisSeedNb;
+    //wxStaticText        *m_pTextTotalSeedNb;
+    //wxStaticLine        *m_pLineSeparator;
+    //wxBitmapButton      *m_pPlayPause;
+    //wxBitmapButton      *m_pBtnStop;
+    //wxImage             m_bmpPause;
+    //wxImage             m_bmpPlay;
+    //wxBitmapButton      *m_pBtnPlaceMagnetR;
+    //wxBitmapButton      *m_pBtnPlaceMagnetG;
+    //wxBitmapButton      *m_pBtnPlaceMagnetB;
     wxToggleButton      *m_pToggleMagnetMode;
     
 private:
+
     wxSizer *m_pTrackingSizer;
     TrackingWindow( wxWindow *pParent, wxWindowID id, const wxPoint &pos, const wxSize &size );
     DECLARE_DYNAMIC_CLASS( TrackingWindow )

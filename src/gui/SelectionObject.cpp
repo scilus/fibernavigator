@@ -119,6 +119,19 @@ SelectionObject::SelectionObject( const wxXmlNode selObjNode )
             m_isVisible = parseXmlBoolString( propVal );
             pChildNode->GetAttribute( wxT("isNOT"), &propVal );
             m_isNOT = parseXmlBoolString( propVal );
+            pChildNode->GetAttribute( wxT("isMagnet"), &propVal );
+            m_isMagnet = parseXmlBoolString( propVal );
+
+            double x, y, z;
+            pChildNode->GetAttribute( wxT("fieldX"), &propVal );
+            propVal.ToDouble( &x );
+            m_magnetField.x = x;
+            pChildNode->GetAttribute( wxT("fieldY"), &propVal );
+            propVal.ToDouble( &y );
+            m_magnetField.y = y;
+            pChildNode->GetAttribute( wxT("fieldZ"), &propVal );
+            propVal.ToDouble( &z );
+            m_magnetField.z = z;
         }
         else if( nodeName == wxT("center") )
         {
@@ -1937,6 +1950,10 @@ bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode, const wxString &root
     pState->AddAttribute( new wxXmlAttribute( wxT( "active" ), m_isActive? wxT( "yes" ) : wxT( "no" ) ) );
     pState->AddAttribute( new wxXmlAttribute( wxT( "visible" ), m_isVisible? wxT( "yes" ) : wxT( "no" ) ) );
     pState->AddAttribute( new wxXmlAttribute( wxT( "isNOT" ), m_isNOT? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "isMagnet" ), m_isMagnet? wxT( "yes" ) : wxT( "no" ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "fieldX" ), wxStrFormat( m_magnetField.x, floatPrecision ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "fieldY" ), wxStrFormat( m_magnetField.y, floatPrecision ) ) );
+    pState->AddAttribute( new wxXmlAttribute( wxT( "fieldZ" ), wxStrFormat( m_magnetField.z, floatPrecision ) ) );
     
     
     wxXmlNode *pCenter = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "center" ) );
@@ -1961,11 +1978,11 @@ bool SelectionObject::populateXMLNode( wxXmlNode *pCurNode, const wxString &root
     pDistanceColoring->AddAttribute( new wxXmlAttribute( wxT( "used" ), m_DistColoring ? wxT( "yes") : wxT( "no" ) ) );
     pCurNode->AddChild( pDistanceColoring );
 
-    wxXmlNode *pMeanFiberOptions = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "mean_fiber_options" ) );
-    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorHTML" ), m_meanFiberColor.GetAsString(wxC2S_HTML_SYNTAX) ) );
-    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "opacity" ), wxStrFormat( m_meanFiberOpacity, floatPrecision ) ) );
-    pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorationMode" ), Helper::getColorationModeString( m_meanFiberColorationMode ) ) );
-    pCurNode->AddChild( pMeanFiberOptions );
+    //wxXmlNode *pMeanFiberOptions = new wxXmlNode( NULL, wxXML_ELEMENT_NODE, wxT( "mean_fiber_options" ) );
+    //pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorHTML" ), m_meanFiberColor.GetAsString(wxC2S_HTML_SYNTAX) ) );
+    //pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "opacity" ), wxStrFormat( m_meanFiberOpacity, floatPrecision ) ) );
+    //pMeanFiberOptions->AddAttribute( new wxXmlAttribute( wxT( "colorationMode" ), Helper::getColorationModeString( m_meanFiberColorationMode ) ) );
+    //pCurNode->AddChild( pMeanFiberOptions );
 
     return true;
 }

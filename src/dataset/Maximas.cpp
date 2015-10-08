@@ -6,6 +6,7 @@
 #include "Maximas.h"
 
 #include "DatasetManager.h"
+#include "RTTrackingHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gui/MyListCtrl.h"
@@ -158,11 +159,13 @@ bool Maximas::load( nifti_image *pHeader, nifti_image *pBody )
     if( m_originalAxialOrientation == 0 )
     { 
         flipAxis( X_AXIS, true );
+        RTTrackingHelper::getInstance()->setMaximaFlip(Vector(-1,1,1));
         flipAnat( X_AXIS );     
     }
     if( m_originalSagOrientation == 0 )
     {
         flipAxis( Y_AXIS, true );
+        RTTrackingHelper::getInstance()->setMaximaFlip(Vector(1,-1,1));
         flipAnat( Y_AXIS );
     }
 
@@ -533,4 +536,14 @@ void Maximas::updatePropertiesSizer()
     m_pRadNormal->Hide();
     m_pRadMapOnSphere->Hide();
     m_pRadMainAxis->Hide();
+}
+
+bool Maximas::save( wxXmlNode *pNode, const wxString &rootPath ) const
+{
+    assert( pNode != NULL );
+
+    pNode->SetName( wxT( "dataset" ) );
+    DatasetInfo::save( pNode, rootPath );
+
+    return true;
 }

@@ -405,9 +405,7 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
             
             std::vector< Vector > positions = s->m_tMesh->getVerts();
             float shellSeedNb = positions.size();
-            RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );
-            
-
+            RTTrackingHelper::getInstance()->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );      
         }
 
         // This slider will set the Brightness level. Currently only the glyphs uses this value.
@@ -501,6 +499,7 @@ void PropertiesWindow::OnFitToAnat( wxCommandEvent& WXUNUSED(event) )
         if( pFibers != NULL )
         {
             pFibers->fitToAnat(false);
+            pFibers->updateLinesShown();
         }
     }
     else
