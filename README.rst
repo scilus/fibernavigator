@@ -27,7 +27,7 @@ New **video tutorials** of the Fibernavigator are available.
 - `Opacity rendering`_: how to generate orientation-dependent opacity rendering.
 - `Tractography-driven resting-state fMRI`_: how to combine dMRI with fMRI.
 
-A list of all tutorials can be seen on the `video tutorials`_ page.
+A list of all tutorials can be seen on the `tutorials`_ page.
 
 Highlights:
 -----------
@@ -60,7 +60,7 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 
 .. _original Fibernavigator: http://code.google.com/p/fibernavigator/
 .. _issue tracker: https://github.com/scilus/fibernavigator/issues
-.. _video tutorials: https://github.com/scilus/fibernavigator/wiki/Video-tutorials
+.. _tutorials: https://github.com/scilus/fibernavigator/wiki/Tutorials
 .. _Build instructions for Ubuntu: https://github.com/scilus/fibernavigator/wiki/Ubuntu-build-instructions
 .. _Releases: https://github.com/scilus/fibernavigator/releases
 .. _wiki: https://github.com/scilus/fibernavigator/wiki
