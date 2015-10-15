@@ -5,7 +5,7 @@ The Fibernavigator is a tool designed for a fast and versatile visualization of 
 
 **Welcome new users**
 
-You can find pre-built versions (windows, mac) and all the latest tools here: https://github.com/scilus/fibernavigator/releases.
+You can find pre-built versions (Windows, OSX) containing all the latest tools on the Releases_ page.
 
 Acknowledgements
 -------------------------------------
