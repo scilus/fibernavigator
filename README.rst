@@ -5,7 +5,7 @@ The Fibernavigator is a tool designed for a fast and versatile visualization of 
 
 **Welcome new users**
 
-You can find a pre-built executable (windows) and all the latest tools here: https://github.com/chamberm/fibernavigator/releases.
+You can find pre-built versions (windows, mac) and all the latest tools here: https://github.com/scilus/fibernavigator/releases.
 
 Acknowledgements
 -------------------------------------
@@ -43,7 +43,7 @@ How to get the application
 --------------------------
 
 - `Build instructions for Ubuntu`_ and other Linux distributions are provided
-- Windows builds are available on the Releases_ page. (32bit, 64bit version to come later).
+- Windows/Mac builds are available on the Releases_ page. (32bit, 64bit version to come later).
 
 Development and contact with the team
 -------------------------------------
@@ -63,7 +63,7 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _video tutorials: https://github.com/scilus/fibernavigator/wiki/Video-tutorials
 .. _Build instructions for Ubuntu: https://github.com/scilus/fibernavigator/wiki/Ubuntu-build-instructions
 .. _Releases: https://github.com/scilus/fibernavigator/releases
-.. _wiki: https://github.com/scilus/fibernavigator/wiki/_pages
+.. _wiki: https://github.com/scilus/fibernavigator/wiki
 .. _Scene navigation: http://www.youtube.com/watch?v=OXuHX8GGaBQ
 .. _Mesh display and interaction: http://www.youtube.com/watch?v=VONdX7iTNSI
 .. _Drawing tool: http://www.youtube.com/watch?v=4vYkQLrdYaY
