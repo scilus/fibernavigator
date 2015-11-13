@@ -147,6 +147,8 @@ void RTTFibers::clearFibersRTT()
     m_streamlinesColors.clear();
     m_streamlinesPoints.clear();
 
+    m_storedDir.clear();
+
     if( SceneManager::getInstance()->isUsingVBO() )
     {
         glDeleteBuffers( 2, m_bufferObjectsRTT );
@@ -1500,7 +1502,17 @@ void RTTFibers::performHARDIRTT(Vector seed, int bwdfwd, vector<float>& points, 
         if( withinMapThreshold(sticksNumber, currPosition) && !m_stop && absPeak != 0)
         {
             bool initWithDir = RTTrackingHelper::getInstance()->isInitSeed();
-            sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
+
+            if(bwdfwd != -1)
+            {
+                sticks = pickDirection(m_pMaximasInfo->getMainDirData()->at(sticksNumber), initWithDir, currPosition); 
+                m_storedDir = sticks;
+            }
+            else
+            { 
+                sticks = m_storedDir;
+            }
+
 
             currDirection.x = flippedAxes.x * sticks[0];
             currDirection.y = flippedAxes.y * sticks[1];

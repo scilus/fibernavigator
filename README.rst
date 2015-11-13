@@ -20,6 +20,7 @@ Tutorials
 New rs-fMRI and real-time fiber tractography tutorials soon available: `Tutorial Page`_.
 New **video tutorials** of the Fibernavigator are available.
 
+- `Optic radiation`_ : Real-time tractography of the optic radiation using HCP data
 - `Scene navigation`_: how to interact with the 3D view, move planes, etc.
 - `Mesh display and interaction`_: how to create and modify the display of meshes.
 - `Drawing tool`_: how to draw on empty or already existing anatomies.
@@ -72,6 +73,5 @@ All issues have been moved to the new `issue tracker`_. New issues will also be 
 .. _Opacity rendering: https://www.youtube.com/watch?v=IzJ537KNpR0
 .. _Image Gallery: http://chamberm.github.io/media.html
 .. _Tutorial Page: http://chamberm.github.io/fibernavigator_single.html
-
-
+.. _Optic radiation: https://www.youtube.com/watch?v=UDFpvyrXNyA
 
