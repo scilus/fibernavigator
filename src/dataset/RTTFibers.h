@@ -127,6 +127,8 @@ private:
 
     std::vector<float> m_streamlinesPoints; // Points to be rendered Forward
 	std::vector<float> m_streamlinesColors; //Color (local directions)Forward
+
+    std::vector<float> m_storedDir;
     
 
 	float m_alpha;
