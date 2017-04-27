@@ -48,6 +48,7 @@ static const wxCmdLineEntryDesc desc[] =
     { wxCMD_LINE_SWITCH, "h", "help", "help yourself" },
     { wxCMD_LINE_SWITCH, "p", "screenshot", "screenshot" },
     { wxCMD_LINE_SWITCH, "d", "dmap", "create a distance map on the first loaded dataset" },
+    { wxCMD_LINE_SWITCH, "m", "maximize", "maximize window on startup" },
     { wxCMD_LINE_SWITCH, "e", "exit", "exit after executing the command line" },
     { wxCMD_LINE_PARAM, NULL, NULL, "scene file", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
     { wxCMD_LINE_NONE } 
@@ -121,7 +122,7 @@ bool MyApp::OnInit( void )
         Logger::getInstance()->print( wxString::Format( wxT( "shader: %s" ), shaderPath.c_str() ), LOGLEVEL_DEBUG );
 
         // Create the main frame window
-        frame = new MainFrame( wxT("Fiber Navigator"), wxPoint( 50, 50 ), wxSize( 800, 600 ) );
+        frame = new MainFrame( wxT("Fiber Navigator"), wxPoint( 50, 50 ), wxSize( 1024, 768 ) );
         SceneManager::getInstance()->setMainFrame( frame );
         SceneManager::getInstance()->setTreeCtrl( frame->m_pTreeWidget );
 
@@ -131,7 +132,6 @@ bool MyApp::OnInit( void )
 #endif
 
         frame->SetMinSize( wxSize( 800, 600 ) );
-        frame->SetSize( wxSize( 1024, 768 ) );
 
         frame->Show( true );
         SetTopWindow( frame );
@@ -167,6 +167,15 @@ bool MyApp::OnInit( void )
             }
         }
 
+        if ( cmdParser.Found( _T( "h" ) ) ) 
+        {
+            cmdParser.Usage();
+            exit( 0 );
+        }
+        if ( cmdParser.Found( _T( "m" ) ) ) 
+        {
+            frame->Maximize();
+        }
         if ( cmdParser.Found( _T( "e" ) ) )
         {
             exit( 0 );
