@@ -4,7 +4,6 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-
 PROJECT( FiberNavigator )
 
 #set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
@@ -147,6 +146,10 @@ SET( CMAKE_CXX_FLAGS "-Wall -ansi -Wno-long-long" )
 SET( CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -O0" )
 SET( CMAKE_CXX_FLAGS_RELEASE "-O3" )
 SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" )
+
+# Enable C++98/11/14 standard for modern wxwidget libs
+set(CMAKE_CXX_STANDARD 11)
+
 ENDIF(UNIX)
 
 # Add this define for every platform. Used by nifti_io to try to read .nii.gz files.
