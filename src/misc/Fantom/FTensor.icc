@@ -139,7 +139,7 @@ inline void FTensor::setOrder( unsigned char ord)
 
 inline void FTensor::resizeTensor (unsigned char dim, unsigned char ord)
 {
-  if ( dimension!=dim || order != order )
+  if ( dimension!=dim || order != ord )
   {
     order = ord;
     dimension = dim;
